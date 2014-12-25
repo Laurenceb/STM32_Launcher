@@ -7,10 +7,39 @@ void ADC_Configuration(void)
   /* ADCCLK = PCLK2/6 = 24/2 = 12MHz*/
   RCC_ADCCLKConfig(RCC_PCLK2_Div2);
 
-  /* Enable ADC1 clock so that we can talk to it */
+  /* Enable ADC1,2 clock so that we can talk to them */
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);
+  RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC2, ENABLE);
+  /*Enable the DMA1 clk*/
+  RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
   /* Put everything back to power-on defaults */
   ADC_DeInit(ADC1);
+  ADC_DeInit(ADC2);
+
+  /* ADC2 Configuration ------------------------------------------------------*/
+
+  /* ADC1 and ADC2 operate independently */
+  ADC_InitStructure.ADC_Mode = ADC_Mode_Independent;
+  /* Enable the scan conversion so we do multiple at a time */
+  ADC_InitStructure.ADC_ScanConvMode = ENABLE;
+  /* Don't do contimuous conversions - do them on demand */
+  ADC_InitStructure.ADC_ContinuousConvMode = DISABLE;
+  /* Start conversin by software, not an external trigger */
+  ADC_InitStructure.ADC_ExternalTrigConv = ADC_ExternalTrigConv_None;
+  /* Conversions are 12 bit - put them in the lower 12 bits of the result */
+  ADC_InitStructure.ADC_DataAlign = ADC_DataAlign_Right;
+  /* Say how many channels would be used by the sequencer */
+  ADC_InitStructure.ADC_NbrOfChannel = 1;
+
+  /* Now do the setup */
+  ADC_Init(ADC2, &ADC_InitStructure);
+
+  /* ADC2 injected channel configuration */
+  ADC_InjectedSequencerLengthConfig(ADC2, 1);//one conversion, battery voltage only
+
+  ADC_InjectedChannelConfig(ADC2, 1, 1, ADC_SampleTime_239Cycles5);//The battery monitoring
+
+  ADC_ExternalTrigInjectedConvConfig(ADC2, ADC_ExternalTrigInjecConv_None);//set this as sw injected channel
 
   /* ADC1 Configuration ------------------------------------------------------*/
   /* ADC1 and ADC2 operate independently */

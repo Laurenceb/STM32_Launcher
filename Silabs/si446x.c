@@ -149,8 +149,8 @@ void si446x_setup(void) {
 	NVIC_Init(&NVIC_InitStructure);
 
 	/* Now enable the other interrupts via the NVIC - USART3 and the two DMA interrupts */
-	NVIC_InitStructure.NVIC_IRQChannel = USART3_IRQn;//UAVtalk Rx triggered interrupt
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x02;	//Third highest group - above the DMA
+	NVIC_InitStructure.NVIC_IRQChannel = USART3_IRQn;//Tx  triggered interrupt
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x03;	//Third highest group - above the DMA
 	NVIC_Init(&NVIC_InitStructure);
 	NVIC_InitStructure.NVIC_IRQChannel = DMA1_Channel4_IRQn;//The DMA complete/half complete triggered interrupt	
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x04;	//4th subpriority
