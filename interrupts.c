@@ -2,9 +2,11 @@
 #include <stdlib.h>
 #include "interrupts.h"
 
-volatile uint8_t Button_hold_tim,Low_Battery_Warning;		//Timer for On/Off/Control button functionality, battery warning
+volatile uint8_t Button_hold_tim,Low_Battery_Warning,System_state_Global;//Timer for On/Off/Control button functionality, battery warning, button function
 volatile uint32_t Millis;					//Timer for system uptime
-volatile float Battery_Voltage;
+volatile float Battery_Voltage,Aux_Voltage,Spin_Rate,Spin_Rate_LPF;
+
+#define MOTOR_POLES 14		/* Turnigy motor */
 
 /**
   * @brief  Configure all interrupts accept on/off pin
@@ -23,6 +25,12 @@ void ISR_Config(void) {
 	NVIC_InitStructure.NVIC_IRQChannel = SysTick_IRQn;	//The 100hz timer triggered interrupt	
 	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x01;//Pre-emption priority
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x02;	//3rd subpriority
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&NVIC_InitStructure);
+	//Configure ADC interrupt
+	NVIC_InitStructure.NVIC_IRQChannel = ADC1_2_IRQn;	//The ADC watchdog triggered interrupt	
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x01;//Low Pre-emption priority
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x01;	//2nd subpriority
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitStructure);
 	//Now we configure the I2C Event ISR
@@ -65,7 +73,8 @@ void SysTick_Configuration(void) {
 __attribute__((externally_visible)) void ADC1_2_IRQHandler(void) {
 	if(ADC_GetITStatus(ADC2, ADC_IT_AWD))			//Analogue watchdog was triggered
 	{
-		Low_Battery_Warning+=2;				//Low battery
+		if(Low_Battery_Warning<253)
+			Low_Battery_Warning+=2;			//Low battery
 		ADC_ClearITPendingBit(ADC2, ADC_IT_EOC);
 		ADC_ClearITPendingBit(ADC2, ADC_IT_JEOC);
 		ADC_ClearITPendingBit(ADC2, ADC_IT_AWD);	//make sure flags are clear
@@ -88,6 +97,7 @@ __attribute__((externally_visible)) void SysTick_Handler(void)
 	static uint32_t Last_Button_Press;			//Holds the timestamp for the previous button press
 	static uint8_t System_state_counter;			//Holds the system state counter
 	static uint8_t button;					//Used for interrupt free button press detection
+	static int16_t com;					//AfroESC commutation counter
 	//FatFS timer function
 	disk_timerproc();
 	//Incr the system uptime
@@ -101,7 +111,24 @@ __attribute__((externally_visible)) void SysTick_Handler(void)
 	ADC_SoftwareStartInjectedConvCmd(ADC2, ENABLE);		//Trigger the injected channel group
 	//Read any I2C bus sensors here (100Hz)
 	if(Sensors&(1<<L3GD20_READ)) {
-		L3GD20_Reported_Temperature=GET_TMP_TEMPERATURE;
+		unt16_t x=*((unt16*)&L3GD20_Data_Buffer[2]);
+		Flipbytes(x);
+		unt16_t y=*((unt16*)&L3GD20_Data_Buffer[4]);
+		Flipbytes(y);
+		unt16_t z=*((unt16*)&L3GD20_Data_Buffer[6]);
+		Flipbytes(z);
+		Gyro_XY_Rate=Gyro_XY_Rate*0.99+0.01*L3GD20_GAIN*((float)(*(int16_t*)&x)*(float)(*(int16_t*)&x)+(float)(*(int16_t*)&y)*(float)(*(int16_t*)&y));
+		Gyro_Z_Rate=Gyro_Z_Rate*0.99+0.01*L3GD20_GAIN*((float)(*(int16_t*)&z)*(float)(*(int16_t*)&z));//1 second time constant on the Turn rate
+		Gyro_Temperature=50-*(int8_t*)L3GD20_Data_Buffer;//This signed 8 bit temperature is just transferred directly to the global
+		uint16_t com_=*(unt16_t*)AFROESC_Data_Buffer;	//Commutation counter
+		Flipbytes(com_);				//AfroESC is big endian
+		Spin_rate=*(int16_t*)&com_-com;
+		com=*(int16_t*)&com_;
+		Spin_Rate*=100/(MOTOR_POLES/2);			//This is the current spin rate in Hz
+		Spin_Rate_LPF=Spin_Rate_LPF*0.8+Spin_Rate*0.2;	//A ~50ms time constant with reduced ~+-85rpm jitter
+		int16_t volt_aux=*(int16_t*)&AFROESC_Data_Buffer[2];
+		Flipbytes(volt_aux);
+		Aux_Voltage=((float)volt_aux)*0.0315;		//33k,180k PD on AFROESC, with 10bit adc running from 5v supply
 		I2C1_Request_Job(L3GD20_READ);			//Request a L3GD20 read 
 		I2C1_Request_Job(AFROESC_READ);			//Read ESC temperature and voltage
 	}
