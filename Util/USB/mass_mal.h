@@ -18,13 +18,11 @@
 #define __MASS_MAL_H
 
 /* Includes ------------------------------------------------------------------*/
-#ifndef CRT
- #include "stm32_eval.h"
-#else
+// #include "stm32_eval.h"
  #include "../../gpio.h"
  #include "../fat_fs/inc/diskio.h"
  #include "../../interrupts.h"
-#endif
+//#endif
 /* Exported types ------------------------------------------------------------*/
 extern volatile uint32_t* Data_Buffer;		/*data buffer for DMA transfers*/
 /* Exported constants --------------------------------------------------------*/

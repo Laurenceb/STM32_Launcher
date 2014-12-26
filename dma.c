@@ -11,7 +11,7 @@
   * @retval None
   * Note this is coded for USART2 Rx - the GPS, and defined in main.h
   */
-void DMA_USART2_Configuration(Buffer_Type* buffer)
+void DMA_USART2_Configuration(buff_type* buffer)
 { /* Feed this function a pointer to the circular buffer, and a size integer */
   DMA_InitTypeDef DMA_InitStructure;
   /* USART2 RX DMA1 Channel (triggered by USART2 Rx event) Config */
@@ -35,7 +35,7 @@ void DMA_USART2_Configuration(Buffer_Type* buffer)
   * @param  Buffer pointer
   * @retval bytes in buffer
   */
-int16_t Bytes_In_DMA_Buffer(Buffer_Type* buffer)
+int16_t Bytes_In_DMA_Buffer(buff_type* buffer)
 {
 	return ((buffer->size-buffer->tail-(int16_t)DMA_GetCurrDataCounter(USART2RX_DMA1))%buffer->size);
 }

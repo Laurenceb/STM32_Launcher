@@ -20,7 +20,7 @@ extern volatile float Battery_Voltage,Aux_Voltage,Ind_Voltage,Spin_Rate,Spin_Rat
 
 //Added functions
 void ISR_Config(void);
-void SysTick_Configuration(void)
+void SysTick_Configuration(void);
 
 //These have to exist
 void NMI_Handler(void);

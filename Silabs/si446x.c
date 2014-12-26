@@ -8,6 +8,7 @@ static volatile uint32_t CTS_Low;
 uint32_t Active_freq = DEFAULT_FREQ;
 uint32_t Active_shift = DEFAULT_SHIFT;
 uint32_t Active_level = DEFAULT_POWER_LEVEL;
+uint32_t Active_channel = DEFAULT_CHANNEL;
 int8_t Outdiv = 4;
 
 //Interface functions go here
@@ -37,12 +38,15 @@ uint8_t silabs_cts_jammed(void) {/* More than 20 milliseconds of jammed CTS caus
 void si446x_setup(void) {
 	GPIO_InitTypeDef    GPIO_InitStructure;
 	USART_InitTypeDef   USART_InitStructure;
+	SPI_InitTypeDef   SPI_InitStructure;
 	EXTI_InitTypeDef   EXTI_InitStructure;
 	NVIC_InitTypeDef   NVIC_InitStructure;
+
+	uint16_t dummyread;
     
 	// Enable clock to GPIO and USART3 peripherals - on different APBs
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB | RCC_APB2Periph_GPIOA, ENABLE);
-	RCC_APB1PeriphClockCmd(USART3_RCC_USART | RCC_APB1Periph_SPI2, ENABLE );
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART3 | RCC_APB1Periph_SPI2, ENABLE );
 
 	// Configure Tx pin
 	GPIO_InitStructure.GPIO_Pin     = GPIO_Pin_10;
@@ -82,12 +86,12 @@ void si446x_setup(void) {
     
 	// Configure USART3 peripheral
 	USART_InitStructure.USART_BaudRate  = RTTY_BAUD;
-	init->USART_WordLength = USART_WordLength_8b;
-	init->USART_StopBits = USART_StopBits_None;
-	init->USART_Parity = USART_Parity_None;
-	init->USART_HardwareFlowControl = USART_HardwareFlowControl_None;
-	init->USART_Mode = USART_Mode_Tx;
-	USART_Init(USART3_USART, &USART_InitStructure );
+	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
+	USART_InitStructure.USART_StopBits = USART_StopBits_1;
+	USART_InitStructure.USART_Parity = USART_Parity_No;
+	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+	USART_InitStructure.USART_Mode = USART_Mode_Tx;
+	USART_Init(USART3, &USART_InitStructure );
 
 	/* SPI configuration */
 	SPI_InitStructure.SPI_Direction = SPI_Direction_2Lines_FullDuplex;
@@ -112,7 +116,7 @@ void si446x_setup(void) {
 	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
 
 	/* Enable the USART3 */
-	USART_Cmd(USART3_USART, ENABLE);
+	USART_Cmd(USART3, ENABLE);
 
 	/* Handle the EXTI */
 	EXTI_DeInit();
@@ -194,8 +198,8 @@ void si446x_setup(void) {
 	si446x_spi_state_machine( &Silabs_spi_state, 8, tx_buffer, 0, rx_buffer, NULL );
 	while(Silabs_spi_state)
 		__WFI();
-	si446x_set_frequency(uint32_t freq);
-	si446x_set_deviation_channel(uint32_t deviation, uint32_t channel_space);
+	si446x_set_frequency(Active_freq);
+	si446x_set_deviation_channel(Active_freq, Active_channel);
 	si446x_set_modem();
 	memcpy(tx_buffer, (uint8_t [6]){0x32, Channel_rx, 0x00, 0x00, 0x03, 0x08}, 6*sizeof(uint8_t));/* ready on CRC match pkt, RX on CRC packet error, FIELD config in packet handler for packet engine */
 	si446x_spi_state_machine( &Silabs_spi_state, 6, tx_buffer, 0, rx_buffer, &si446x_state_machine );/* Start off in Rx mode */
@@ -270,8 +274,8 @@ void si446x_set_deviation_channel(uint32_t deviation, uint32_t channel_space) {
 	while(Silabs_spi_state)
 		__WFI();
 	uint32_t channel_spacing = (uint32_t)(units_per_hz * channel_space / 2.0 );
-	uint8_t modem_freq_dev_0 = mask & channel_spacing ;
-	uint8_t modem_freq_dev_1 = mask & (channel_spacing >> 8);
+	modem_freq_dev_0 = mask & channel_spacing ;
+	modem_freq_dev_1 = mask & (channel_spacing >> 8);
 	memcpy(tx_buffer, (uint8_t [6]){0x11, 0x40, 0x02, 0x04, modem_freq_dev_1, modem_freq_dev_0}, 6*sizeof(uint8_t));
 	si446x_spi_state_machine( &Silabs_spi_state, 6, tx_buffer, 0, rx_buffer, NULL );
 	while(Silabs_spi_state)
@@ -299,7 +303,7 @@ void si446x_set_modem(void) {
 		__WFI();
 	//Configure the RSSI thresholding for RX mode, with 12dB jump threshold (reset if RSSI changes this much during Rx), RSSI mean with packet toggle
 	//RSSI_THRESH is in dBm, it needs to be converted to 0.5dBm steps offset by ~130
-	uint8_t rssi = (2*(RSSI_THRESH+130))&0xFF
+	uint8_t rssi = (2*(RSSI_THRESH+130))&0xFF;
 	memcpy(tx_buffer, (uint8_t [8]){0x11, 0x20, 0x04, 0x4A, rssi, 0x0C, 0x12, 0x3E}, 8*sizeof(uint8_t));
 	si446x_spi_state_machine( &Silabs_spi_state, 8, tx_buffer, 0, rx_buffer, NULL );
 	while(Silabs_spi_state)
@@ -343,7 +347,7 @@ void si446x_state_machine(uint8_t *state_, uint8_t reason ) {
 			else if(reason==1) {/* Silabs interrupt, setup a read to get the status */
 				*state_=1;/* Go to state 1 */
 				tx_buffer[0]=0x21;/* Get packethandler status */
-				si446x_spi_state_machine( &Silabs_spi_state, 1, tx_buffer, 4, rx_buffer, &si446x_state_machine )
+				si446x_spi_state_machine( &Silabs_spi_state, 1, tx_buffer, 4, rx_buffer, &si446x_state_machine );
 			}
 			if(reason==2 || unhandled_tx_data==1 ) {/* We have data ready to send via TX */
 				unhandled_tx_data=0;/* Reset this here */
@@ -492,6 +496,7 @@ __attribute__((externally_visible)) void EXTI0_IRQHandler(void) {
 			si446x_state_machine( &Silabs_driver_state, 2 );
 		}
 	}
+}
 
 /**
  * @brief USART3 Tx/Rx interrupt handler, used to send RTTY data via TX3
@@ -504,8 +509,8 @@ __attribute__((externally_visible)) void USART3_IRQHandler(void) {
 	}
 	else if(USART_GetITStatus(USART3, USART_IT_TXE) != RESET) {
 		USART_ClearITPendingBit(USART3, USART_IT_TXE);/* Clear pending bit. */
-		USART_SendData(USART3_USART, Get_From_Buffer(&Usart3_tx_buff));/* Read the data from the tx buffer. */
-		if(!Bytes_In_ISR_Buffer(&Usart3_tx_buff)) {/* No more data to send? */
+		USART_SendData(USART3, Pop_From_Buffer(&Silabs_Tx_Buffer));/* Read the data from the tx buffer. */
+		if(!Bytes_In_Buffer(&Silabs_Tx_Buffer)) {/* No more data to send? */
 			USART3->CR1 &=~(1<<7);		/* Disable the interrupt here. */
 			si446x_state_machine( &Silabs_driver_state, 4 );/* Reason 4 callback is for data sent ok */
 		}
@@ -519,10 +524,10 @@ __attribute__((externally_visible)) void USART3_IRQHandler(void) {
   * @param  State machine state, tx and rx config, callback function pointer, note that rx buffer offset by one byte is fast (CMD) and two bytes in normal (CMD,CTS)
   * @retval None
   */
-void si446x_spi_state_machine( uint8_t *state_, uint8_t tx_bytes, uint8_t *tx_data, uint8_t rx_bytes, uint8_t *rx_data, void* callback ) {
+void si446x_spi_state_machine( uint8_t *state_, uint8_t tx_bytes, uint8_t *tx_data, uint8_t rx_bytes, uint8_t *rx_data, void(*callback)(void*)) {
 	static uint8_t tx_bytes_local,rx_bytes_local;	/* These allow the buffers to be set only once */
-	static uint8_t *tx_data_local,*rx_data_local;SPIx->DR = Data;
-	static void *callback_local;
+	static uint8_t *tx_data_local,*rx_data_local;
+	static void(*callback_local)( uint8_t* arg1, uint8_t arg2);
 	DMA_InitTypeDef DMA_InitStructure;
 	uint8_t state=*state_;
 	if(tx_data) {	/* These only need to be set once with a non NULL pointer*/
@@ -537,7 +542,7 @@ void si446x_spi_state_machine( uint8_t *state_, uint8_t tx_bytes, uint8_t *tx_da
 		callback_local=callback;
 	if ( !state || state==2 ) {
 		/* Shared DMA configuration values */
-		DMA_InitStructure.DMA_PeripheralBaseAddr = (DWORD)(&(SPI_Silabs->DR));
+		DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)(&(SPI2->DR));
 		DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
 		DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
 		DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
@@ -545,8 +550,8 @@ void si446x_spi_state_machine( uint8_t *state_, uint8_t tx_bytes, uint8_t *tx_da
 		DMA_InitStructure.DMA_Mode = DMA_Mode_Normal;
 		DMA_InitStructure.DMA_Priority = DMA_Priority_Low;
 		DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
-		DMA_DeInit(DMA_Channel_SPI_Silabs_RX);
-		DMA_DeInit(DMA_Channel_SPI_Silabs_TX);
+		DMA_DeInit(DMA1_Channel4);
+		DMA_DeInit(DMA1_Channel5);
 	}
 	switch (state) {
 		case 0:	/* First state is Tx via DMA */
@@ -556,12 +561,12 @@ void si446x_spi_state_machine( uint8_t *state_, uint8_t tx_bytes, uint8_t *tx_da
 				DMA_InitStructure.DMA_MemoryBaseAddr = tx_data_local;
 				DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralDST;
 				DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Disable;
-				DMA_Init(DMA_Channel_5, &DMA_InitStructure);
+				DMA_Init(DMA1_Channel5, &DMA_InitStructure);
 				/* Enable the DMA complete callback interrupt here */
 				DMA_ClearFlag(DMA1_FLAG_TC5|DMA1_FLAG_HT5);  /* Make sure flags are clear */
 				DMA_ITConfig(DMA1_Channel5, DMA_IT_TC, ENABLE);/* Interrupt on complete */
 				/* Enable DMA TX Channel */
-				DMA_Cmd(DMA_Channel_5, ENABLE);
+				DMA_Cmd(DMA1_Channel5, ENABLE);
 			}
 			else {
 				SPI2->DR=*tx_data_local;/* Directly write the command byte */
@@ -569,17 +574,17 @@ void si446x_spi_state_machine( uint8_t *state_, uint8_t tx_bytes, uint8_t *tx_da
 				DMA_InitStructure.DMA_MemoryBaseAddr = rx_data_local;
 				DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
 				DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Disable;
-				DMA_Init(DMA_Channel_4, &DMA_InitStructure);
+				DMA_Init(DMA1_Channel4, &DMA_InitStructure);
 				/* Enable the DMA complete callback interrupt here */
 				DMA_ClearFlag(DMA1_FLAG_TC4|DMA1_FLAG_HT4);  /* Make sure flags are clear */
 				DMA_ITConfig(DMA1_Channel4, DMA_IT_TC, ENABLE);/* Interrupt on complete */
 				/* Enable DMA RX Channel */
-				DMA_Cmd(DMA_Channel_4, ENABLE);
+				DMA_Cmd(DMA1_Channel4, ENABLE);
 			}
 			break;
 		case 1: /* We get here because the DMA transfer completed, portb, pin 11 */
 			if(tx_bytes_local) {/* Normal command/response comms */
-				DMA_Cmd(DMA_Channel_5, DISABLE);
+				DMA_Cmd(DMA1_Channel5, DISABLE);
 				DMA_ITConfig(DMA1_Channel5, DMA_IT_TC, DISABLE);
 				SPI_Cmd(SPI2, DISABLE);/* This clears NSS */
 				SPI_Cmd(SPI2, ENABLE);
@@ -591,7 +596,7 @@ void si446x_spi_state_machine( uint8_t *state_, uint8_t tx_bytes, uint8_t *tx_da
 					break;
 			}
 			else { 			/* Fast response mode, this is the final state */
-				DMA_Cmd(DMA_Channel_4, DISABLE);
+				DMA_Cmd(DMA1_Channel4, DISABLE);
 				DMA_ITConfig(DMA1_Channel4, DMA_IT_TC, DISABLE);
 				SPI_Cmd(SPI2, DISABLE);/* This clears NSS */
 				SPI_Cmd(SPI2, ENABLE);
@@ -607,26 +612,26 @@ void si446x_spi_state_machine( uint8_t *state_, uint8_t tx_bytes, uint8_t *tx_da
 				DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
 				DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
 				DMA_InitStructure.DMA_BufferSize = rx_bytes_local;
-				DMA_Init(DMA_Channel_4, &DMA_InitStructure);
+				DMA_Init(DMA1_Channel4, &DMA_InitStructure);
 				/* Enable the DMA complete callback interrupt here */
 				DMA_ClearFlag(DMA1_FLAG_TC4|DMA1_FLAG_HT4);  /* Make sure flags are clear */
 				DMA_ITConfig(DMA1_Channel4, DMA_IT_TC, ENABLE);/* Interrupt on complete */
 				/* Enable DMA RX Channel */
-				DMA_Cmd(DMA_Channel_4, ENABLE);
+				DMA_Cmd(DMA1_Channel4, ENABLE);
 				break;
 			}
 		case 3:
-			DMA_Cmd(DMA_Channel_4, DISABLE);
+			DMA_Cmd(DMA1_Channel4, DISABLE);
 			DMA_ITConfig(DMA1_Channel4, DMA_IT_TC, DISABLE);
 			SPI_Cmd(SPI2, DISABLE);/* This clears NSS */
 			SPI_Cmd(SPI2, ENABLE);
 			*state_=0;
 			if( callback_local )
-				*callback_local( &Silabs_driver_state, 0);/* The callback function with argument zero to show SPI callback */
+				(*callback_local)( &Silabs_driver_state, 0);/* The callback function with argument zero to show SPI callback */
 			break;
 		default:
-			DMA_Cmd(DMA_Channel_4, DISABLE);
-			DMA_Cmd(DMA_Channel_5, DISABLE);
+			DMA_Cmd(DMA1_Channel4, DISABLE);
+			DMA_Cmd(DMA1_Channel5, DISABLE);
 			*state_=0;	/* Should not happen */
 	}
 }

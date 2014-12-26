@@ -5,7 +5,7 @@
 
 // globals
 
-volatile ISR_Buffer_Type Usart1_rx_buff;
+volatile buff_type Usart1_rx_buff;
 
 //Public functions
 
@@ -165,41 +165,7 @@ __attribute__((externally_visible)) void USART1_IRQHandler(void) {
     //Clear pending bit and read the data.
     USART_ClearITPendingBit(USART1, USART_IT_RXNE);
   }
-  Add_To_ISR_Buffer(&Usart1_rx_buff, (uint8_t)(USART_ReceiveData(USART1)&0x00FF));
-}
-
-/**
- * @brief Adds a byte to an ISR buffer type
- * @param Pointer to the buffer structure, byte to add
- * @retval None
- */
-void Add_To_ISR_Buffer(volatile ISR_Buffer_Type* buff, uint8_t c) {
-  buff->data[buff->head++]=c;//Add to the buffer
-  //  buff->head%=BUFFER_SIZE;//Put head in correct range
-  //if(buff->head==buff->tail) {//Overflow
-  //  buff->tail++;
-  //  buff->tail%=BUFFER_SIZE;
-  // }
-}
-
-/**
- * @brief Get a byte from an ISR buffer type
- * @param Pointer to the buffer structure
- * @retval Byte out of buffer
- */
-uint8_t Get_From_ISR_Buffer(volatile ISR_Buffer_Type* buff) {
-  uint8_t a=buff->data[buff->tail++];
-  //buff->tail%=BUFFER_SIZE;
-  return a;
-}
-
-/**
- * @brief Number of bytes in an ISR buffer type
- * @param Pointer to the buffer structure
- * @retval Bytes in the buffer
- */
-uint16_t Bytes_In_ISR_Buffer(volatile ISR_Buffer_Type* buff) {
-  return (buff->head>=buff->tail)?buff->head-buff->tail:buff->head+BUFFER_SIZE-buff->tail;
+  Add_To_Buffer(&Usart1_rx_buff, (uint8_t)(USART_ReceiveData(USART1)&0x00FF));
 }
 
 //Private functions

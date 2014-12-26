@@ -18,9 +18,7 @@
 #ifdef STM32L1XX_MD
  #include "stm32l1xx_it.h"
 #else
-#ifndef CRT
- #include "stm32f10x_it.h"
-#endif
+// #include "stm32f10x_it.h"
 #endif /* STM32L1XX_MD */
  
 #include "hw_config.h"

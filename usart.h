@@ -1,18 +1,11 @@
 //Dactyl project v1.0
 // Send and receive data over the USARTs
 #pragma once
-#include "main.h"
 #include "stm32f10x.h"
 #include <stdio.h>
+#include "buffer.h"
 
-//ISR buffer datatype
-typedef struct{
-  uint8_t head;
-  uint8_t tail;
-  uint8_t data[BUFFER_SIZE];
-} ISR_Buffer_Type;
-
-extern volatile ISR_Buffer_Type Usart1_rx_buff;
+extern volatile buff_type Usart1_rx_buff;
 
 //Defines - USART 1 and 2 used
 
@@ -36,9 +29,6 @@ extern volatile ISR_Buffer_Type Usart1_rx_buff;
 void Usarts_Init();
 void Default_Usart_Config(USART_InitTypeDef* init);
 void Usart_Send_Str(char* str);
-void Add_To_ISR_Buffer(volatile ISR_Buffer_Type* buff, uint8_t c);
-uint8_t Get_From_ISR_Buffer(volatile ISR_Buffer_Type* buff);
-uint16_t Bytes_In_ISR_Buffer(volatile ISR_Buffer_Type* buff);
 
 /* Private function prototypes -----------------------------------------------*/
 #ifdef USE_LIBC_PRINTF	/*define in main.h to set the printf function that is used */

@@ -26,7 +26,7 @@ uint8_t Get_From_Buffer(uint32_t* data,volatile buff_type* buffer) {
 * @param Buffer pointer
 * @retval byte
 */
-uint32_t Pop_From_Buffer(Buffer_Type* buffer) {
+uint32_t Pop_From_Buffer(buff_type* buffer) {
 	uint32_t d=(buffer->data)[buffer->tail];//read data at tail
 	buffer->tail=(buffer->tail+1)%buffer->size;
 	return d; //returns the byte
