@@ -13,9 +13,14 @@
 
 #include "stm32f10x.h"
 
+//Externals
+extern volatile uint8_t Button_hold_tim,Low_Battery_Warning,System_state_Global;//Timer for On/Off/Control button functionality, battery warning, button function
+extern volatile uint32_t Millis;					//Timer for system uptime
+extern volatile float Battery_Voltage,Aux_Voltage,Ind_Voltage,Spin_Rate,Spin_Rate_LPF,Gyro_XY_Rate,Gyro_Z_Rate,Gyro_Temperature;
+
 //Added functions
-void EXTI_Config(void);
-void EXTI9_5_IRQHandler(void);
+void ISR_Config(void);
+void SysTick_Configuration(void)
 
 //These have to exist
 void NMI_Handler(void);

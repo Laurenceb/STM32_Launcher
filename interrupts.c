@@ -4,9 +4,10 @@
 
 volatile uint8_t Button_hold_tim,Low_Battery_Warning,System_state_Global;//Timer for On/Off/Control button functionality, battery warning, button function
 volatile uint32_t Millis;					//Timer for system uptime
-volatile float Battery_Voltage,Aux_Voltage,Spin_Rate,Spin_Rate_LPF,Gyro_XY_Rate,Gyro_Z_Rate,Gyro_Temperature;
+volatile float Battery_Voltage,Aux_Voltage,Ind_Voltage,Spin_Rate,Spin_Rate_LPF,Gyro_XY_Rate,Gyro_Z_Rate,Gyro_Temperature;
 
 #define MOTOR_POLES 14		/* Turnigy motor */
+#define L3GD20_GAIN (1/(114.28*114.28))	/* This is actually 1/gain^2 */
 
 /**
   * @brief  Configure all interrupts accept on/off pin
@@ -134,6 +135,10 @@ __attribute__((externally_visible)) void SysTick_Handler(void)
 	}
 	//Ignition and launch autosequence
 	if(AutoSequence) {
+		//Trigger an ADC1 read of the Inductor sense
+		if(ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC) == SET)
+			Ind_Voltage=(float)ADC_GetConversionValue(ADC1)/1241.2;//Ind measurement in volts
+		ReadADC1_noblock(1);				//Ind sense on PortB.1	
 		//AFROESC throttle control
 		if(AutoSequence<(IGNITION_END*100))		//Ramp up to 100% from 0 until RAMP_DURATION, 100% until IGNITION_END, down over SHUTDOWN_DURATION 
 			float throt=(float)AutoSequence/(RAMP_DURATION*100);

@@ -82,4 +82,9 @@ uint16_t readADC1(uint8_t channel)
   return ADC_GetConversionValue(ADC1);
 }
 
-
+void ReadADC1_noblock(uint8_t channel)
+{
+  ADC_RegularChannelConfig(ADC1, channel, 1, ADC_SampleTime_7Cycles5);
+  // Start the conversion
+  ADC_SoftwareStartConvCmd(ADC1, ENABLE);
+}
