@@ -8,6 +8,9 @@
 #define GET_VBUS_STATE GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_2)
 #define GET_PWR_STATE GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_0)
 
+#define INDUCTION_ON GPIO_WriteBit(GPIOB,GPIO_Pin_12,Bit_SET)
+#define INDUCTION_OFF GPIO_WriteBit(GPIOB,GPIO_Pin_12,Bit_RESET)
+
 extern uint8_t bootsource;
 
 void setup_gpio(void);

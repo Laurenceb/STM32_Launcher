@@ -61,7 +61,7 @@ void setup_gpio(void)
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12;
 	GPIO_Init( GPIOB, &GPIO_InitStructure );
 	GPIO_WriteBit(GPIOB,GPIO_Pin_12,Bit_RESET);//Make sure Igntion off
-	GPIO_Init( GPIOA, &GPIO_InitStructure );
+	GPIO_Init( GPIOB, &GPIO_InitStructure );
 }
 
 uint8_t get_wkup()

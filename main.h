@@ -10,8 +10,15 @@
 
 //Ignition system defines
 #define IGNITION_END 2000
+#define IGNITION_TEST 400
 #define SHUTDOWN_DURATION 500
 #define RAMP_DURATION 300
+
+#define SPIN_RATE_HIGH 300
+#define SPIN_RATE_LOW 165
+
+#define INDUCT_SENSE_LOW 0.2	/*need to check these values again*/
+#define INDUCT_SENSE_HIGH 0.46 
 
 //#define SINGLE_LOGFILE
 #ifndef SINGLE_LOGFILE

@@ -4,8 +4,9 @@
 
 volatile uint8_t Button_hold_tim,Low_Battery_Warning,System_state_Global,Shutdown_System;//Timer for On/Off/Control button functionality, battery warning, button function
 volatile uint32_t Millis;					//Timer for system uptime
-volatile float Battery_Voltage,Aux_Voltage,Ind_Voltage,Spin_Rate,Spin_Rate_LPF,Gyro_XY_Rate,Gyro_Z_Rate,Gyro_Temperature;
+volatile float Battery_Voltage,Aux_Voltage,Ind_Voltage,Spin_Rate,Spin_Rate_LPF,Gyro_XY_Rate,Gyro_Z_Rate,Gyro_Temperature,Auto_spin,Auto_volt;
 volatile uint16_t AutoSequence;
+volatile uint8_t Ignition_Selftest;				//Used for status readout
 
 #define MOTOR_POLES 14		/* Turnigy motor */
 #define L3GD20_GAIN (1/(114.28*114.28))	/* This is actually 1/gain^2 */
@@ -140,6 +141,8 @@ __attribute__((externally_visible)) void SysTick_Handler(void)
 	}
 	//Ignition and launch autosequence
 	if(AutoSequence) {
+		if(AutoSequence==1)				//Setup the PWM to the induction system
+			Timer_GPIO_Enable();
 		//Trigger an ADC1 read of the Inductor sense
 		if(ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC) == SET)
 			Ind_Voltage=(float)ADC_GetConversionValue(ADC1)/1241.2;//Ind measurement in volts
@@ -156,12 +159,31 @@ __attribute__((externally_visible)) void SysTick_Handler(void)
 		AFROESC_Throttle=Flipedbytes(t);		//Ramp up to 100%, i.e. 0x7FFF
 		I2C1_Request_Job(AFROESC_THROTTLE);
 		//RPM status read and ignition control goes here
+		if(AutoSequence==(IGNITION_TEST/10)) {		//At this point we test the voltage and the rpm
+			Auto_spin=Spin_Rate_LPF;
+			Auto_volt=Ind_Voltage;
+			if(Spin_Rate_LPF<SPIN_RATE_LOW || Spin_Rate>SPIN_RATE_HIGH)
+				Ignition_Selftest=2;		//2==spin failure
+			else
+				Ignition_Selftest=(Ind_Voltage>INDUCT_SENSE_LOW && Ind_Voltage<INDUCT_SENSE_HIGH)?0:1;
+			if(Ignition_Selftest)
+				AutoSequence=(IGNITION_END/10);	//Start ramping down the throttle immediatly
+			else
+				INDUCTION_ON;			//Turn on the ignition
+		}
+		if(AutoSequence>=(IGNITION_END/10))
+			INDUCTION_OFF;				//Turn off the ignition
 		AutoSequence++;					//Autosequence allows the launch sequencing to be correctly ordered, it goes from setting to zero
+		//Clean up code to complete the autosequence
+		if(AutoSequence>=(IGNITION_END/10)+(SHUTDOWN_DURATION/10)) {
+			Timer_GPIO_Disable();
+			AutoSequence=0;
+		}
 	}
 	//Now process the control button functions, and USB VBUS detection
-	if(get_wkup() && !button) {				//Rising edge detect
+	if(get_wkup() && !button && USB_SOURCE!=bootsource) {	//Rising edge detect
 		Button_hold_tim=BUTTON_TURNOFF_TIME;
-		if(USB_SOURCE!=bootsource && GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_2)) 	//Interrupt due to USB insertion - reset to usb mode
+		if(GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_2)) //Interrupt due to USB insertion - reset to usb mode
                         Shutdown_System=USB_INSERTED;		//Request a software reset of the system - USB inserted whilst running
 	}
 	button=get_wkup();
