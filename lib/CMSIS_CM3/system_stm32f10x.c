@@ -112,8 +112,8 @@
   const uint32_t SystemFrequency         = SYSCLK_FREQ_24MHz;      /*!< System Clock Frequency (Core Clock) */
   const uint32_t SystemFrequency_SysClk  = SYSCLK_FREQ_24MHz;      /*!< System clock                        */
   const uint32_t SystemFrequency_AHBClk  = SYSCLK_FREQ_24MHz;      /*!< AHB System bus speed                */
-  const uint32_t SystemFrequency_APB1Clk = SYSCLK_FREQ_3MHz;      /*!< APB Peripheral bus 1 (low)  speed   */
-  const uint32_t SystemFrequency_APB2Clk = SYSCLK_FREQ_12MHz;      /*!< APB Peripheral bus 2 (high) speed   */
+  const uint32_t SystemFrequency_APB1Clk = (SYSCLK_FREQ_24MHz/8);      /*!< APB Peripheral bus 1 (low)  speed   */
+  const uint32_t SystemFrequency_APB2Clk = (SYSCLK_FREQ_24MHz/2);      /*!< APB Peripheral bus 2 (high) speed   */
 #elif defined SYSCLK_FREQ_36MHz
   const uint32_t SystemFrequency         = SYSCLK_FREQ_36MHz;      /*!< System Clock Frequency (Core Clock) */
   const uint32_t SystemFrequency_SysClk  = SYSCLK_FREQ_36MHz;      /*!< System clock                        */

@@ -2,9 +2,10 @@
 #include <stdlib.h>
 #include "interrupts.h"
 
-volatile uint8_t Button_hold_tim,Low_Battery_Warning,System_state_Global;//Timer for On/Off/Control button functionality, battery warning, button function
+volatile uint8_t Button_hold_tim,Low_Battery_Warning,System_state_Global,Shutdown_System;//Timer for On/Off/Control button functionality, battery warning, button function
 volatile uint32_t Millis;					//Timer for system uptime
 volatile float Battery_Voltage,Aux_Voltage,Ind_Voltage,Spin_Rate,Spin_Rate_LPF,Gyro_XY_Rate,Gyro_Z_Rate,Gyro_Temperature;
+volatile uint16_t AutoSequence;
 
 #define MOTOR_POLES 14		/* Turnigy motor */
 #define L3GD20_GAIN (1/(114.28*114.28))	/* This is actually 1/gain^2 */
@@ -111,26 +112,30 @@ __attribute__((externally_visible)) void SysTick_Handler(void)
 	Low_Battery_Warning-=1;
 	ADC_SoftwareStartInjectedConvCmd(ADC2, ENABLE);		//Trigger the injected channel group
 	//Read any I2C bus sensors here (100Hz)
-	if(Sensors&(1<<L3GD20_READ)) {
-		unt16_t x=*((unt16*)&L3GD20_Data_Buffer[2]);
+	if(Completed_Jobs&(1<<L3GD20_READ)) {
+		Completed_Jobs&=~(1<<L3GD20_READ);
+		uint16_t x=*((uint16_t*)&L3GD20_Data_Buffer[2]);
 		Flipbytes(x);
-		unt16_t y=*((unt16*)&L3GD20_Data_Buffer[4]);
+		uint16_t y=*((uint16_t*)&L3GD20_Data_Buffer[4]);
 		Flipbytes(y);
-		unt16_t z=*((unt16*)&L3GD20_Data_Buffer[6]);
+		uint16_t z=*((uint16_t*)&L3GD20_Data_Buffer[6]);
 		Flipbytes(z);
 		Gyro_XY_Rate=Gyro_XY_Rate*0.99+0.01*L3GD20_GAIN*((float)(*(int16_t*)&x)*(float)(*(int16_t*)&x)+(float)(*(int16_t*)&y)*(float)(*(int16_t*)&y));
 		Gyro_Z_Rate=Gyro_Z_Rate*0.99+0.01*L3GD20_GAIN*((float)(*(int16_t*)&z)*(float)(*(int16_t*)&z));//1 second time constant on the Turn rate
 		Gyro_Temperature=50-*(int8_t*)L3GD20_Data_Buffer;//This signed 8 bit temperature is just transferred directly to the global
+		I2C1_Request_Job(L3GD20_READ);			//Request a L3GD20 read 
+	}
+	if(Completed_Jobs&(1<<AFROESC_READ)) {
+		Completed_Jobs&=~(1<<AFROESC_READ);
 		uint16_t com_=*(uint16_t*)AFROESC_Data_Buffer;	//Commutation counter
 		Flipbytes(com_);				//AfroESC is big endian
-		Spin_rate=*(int16_t*)&com_-com;
+		Spin_Rate=*(int16_t*)&com_-com;
 		com=*(int16_t*)&com_;
 		Spin_Rate*=100/(MOTOR_POLES/2);			//This is the current spin rate in Hz
 		Spin_Rate_LPF=Spin_Rate_LPF*0.8+Spin_Rate*0.2;	//A ~50ms time constant with reduced ~+-85rpm jitter
 		int16_t volt_aux=*(int16_t*)&AFROESC_Data_Buffer[2];
 		Flipbytes(volt_aux);
 		Aux_Voltage=((float)volt_aux)*0.0315;		//33k,180k PD on AFROESC, with 10bit adc running from 5v supply
-		I2C1_Request_Job(L3GD20_READ);			//Request a L3GD20 read 
 		I2C1_Request_Job(AFROESC_READ);			//Read ESC temperature and voltage
 	}
 	//Ignition and launch autosequence
@@ -140,25 +145,26 @@ __attribute__((externally_visible)) void SysTick_Handler(void)
 			Ind_Voltage=(float)ADC_GetConversionValue(ADC1)/1241.2;//Ind measurement in volts
 		ReadADC1_noblock(1);				//Ind sense on PortB.1	
 		//AFROESC throttle control
-		if(AutoSequence<(IGNITION_END*100))		//Ramp up to 100% from 0 until RAMP_DURATION, 100% until IGNITION_END, down over SHUTDOWN_DURATION 
-			float throt=(float)AutoSequence/(RAMP_DURATION*100);
+		float throt;
+		if(AutoSequence<(IGNITION_END/10))		//Ramp up to 100% from 0 until RAMP_DURATION, 100% until IGNITION_END, down over SHUTDOWN_DURATION 
+			throt=(float)AutoSequence/(RAMP_DURATION/10);
 		else {
-			float throt=(float)((IGNITION_END*100)-AutoSequence)/(SHUTDOWN_DURATION*100);
-			throt=(throt<0)0:throt;
+			throt=(float)((IGNITION_END/10)-AutoSequence)/(SHUTDOWN_DURATION/10);
+			throt=(throt<0)?0:throt;
 		}
-		uint16_t t=(((throt>1)1:throt)*0x7FFF);
+		uint16_t t=(((throt>1)?1:throt)*0x7FFF);
 		AFROESC_Throttle=Flipedbytes(t);		//Ramp up to 100%, i.e. 0x7FFF
 		I2C1_Request_Job(AFROESC_THROTTLE);
 		//RPM status read and ignition control goes here
 		AutoSequence++;					//Autosequence allows the launch sequencing to be correctly ordered, it goes from setting to zero
 	}
 	//Now process the control button functions, and USB VBUS detection
-	if(GET_BUTTON && !button) {				//Rising edge detect
+	if(get_wkup() && !button) {				//Rising edge detect
 		Button_hold_tim=BUTTON_TURNOFF_TIME;
-		if(USB_SOURCE!=bootsource && GET_VBUS_STATE) 	//Interrupt due to USB insertion - reset to usb mode
+		if(USB_SOURCE!=bootsource && GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_2)) 	//Interrupt due to USB insertion - reset to usb mode
                         Shutdown_System=USB_INSERTED;		//Request a software reset of the system - USB inserted whilst running
 	}
-	button=GET_BUTTON;
+	button=get_wkup();
 	if(Button_hold_tim ) {					//If a button press generated timer has been triggered
 		if(button) {					//Button hold turns off the device
 			if(!--Button_hold_tim) {

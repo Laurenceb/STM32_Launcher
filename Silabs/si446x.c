@@ -510,7 +510,7 @@ __attribute__((externally_visible)) void USART3_IRQHandler(void) {
 	else if(USART_GetITStatus(USART3, USART_IT_TXE) != RESET) {
 		USART_ClearITPendingBit(USART3, USART_IT_TXE);/* Clear pending bit. */
 		USART_SendData(USART3, Pop_From_Buffer(&Silabs_Tx_Buffer));/* Read the data from the tx buffer. */
-		if(!Bytes_In_Buffer(&Silabs_Tx_Buffer)) {/* No more data to send? */
+		if(!bytes_in_buff(&Silabs_Tx_Buffer)) {/* No more data to send? */
 			USART3->CR1 &=~(1<<7);		/* Disable the interrupt here. */
 			si446x_state_machine( &Silabs_driver_state, 4 );/* Reason 4 callback is for data sent ok */
 		}

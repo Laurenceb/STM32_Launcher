@@ -44,7 +44,7 @@ void setup_gpio(void)
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;//pushpull
 	GPIO_Init( GPIOB, &GPIO_InitStructure );
-	GPIO_WriteBit(GPIOB,PWREN,Bit_SET);	//Make sure power enabled
+	GPIO_WriteBit(GPIOB,GPIO_Pin_5,Bit_SET);	//Make sure power enabled
 	//Configure the ADC inputs, PortA/B.1
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;

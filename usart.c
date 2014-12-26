@@ -60,7 +60,7 @@ void Usarts_Init() {
 void Default_Usart_Config(USART_InitTypeDef* init) {
     init->USART_WordLength = USART_WordLength_8b;
     init->USART_StopBits = USART_StopBits_1;
-    init->USART_Parity = USART_Parity_None;
+    init->USART_Parity = USART_Parity_No;
     init->USART_HardwareFlowControl = USART_HardwareFlowControl_None;
     init->USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
 }

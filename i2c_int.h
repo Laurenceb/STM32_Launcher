@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include "stm32f10x.h"
 #include "gpio.h"
-#include "Sensors/temperature.h"
 
 //Datatypes
 typedef struct{
@@ -21,6 +20,10 @@ typedef struct{
 //Globals
 extern volatile uint32_t Jobs,Completed_Jobs;	//used for task control (only ever access this from outside for polling Jobs/Reading Completed_Jobs)
 extern volatile I2C_Error_Type I2C1error;	//used to store error state
+//Sensor Globals
+extern volatile uint8_t L3GD20_Data_Buffer[8];
+extern volatile uint8_t AFROESC_Data_Buffer[7];
+extern volatile uint16_t AFROESC_Throttle;
 //Macros
 
 //Sensor specific defines
