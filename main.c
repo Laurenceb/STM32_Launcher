@@ -40,6 +40,8 @@ int main(void)
 	uint8_t sensors=0;
 	int8_t RTC_Offset;				//RTC correction from setting file
 	float sensor_data;
+	uint8_t UplinkFlags=0,CutFlags=0;
+	uint16_t UplinkBytes=0;				//Counters and flags for telemetry
 	RTC_t RTC_time;
         _REENT_INIT_PTR(&my_reent);
         _impure_ptr = &my_reent;
@@ -160,7 +162,7 @@ int main(void)
 		Watchdog_Reset();			//Reset the watchdog each main loop iteration
 		while(1)
 			__WFI();			//Wait for some PPG data
-
+		
 		//Other sensors etc can go here
 		//Button multipress status
 		if(System_state_Global&0x80) {		//A "control" button press

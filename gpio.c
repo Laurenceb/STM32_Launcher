@@ -68,3 +68,18 @@ uint8_t get_wkup()
 {
 	return GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_0);
 }
+
+uint8_t test_cutdown() {
+	GPIO_InitTypeDef	GPIO_InitStructure;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;//Cutdown is first - PortA.15
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_15;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+	GPIO_Init( GPIOA, &GPIO_InitStructure );//Set the pin to input, if it floats down then there is a continuity failure
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+	Delay(20);				//Beware, this function is blocking
+	uint8_t t=GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_15);//High value means power is good and continuity is ok
+	GPIO_Init( GPIOA, &GPIO_InitStructure );//Return to origional state
+	GPIO_WriteBit(GPIOA,GPIO_Pin_15,Bit_SET);//Make sure CUT disabled (note its inverted due to driver)
+	return t;
+}
+

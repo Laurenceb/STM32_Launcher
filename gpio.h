@@ -11,7 +11,11 @@
 #define INDUCTION_ON GPIO_WriteBit(GPIOB,GPIO_Pin_12,Bit_SET)
 #define INDUCTION_OFF GPIO_WriteBit(GPIOB,GPIO_Pin_12,Bit_RESET)
 
+#define CUTDOWN GPIO_WriteBit(GPIOA,GPIO_Pin_15,Bit_RESET)
+#define CUTOFF GPIO_WriteBit(GPIOA,GPIO_Pin_15,Bit_SET)
+
 extern uint8_t bootsource;
 
 void setup_gpio(void);
 uint8_t get_wkup(void);
+uint8_t test_cutdown(void);
