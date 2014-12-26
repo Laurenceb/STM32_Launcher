@@ -35,15 +35,12 @@ enum{BUTTON_TURNOFF=1,USB_INSERTED,LOW_BATTERY};
 enum{BUTTON_SOURCE=0,USB_SOURCE=1};
 //Battery specific config goes here
 #define BATTERY_STARTUP_LIMIT 3.7 /*Around 25% capacity remaining for lithium polymer at 25C slow discharge*/
-#if BOARD<3
-	#define MINIMUM_VOLTAGE 3.0	/* A single lithium polymer cell*/
-#else
-	#define MINIMUM_VOLTAGE 3.42	/* A single lithium polymer cell through LDO regulator - no smps on later boards*/
-#endif
+#define MINIMUM_VOLTAGE 3.42	/* Lowest cell voltage through LDO regulator - no smps */
 
 //function prototypes
 void __fat_print_char(char c);
 void __str_print_char(char c);
+uint8_t detect_sensors(void);
 
 //fatfs globals
 extern volatile uint8_t file_opened;

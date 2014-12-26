@@ -186,6 +186,8 @@ __attribute__((externally_visible)) void SysTick_Handler(void)
 		if(GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_2)) //Interrupt due to USB insertion - reset to usb mode
                         Shutdown_System=USB_INSERTED;		//Request a software reset of the system - USB inserted whilst running
 	}
+	else if(button && ! get_wkup() && USB_SOURCE==bootsource)//USB unplug event
+		shutdown();					//Shuts down - only wakes up on power pin i.e. WKUP
 	button=get_wkup();
 	if(Button_hold_tim ) {					//If a button press generated timer has been triggered
 		if(button) {					//Button hold turns off the device

@@ -50,7 +50,7 @@ extern volatile uint16_t AFROESC_Throttle;
 #define AFROESC_THROTTLE 2
 #define AFROESC_READ 3
 //Config all the sensors
-#define CONFIG_SENSORS 0			/*No extra sensors to configure yet*/
+#define CONFIG_SENSORS (1<<AFROESC_READ)	/*Read esc to test its there and running*/
 #define SCHEDULE_CONFIG I2C1_Request_Job(L3GD20_CONFIG);Jobs|=CONFIG_SENSORS/*Just adds directly - job request call starts i2c interrupts off*/
 
 //Function prototypes

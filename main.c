@@ -37,6 +37,7 @@ FILINFO FATFS_info;
 int main(void)
 {
 	uint8_t system_state=0;				//used to track button press functionality
+	uint8_t sensors=0;
 	int8_t RTC_Offset;				//RTC correction from setting file
 	float sensor_data;
 	RTC_t RTC_time;
@@ -136,15 +137,20 @@ int main(void)
 	}
 	Watchdog_Reset();				//Card Init can take a second or two
 	I2C_Config();					//Setup the I2C bus
+	sensors=detect_sensors();
+	if(sensors&((1<<L3GD20_CONFIG)|(1<<AFROESC_READ))!=((1<<L3GD20_CONFIG)|(1<<AFROESC_READ))) {
+		f_puts("I2C sensor detect error",&FATFS_logfile);
+		f_close(&FATFS_logfile);		//So we log that something went wrong in the logfile
+		shutdown();
+	}
 	rtc_gettime(&RTC_time);				//Get the RTC time and put a timestamp on the start of the file
 	print_string[0]=0x00;				//Set string length to 0
 	printf("%02d-%02d-%02dT%02d:%02d:%02d\n",RTC_time.year,RTC_time.month,RTC_time.mday,RTC_time.hour,RTC_time.min,RTC_time.sec);//ISO 8601 timestamp header
         sensor_data=Battery_Voltage;			//Have to flush adc for some reason
         Delay(10000);
-
 	printf("Battery: %3fV\n",Battery_Voltage);	//Get the battery voltage using blocking regular conversion and print
-	printf("Time");					//Print out the sensors that are present in the CSV file
-	printf(", Button press\r\n");
+	printf("Time");					//Print out a header for columns that are present in the CSV file
+	printf("Lat,Long,Alt,Voltage,Aux_Voltage,XY_Gyro,Z_Gyro,Temperature,Uplink(Bytes),Uplink_CommandFlags,Cutdown,Spin,Ind,Button press\r\n");
 	if(file_opened) {
 		f_puts(print_string,&FATFS_logfile);
 		print_string[0]=0x00;			//Set string length to 0
@@ -164,8 +170,7 @@ int main(void)
 			System_state_Global&=~0x80;	//Wipe the flag bit to show this has been processed
 		}
 		 printf(",%d\n",system_state);		//Terminating newline
-
-
+		//Can do other things with the system state here
 		system_state=0;				//Reset this
 		if(file_opened  & 0x01) {
 			f_puts(print_string,&FATFS_logfile);
@@ -177,9 +182,7 @@ int main(void)
 			f_lseek(&FATFS_logfile, f_size(&FATFS_logfile)+PRE_SIZE);//preallocate another PRE_SIZE
 			f_lseek(&FATFS_logfile, size);	//Seek back to where we were before
 		}
-
                 if(Shutdown_System) {			//A system shutdown has been requested
-		        write_settings_file(1);
 			if(file_opened)
 				shutdown_filesystem(Shutdown_System, file_opened);
 			if(Shutdown_System==USB_INSERTED)
@@ -226,5 +229,6 @@ uint8_t detect_sensors(void) {
 	  if(Millis>(millis+20))
 	    return 0;
 	}
+	sensors=Completed_Jobs;				//Which I2C jobs completed ok?
 	return sensors;
 }
