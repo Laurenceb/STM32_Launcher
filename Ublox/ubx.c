@@ -7,8 +7,8 @@
 #include "../Util/rprintf.h"				//printf
 #include "ubx.h"
 
-extern volatile Ubx_Gps_Type Gps;			//These are global
-extern buff_type Gps_Buffer;
+volatile Ubx_Gps_Type Gps;			//These are global
+buff_type Gps_Buffer;
 
 /* - example trivial use
 	for(;;)

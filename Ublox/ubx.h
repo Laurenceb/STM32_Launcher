@@ -103,6 +103,10 @@ typedef struct
 	#define GPS_SPECTRAL_FUDGE_FACTOR 1.0/*Ublox seems to model this internally, so the output error is usable in a kalman*/
 #endif
 
+//Globals
+extern volatile Ubx_Gps_Type Gps;	//These are global
+extern buff_type Gps_Buffer;
+
 //Function prototypes
 void Gps_Process_Byte(uint8_t c,Ubx_Gps_Type* gps);
 uint8_t Config_Gps(void);

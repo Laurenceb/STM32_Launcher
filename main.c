@@ -8,6 +8,7 @@
 #include "interrupts.h"
 #include "pwm.h"
 #include "watchdog.h"
+#include "Ublox/ubx.h"
 #include "Util/rprintf.h"
 #include "Util/delay.h"
 #include "usb_lib.h"
@@ -148,8 +149,16 @@ int main(void)
 	rtc_gettime(&RTC_time);				//Get the RTC time and put a timestamp on the start of the file
 	print_string[0]=0x00;				//Set string length to 0
 	printf("%02d-%02d-%02dT%02d:%02d:%02d\n",RTC_time.year,RTC_time.month,RTC_time.mday,RTC_time.hour,RTC_time.min,RTC_time.sec);//ISO 8601 timestamp header
-        sensor_data=Battery_Voltage;			//Have to flush adc for some reason
-        Delay(10000);
+	//Todo, await GPS fix here?
+	Gps.packetflag=0x00;			//Reset
+	while(Gps.packetflag!=REQUIRED_DATA) {	//Wait for all fix data
+		while(Bytes_In_DMA_Buffer(&Gps_Buffer))//Dump all the data
+			Gps_Process_Byte((uint8_t)(Pop_From_Buffer(&Gps_Buffer)),&Gps);
+	}
+	Usart_Send_Str((char*)"\r\nGot GPS fix:");//Print out the fix for debug purposes
+	printf("%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld,%1x\r\n",\
+	Gps.latitude,Gps.longitude,Gps.mslaltitude,\
+	Gps.vnorth,Gps.veast,Gps.vdown,Gps.horizontal_error,Gps.vertical_error,Gps.speedacc,Gps.nosats);
 	printf("Battery: %3fV\n",Battery_Voltage);	//Get the battery voltage using blocking regular conversion and print
 	printf("Time");					//Print out a header for columns that are present in the CSV file
 	printf("Lat,Long,Alt,Voltage,Aux_Voltage,XY_Gyro,Z_Gyro,Temperature,Uplink(Bytes),Uplink_CommandFlags,Cutdown,Spin,Ind,Button press\r\n");
