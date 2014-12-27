@@ -9,6 +9,7 @@
 #include "pwm.h"
 #include "pwr.h"
 #include "watchdog.h"
+#include "polygon.h"
 #include "Ublox/ubx.h"
 #include "Util/rprintf.h"
 #include "Util/delay.h"
@@ -44,6 +45,10 @@ int main(void)
 	float sensor_data;
 	uint8_t UplinkFlags=0,CutFlags=0;
 	uint16_t UplinkBytes=0;				//Counters and flags for telemetry
+	uint32_t last_telemetry=0,cutofftime=0;
+	uint16_t sentence_counter=0;
+	//Cutdown config stuff here, atm uses hardcoded polygon defined in polygon.h
+	static const int32_t Geofence[UK_GEOFENCE_POINTS*2]=UK_GEOFENCE;
 	RTC_t RTC_time;
         _REENT_INIT_PTR(&my_reent);
         _impure_ptr = &my_reent;
@@ -185,7 +190,7 @@ int main(void)
 		Watchdog_Reset();			//Reset the watchdog each main loop iteration
 		while(1)
 			__WFI();			//Wait for something to happen - saves power 
-		//Check for Silabs uplinked data
+		//Check for Silabs uplinked data, and process it
 		{
 		uint8_t stat;
 		uint8_t str[10];			//For receiving uplinked data
@@ -197,7 +202,7 @@ int main(void)
 		if(stat || n>1)
 			UplinkBytes+=n;			//Stores the amount of uplinked data
 		if(stat && strlen(str)==6 && !strncmp(str,"$$RO",4)) {//We recived something, here we process the data that was received, as long as it is '$$RO**'
-			if(str[4]=='K' && str[5]>47 && str[5]<58 )//Need to send "$$ROKx" where x is 0 to 9
+			if(str[4]=='K' && str[5]>47 && str[5]<56 )//Need to send "$$ROKx" where x is 0 to 7
 				UplinkFlags|=1<<(str[5]-48);//Set the correct flag bit			
 		}
 		}
@@ -207,7 +212,33 @@ int main(void)
 				Gps_Process_Byte((uint8_t)(Pop_From_Buffer(&Gps_Buffer)),&Gps);
 		}
 		Gps.packetflag=0x00;
+		//Test the Cutdown and update the appropriate bit in the Cut flags byte, check for cutdown conditions and process accordingly
+		CutFlags=(CutFlags&0xFE)|test_cutdown();//LSB is cut test status
+		if(!pointinpoly(Geofence, UK_GEOFENCE_POINTS, Gps.longitude, Gps.latitude) && Gps.latitude)//Check to see if we need to cutdown due to polygon here
+			CutFlags|=(1<<1)|(1<<7);	//Second bit means cutdown triggered due to polygon
+		if(UplinkFlags&(1<<CUTDOWN_COMMAND)) {	//Cutdown was requested
+			CutFlags|=(1<<2)|(1<<7);
+			UplinkFlags&=~(1<<CUTDOWN_COMMAND);//Wipe the bit
+		}
+		if(Millis>MISSION_TIMEOUT)		//Cutdown after a certain amount of uptime
+			CutFlags|=(1<<3)|(1<<7);
+		if(CutFlags&(1<<7)) {			//Upper bit triggers a cutdown
+			CutFlags&=~(1<<7);		//Wipe the bit
+			CUTDOWN;
+			cutofftime=Millis+6000;		//Cutter on for 6 seconds
+		}
+		if(Millis>cutofftime && cutofftime) {	//Reset the cutdown later
+			CUTOFF;
+			cutofftime=0;
+		}
 		//Other sensors etc can go here
+		//Generate the Telemetry string
+		if(Millis-last_telemetry>15000) {	//Every 15 seconds
+			last_telemetry=Millis;
+			rtc_gettime(&RTC_time);		//Get the RTC time and put a timestamp on the start of the file
+			print_string[0]=0x00;		//Set string length to 0
+			printf("$$%s,%d,%02d:%02d,%3f,%3f,%1f,%1f,%1f,%1f,%1f,%d,%d,%2x,%2x,%1f,%2f\n",CALLSIGN,sentence_counter++,RTC_time.hour,RTC_time.min,(float)Gps.latitude*1e-7,(float)Gps.longitude*1e-7,(float)Gps.mslaltitude*1e-3,Battery_Voltage,Aux_Voltage,Gyro_XY_Rate,Gyro_Z_Rate,Gyro_Temperature,UplinkBytes,UplinkFlags,CutFlags,Auto_spin,Auto_volt);
+		}
 		//Button multipress status
 		if(System_state_Global&0x80) {		//A "control" button press
 			system_state=System_state_Global&~0x80;//Copy to local variable

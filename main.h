@@ -20,6 +20,14 @@
 #define INDUCT_SENSE_LOW 0.2	/*need to check these values again*/
 #define INDUCT_SENSE_HIGH 0.46 
 
+//Other important config
+#define CALLSIGN "Foo"
+
+#define CUTDOWN_COMMAND 7
+#define LAUNCH_COMMAND 1
+
+#define MISSION_TIMEOUT 12600000UL /* 3.5 hours */
+
 //#define SINGLE_LOGFILE
 #ifndef SINGLE_LOGFILE
  #define LOGFILE_NAME print_string
