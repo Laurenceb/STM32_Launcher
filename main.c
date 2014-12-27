@@ -182,6 +182,8 @@ int main(void)
 	{
 	uint32_t last_message;
 	while(Gps.status!=UBLOX_3D ) {			//Wait for a 3D fix
+		Watchdog_Reset();			//Reset the watchdog each main loop iteration
+		__WFI();				//Wait for something to happen - saves power
 		uint8_t mode=0;
 		while(Bytes_In_DMA_Buffer(&Gps_Buffer))//Dump all the data
 			Gps_Process_Byte((uint8_t)(Pop_From_Buffer(&Gps_Buffer)),&Gps);

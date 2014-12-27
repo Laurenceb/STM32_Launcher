@@ -483,7 +483,7 @@ void si446x_state_machine(uint8_t *state_, uint8_t reason ) {
 					tx_buffer[1]=0x00;
 					tx_buffer[1]=0x00;
 					si446x_spi_state_machine( &Silabs_spi_state, 1, tx_buffer, 10, rx_buffer, &si446x_state_machine );
-				}
+				}//Reason 2 == more data being added just does nothing, but data will have been added to the buffer and sent with string
 			}
 		default:
 			*state_=0;/* This should not happen - called with an unknown state */
