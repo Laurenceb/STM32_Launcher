@@ -43,7 +43,6 @@ int main(void)
 {
 	uint8_t system_state=0;				//used to track button press functionality
 	uint8_t sensors=0;
-	int8_t RTC_Offset;				//RTC correction from setting file
 	float sensor_data;
 	uint8_t UplinkFlags=0,CutFlags=0;
 	uint16_t UplinkBytes=0;				//Counters and flags for telemetry
@@ -83,8 +82,9 @@ int main(void)
 			Watchdog_Reset();		//Reset watchdog here, if we are stalled here the Millis timeout should catch us
 		}
 	}
-	if(!GET_PWR_STATE)				//Check here to make sure the power button is still pressed, if not, sleep
-		shutdown();				//This means a glitch on the supply line, or a power glitch results in sleep
+        if(!GET_PWR_STATE &&  !(CoreDebug->DHCSR&0x00000001)) {//Check here to make sure the power button is still pressed, if not, sleep if no debug
+                shutdown();                             //This means a glitch on the supply line, or a power glitch results in sleep
+        }
 	// check to see if battery has enough charge to start
 	ADC_Configuration();				//We leave this a bit later to allow stabilisation
 	Delay(100000);					//Sensor+inst amplifier takes about 100ms to stabilise after power on
@@ -112,9 +112,29 @@ int main(void)
 		}
 		// load settings if file exists
 		if(!f_open(&FATFS_logfile,"settings.dat",FA_OPEN_EXISTING | FA_READ)) {
-		  UINT br;
-		  f_read(&FATFS_logfile, (void*)(&RTC_Offset),sizeof(RTC_Offset),&br);
-		  f_close(&FATFS_logfile);	//Close the settings.dat file
+			UINT br;
+			int8_t rtc_correction;
+			f_read(&FATFS_logfile, (void*)(&rtc_correction),sizeof(rtc_correction),&br);
+			f_close(&FATFS_logfile);	//Close the settings.dat file
+			//Use the setting to apply correction to the RTC
+                        if(br && (rtc_correction<30) && (rtc_correction>-92) && rtc_correction ) {
+                                PWR_BackupAccessCmd(ENABLE);/* Allow access to BKP Domain */
+                                uint16_t tweaked_prescale = (0x0001<<15)-2;/* Try to run the RTC slightly too fast so it can be corrected either way */
+                                RTC_WaitForSynchro();   /* Wait for RTC registers synchronization */
+                                if( RTC->PRLL != tweaked_prescale ) {/*Note that there is a 0.5ppm offset here (correction 0==0.5ppm slow)*/
+                                        RTC_SetPrescaler(tweaked_prescale); /* RTC period = RTCCLK/RTC_PR = (32.768 KHz)/(32767-2+1) */
+                                        RTC_WaitForLastTask();
+                                }
+                                BKP_SetRTCCalibrationValue((uint8_t) ((int16_t)31-(21*(int16_t)rtc_correction)/(int16_t)20) );
+                                BKP_RTCOutputConfig(BKP_RTCOutputSource_None);/* Ensure any output is disabled here */
+                                /* Lock access to BKP Domain */
+                                PWR_BackupAccessCmd(DISABLE);
+                        }
+                        else if(br && ((uint8_t)rtc_correction==0x91) ) {/* 0x91 magic flag sets the RTC clock output on */
+                                PWR_BackupAccessCmd(ENABLE);/* Allow access to BKP Domain */
+                                BKP_RTCOutputConfig(BKP_RTCOutputSource_CalibClock);/* Output a 512Hz reference clock on the TAMPER pin*/
+                                PWR_BackupAccessCmd(DISABLE);
+                        }
 		}
 #ifndef SINGLE_LOGFILE
 		rtc_gettime(&RTC_time);			//Get the RTC time and put a timestamp on the start of the file
