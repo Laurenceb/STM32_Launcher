@@ -11,7 +11,7 @@ uint16_t string_CRC16_checksum (char *string) {
 	for (i = 2; i < strlen(string); i++)
 	{
 		c = string[i];
-		crc = _crc_xmodem_update (crc, c);
+		crc = crc_xmodem_update (crc, c);
 	}
 	return crc;
 }

@@ -10,6 +10,7 @@
 #include "pwr.h"
 #include "watchdog.h"
 #include "polygon.h"
+#include "crc.h"
 #include "Ublox/ubx.h"
 #include "Util/rprintf.h"
 #include "Util/delay.h"
@@ -169,7 +170,7 @@ int main(void)
 	print_string[0]=0x00;				//Set string length to 0
 	printf("%02d-%02d-%02dT%02d:%02d:%02d\n",RTC_time.year,RTC_time.month,RTC_time.mday,RTC_time.hour,RTC_time.min,RTC_time.sec);//ISO 8601 timestamp header
 	printf("Battery: %3fV\n",Battery_Voltage);	//Get the battery voltage using blocking regular conversion and print
-	printf("Time");					//Print out a header for columns that are present in the CSV file
+	printf("Time,");					//Print out a header for columns that are present in the CSV file
 	printf("Lat,Long,Alt,Voltage,Aux_Voltage,XY_Gyro,Z_Gyro,Temperature,Uplink(Bytes),Uplink_CommandFlags,Cutdown,Spin,Ind,Button press\r\n");
 	if(file_opened) {
 		f_puts(print_string,&FATFS_logfile);
@@ -188,8 +189,7 @@ int main(void)
 	Millis=0;					//Reset system uptime, we have 50 days before overflow
 	while (1) {					//Main loop
 		Watchdog_Reset();			//Reset the watchdog each main loop iteration
-		while(1)
-			__WFI();			//Wait for something to happen - saves power 
+		__WFI();				//Wait for something to happen - saves power 
 		//Check for Silabs uplinked data, and process it
 		{
 		uint8_t stat;
@@ -265,28 +265,32 @@ int main(void)
 				UplinkFlags^=(1<<(LAUNCH_REFUSED));
 		}		
 		//Other sensors etc can go here
+		//Button multipress status
+		if(System_state_Global&0x80) {		//A "control" button press
+			system_state=System_state_Global&~0x80;//Copy to local variable
+			if(system_state==1)		//A single button press
+				//Function call can go here
+			System_state_Global&=~0x80;	//Wipe the flag bit to show this has been processed
+		}
 		//Generate the Telemetry string
 		if(Millis-last_telemetry>25000) {	//Every 25 seconds
 			last_telemetry=Millis;
 			rtc_gettime(&RTC_time);		//Get the RTC time and put a timestamp on the start of the file
 			print_string[0]=0x00;		//Set string length to 0
-			printf("$$%s,%d,%02d:%02d,%3f,%3f,%1f,%1f,%1f,%1f,%1f,%d,%d,%2x,%2x,%1f,%2f,",CALLSIGN,sentence_counter++,RTC_time.hour,RTC_time.min,(float)Gps.latitude*1e-7,(float)Gps.longitude*1e-7,(float)Gps.mslaltitude*1e-3,Battery_Voltage,Aux_Voltage,Gyro_XY_Rate,Gyro_Z_Rate,Gyro_Temperature,UplinkBytes,UplinkFlags,CutFlags,Auto_spin,Auto_volt);
+			printf("$$%s,%d,%02d:%02d,%3f,%3f,%1f,%1f,%1f,%1f,%1f,%d,%d,%2x,%2x,%1f,%2f",CALLSIGN,sentence_counter++,RTC_time.hour,RTC_time.min,(float)Gps.latitude*1e-7,(float)Gps.longitude*1e-7,(float)Gps.mslaltitude*1e-3,Battery_Voltage,Aux_Voltage,Gyro_XY_Rate,Gyro_Z_Rate,Gyro_Temperature,UplinkBytes,UplinkFlags,CutFlags,Auto_spin,Auto_volt);
 			uint16_t checksum=string_CRC16_checksum (print_string);//Generate the checksum
-			printf("%04x\n",checksum);
+			printf("*%04x\n",checksum);
 			send_string_to_silabs(print_string);//Output the string via the silabs
+			uint8_t endhead=strchr(print_string,',');//Find end of the header
+			uint8_t endstring=strchr(print_string,'*');//Find end of formatted string
+			uint8_t strcopy[strlen(print_string)];
+			memcpy(&print_string[endhead],strcopy,endstring-endhead);//Copy the contents of string into the backup
+			print_string[0]=0;
+			printf("%1f%s,%d\n",(float)Millis/1000,strcopy,system_state);
 		}
-		//Button multipress status
-		if(System_state_Global&0x80) {		//A "control" button press
-			system_state=System_state_Global&~0x80;//Copy to local variable
-			if(system_state==1)		//A single button press
-				PPG_Automatic_Brightness_Control();//At the moment this is the only function implimented
-			System_state_Global&=~0x80;	//Wipe the flag bit to show this has been processed
-		}
-		 printf(",%d\n",system_state);		//Terminating newline
-		//Can do other things with the system state here
-		system_state=0;				//Reset thisc string functions
-		if(file_opened  & 0x01) {
-			f_puts(print_string,&FATFS_logfile);
+		system_state=0;				//Reset this
+		if((file_opened&0x01) &&strlen(print_string)) {
+			f_puts(print_string,&FATFS_logfile);//Store the reformatted telemetry in the logfile
 			print_string[0]=0x00;		//Set string length to 0
 		}
 		//Deal with file size - may need to preallocate some more
