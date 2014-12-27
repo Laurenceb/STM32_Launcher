@@ -45,7 +45,7 @@ int main(void)
 	float sensor_data;
 	uint8_t UplinkFlags=0,CutFlags=0;
 	uint16_t UplinkBytes=0;				//Counters and flags for telemetry
-	uint32_t last_telemetry=0,cutofftime=0;
+	uint32_t last_telemetry=0,cutofftime=0,indtest=0,badgyro=0;
 	uint16_t sentence_counter=0;
 	//Cutdown config stuff here, atm uses hardcoded polygon defined in polygon.h
 	static const int32_t Geofence[UK_GEOFENCE_POINTS*2]=UK_GEOFENCE;
@@ -231,6 +231,27 @@ int main(void)
 			CUTOFF;
 			cutofftime=0;
 		}
+		//The launch functionality, needs an uplink command and for the gyro rates, induction self test and altitude conditions to be met
+		if((Gyro_XY_Rate>XY_RATE_LIMIT)||(Gyro_Z_Rate>Z_RATE_LIMIT))
+			badgyro=Millis;			//This is used for timestamping bad events
+		if((Millis-indtest)>100000) {		//Test the induction system every 100 seconds
+			indtest=Millis;
+			Timer_GPIO_Enable();
+		}
+		if((Millis-indtest)>100 && (Millis-indtest)<500) {
+			Auto_volt=Ind_Voltage;
+			Timer_GPIO_Disable();
+			indtest=Millis-500;
+		}
+		//This processed and checks the actual launch command
+		if(  (UplinkFlags&(1<<(LAUNCH_COMMAND)))) {
+			UplinkFlags&=~(1<<(LAUNCH_COMMAND));//Wipe the bit
+			UplinkFlags^=(1<<(LAUNCH_RECEIVED));//Notification bit is toggled
+			if( ((Gps.mslaltitude/1000) > LAUNCH_ALTITUDE) && ((Millis-badgyro)>LAUNCH_STABLE_PERIOD ) && (Auto_volt>INDUCT_SENSE_LOW && Auto_volt<INDUCT_SENSE_HIGH)) 
+				AutoSequence=1;		//Go for launch
+			else				//Launch refused
+				UplinkFlags^=(1<<(LAUNCH_REFUSED));
+		}		
 		//Other sensors etc can go here
 		//Generate the Telemetry string
 		if(Millis-last_telemetry>15000) {	//Every 15 seconds
