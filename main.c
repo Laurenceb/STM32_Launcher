@@ -177,16 +177,64 @@ int main(void)
 		f_puts(print_string,&FATFS_logfile);
 		print_string[0]=0x00;			//Set string length to 0
 	}
-	//Todo, await GPS fix here?
-	Gps.packetflag=0x00;			//Reset
-	while(Gps.packetflag!=REQUIRED_DATA) {	//Wait for all fix data
+	//Await GPS fix here, allow echoing of radio commands here, for debug purposes
+	if(!Config_Gps()) Usart_Send_Str((char*)"Setup GPS ok - awaiting fix, enter 1 for indoor mode\r\n");//If not the function printfs its error
+	{
+	uint32_t last_message;
+	while(Gps.status!=UBLOX_3D ) {			//Wait for a 3D fix
+		uint8_t mode=0;
 		while(Bytes_In_DMA_Buffer(&Gps_Buffer))//Dump all the data
 			Gps_Process_Byte((uint8_t)(Pop_From_Buffer(&Gps_Buffer)),&Gps);
+		if(Gps.packetflag==REQUIRED_DATA){		
+			putchar(0x30+Gps.nosats);putchar(0x2C);//Number of sats seperated by commas
+			Gps.packetflag=0x00;
+		}
+		while(bytes_in_buff(&Usart1_rx_buff)) {//Bytes received on serial terminal
+			uint8_t err=(uint8_t)(Pop_From_Buffer(&Usart1_rx_buff));
+			if('1'==err) {		//Enter '1' to abort to indoor mode
+				printf("Indoor mode\r\n");
+				mode=1;
+			}
+		}
+		if(mode==1)
+			break;
+		//Now some radio debug and 10 secondly output
+		if(Millis-last_message>10000) {
+			print_string[0]=0;
+			printf("Rockoon project:%d sats\n",Gps.nosats);	//Test the silabs RTTY
+			send_string_to_silabs(print_string);		//Send the string
+			last_message=Millis;
+		}
+		//Check for Silabs uplinked data, and process it
+		{
+		uint8_t stat;
+		uint8_t str[10];			//For receiving uplinked data
+		uint8_t n=0;
+		do {
+			str[n]=(uint8_t)get_from_silabs_buffer(&stat);
+			n++;
+		} while(stat && n<=10);
+		if(stat || n>1)
+			UplinkBytes+=n;			//Stores the amount of uplinked data
+		if(stat && strlen(str)==6 && !strncmp(str,&Silabs_Header,4)) {
+			print_string[0]=0;
+			printf("Rockoon project: received: %s\n",str);//Test the silabs RTTY - echo function
+			send_string_to_silabs(print_string);//Send the string
+			last_message=Millis;
+		}
+		}//Context only
 	}
-	Usart_Send_Str((char*)"\r\nGot GPS fix:");//Print out the fix for debug purposes
+	}//Context only
+	Gps.packetflag=0x00;				//Reset
+	while(Gps.packetflag!=REQUIRED_DATA) {		//Wait for all fix data
+		while(Bytes_In_DMA_Buffer(&Gps_Buffer))	//Dump all the data
+			Gps_Process_Byte((uint8_t)(Pop_From_Buffer(&Gps_Buffer)),&Gps);
+	}
+	Usart_Send_Str((char*)"\r\nGot GPS fix:");	//Print out the fix for debug purposes
 	printf("%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld,%1x\r\n",\
 	Gps.latitude,Gps.longitude,Gps.mslaltitude,\
 	Gps.vnorth,Gps.veast,Gps.vdown,Gps.horizontal_error,Gps.vertical_error,Gps.speedacc,Gps.nosats);
+	print_string[0]=0;				//Reset the print output
 	Millis=0;					//Reset system uptime, we have 50 days before overflow
 	while (1) {					//Main loop
 		Watchdog_Reset();			//Reset the watchdog each main loop iteration

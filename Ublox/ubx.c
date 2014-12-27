@@ -160,7 +160,7 @@ uint8_t Get_UBX_Ack(uint8_t Class, uint8_t Id) {
  	while(1) {				//Test for success
 		if(ackByteID > 9)return UBX_OK;	//All packets in order!
 		if(counter++>GPS_RESPONSE_TIMEOUT)return UBX_FAIL; //Timeout if no valid response in 3 seconds
-		if(Bytes_In_Buffer(&Gps_Buffer)) {//Make sure data is available to read
+		if(bytes_in_buff(&Gps_Buffer)) {//Make sure data is available to read
 			b=Pop_From_Buffer(&Gps_Buffer);
 			//putchar(b);
  			if(b==ackPacket[ackByteID])//Check that bytes arrive correct sequence
@@ -190,8 +190,6 @@ uint8_t Config_Gps(void) {
 	static const char sbas[]=SBAS_OFF;
 	static const char packets[]=LLN_ENABLE VEL_ENABLE STAT_ENABLE;//note that this has only one header
 	static const char usart_conf[]=USART1_57600_UBX;
-	Set_Gps_Pwr(Bit_SET);			//GPS on
-	Delay(GPS_DELAY);			//Wait for the gps to boot itself up
 	Gps_Send_Str(gll_off);			//Use NMEA commands to disable all sentences
 	Gps_Send_Str(zda_off);
 	Gps_Send_Str(vtg_off);
@@ -200,7 +198,7 @@ uint8_t Config_Gps(void) {
 	Gps_Send_Str(rmc_off);
 	Gps_Send_Str(gga_off);
 	Delay(GPS_DELAY);			//Wait for the gps to process this
-	Flush_Buffer(&Gps_Buffer);		//Wipe the DMA buffer - it will have been overwritten with NMEA
+	Empty_Buffer(&Gps_Buffer);		//Wipe the DMA buffer - it will have been overwritten with NMEA
 	Gps_Send_Utf8(usart_conf);
 	if(Get_UBX_Ack(usart_conf[3],usart_conf[4])) {
 		printf("Ack Error -Usart config\r\n");
