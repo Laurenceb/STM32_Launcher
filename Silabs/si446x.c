@@ -3,6 +3,7 @@
 /* Globals live here */
 volatile uint8_t Channel_rx,Channel_tx,Silabs_spi_state,Silabs_driver_state;
 volatile buff_type Silabs_Tx_Buffer,Silabs_Rx_Buffer;
+const uint8_t Silabs_Header[5]=UPLINK_CALLSIGN;
 
 static volatile uint32_t CTS_Low;
 uint32_t Active_freq = DEFAULT_FREQ;
@@ -317,8 +318,8 @@ void si446x_set_modem(void) {
 	si446x_spi_state_machine( &Silabs_spi_state, 8, tx_buffer, 0, rx_buffer, NULL );
 	while(Silabs_spi_state)
 		__WFI();
-	//Configure the match value, this constrains the first 4 bytes of data to match $$RO
-	memcpy(tx_buffer, (uint8_t [16]){0x11, 0x30, 0x0C, 0x00, 0x24, 0xFF, 0x41, 0x24, 0xFF, 0x42, 0x52, 0xFF, 0x43, 0x4F, 0xFF, 0x44}, 16*sizeof(uint8_t));
+	//Configure the match value, this constrains the first 4 bytes of data to match e.g. $$RO
+	memcpy(tx_buffer, (uint8_t [16]){0x11, 0x30, 0x0C, 0x00,Silabs_Header[0], 0xFF, 0x41,Silabs_Header[1], 0xFF, 0x42,Silabs_Header[2], 0xFF, 0x43,Silabs_Header[3], 0xFF, 0x44}, 16*sizeof(uint8_t));
 	si446x_spi_state_machine( &Silabs_spi_state, 16, tx_buffer, 0, rx_buffer, NULL );
 	while(Silabs_spi_state)
 		__WFI();

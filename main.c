@@ -11,6 +11,7 @@
 #include "watchdog.h"
 #include "polygon.h"
 #include "crc.h"
+#include "si446x.h"
 #include "Ublox/ubx.h"
 #include "Util/rprintf.h"
 #include "Util/delay.h"
@@ -201,8 +202,8 @@ int main(void)
 		} while(stat && n<=10);
 		if(stat || n>1)
 			UplinkBytes+=n;			//Stores the amount of uplinked data
-		if(stat && strlen(str)==6 && !strncmp(str,"$$RO",4)) {//We recived something, here we process the data that was received, as long as it is '$$RO**'
-			if(str[4]=='K' && str[5]>47 && str[5]<56 ) {//Need to send "$$ROKx" where x is 0 to 7
+		if(stat && strlen(str)==6 && !strncmp(str,&Silabs_Header,4)) {//We recived something, here we process the data that was received, as long as it is '$$RO**'
+			if(str[4]==Silabs_Header[4] && str[5]>47 && str[5]<56 ) {//Need to send e.g. "$$ROKx" where x is 0 to 7
 				if(str[5]-48!=UPLINK_TEST_BIT)
 					UplinkFlags|=1<<(str[5]-48);//Set the correct flag bit
 				else
@@ -283,10 +284,11 @@ int main(void)
 			send_string_to_silabs(print_string);//Output the string via the silabs
 			uint8_t endhead=strchr(print_string,',');//Find end of the header
 			uint8_t endstring=strchr(print_string,'*');//Find end of formatted string
-			uint8_t strcopy[strlen(print_string)];
-			memcpy(&print_string[endhead],strcopy,endstring-endhead);//Copy the contents of string into the backup
+			print_string[endstring]=0;	//End here also
 			print_string[0]=0;
-			printf("%1f%s,%d\n",(float)Millis/1000,strcopy,system_state);
+			printf("%d",Millis/1000);	
+			memcpy(&print_string[strlen(print_string)],&print_string[endhead],endstring-endhead+1);//Compress the contents backwards
+			printf(",%d\n",system_state);	//Adds the state and newline to the end of the string
 		}
 		system_state=0;				//Reset this
 		if((file_opened&0x01) &&strlen(print_string)) {

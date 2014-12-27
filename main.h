@@ -30,6 +30,8 @@
 //Other important config
 #define CALLSIGN "Foo"
 
+#define UPLINK_CALLSIGN "$$ROK"	/* This should be a 5 character callsign, first 4 characters are used for the hardware address filter */
+
 #define CUTDOWN_COMMAND 0
 
 #define LAUNCH_COMMAND 7
