@@ -47,7 +47,7 @@ int main(void)
 	float sensor_data;
 	uint8_t UplinkFlags=0,CutFlags=0;
 	uint16_t UplinkBytes=0;				//Counters and flags for telemetry
-	uint32_t last_telemetry=0,cutofftime=0,indtest=0,badgyro=0,permission_time=0;
+	uint32_t last_telemetry=0,cutofftime=0,indtest=0,badgyro=0,permission_time=0,countdown_time=0;
 	uint16_t sentence_counter=0;
 	//Cutdown config stuff here, atm uses hardcoded polygon defined in polygon.h
 	static const int32_t Geofence[UK_GEOFENCE_POINTS*2]=UK_GEOFENCE;
@@ -313,11 +313,18 @@ int main(void)
 		if( UplinkFlags&(1<<(LAUNCH_COMMAND)) && UplinkFlags&(1<<(LAUNCH_PERMISSION))) {//Need to send the command whilst the permission is valid
 			UplinkFlags&=~(1<<(LAUNCH_COMMAND));//Wipe the bit
 			if( ((Gps.mslaltitude/1000) > LAUNCH_ALTITUDE) && ((Millis-badgyro)>LAUNCH_STABLE_PERIOD ) && (Auto_volt>INDUCT_SENSE_LOW && Auto_volt<INDUCT_SENSE_HIGH)) {
-				AutoSequence=1;		//Go for launch
+				countdown_time=Millis+COUNTDOWN_DELAY;
+				GOPRO_TRIG_ON;		//Turn the GoPro on the record the launch, it runs an autoexec.ash script
 				UplinkFlags^=(1<<(LAUNCH_RECEIVED));//Notification bit is toggled
 			} else				//Launch refused
 				UplinkFlags^=(1<<(LAUNCH_REFUSED));
-		}		
+		}
+		if( countdown_time && Millis>countdown_time-COUNTDOWN_DELAY+GOPRO_TRIGGER_TIME )
+			GOPRO_TRIG_OFF;
+		if( countdown_time && Millis>countdown_time ) {
+			countdown_time=0;
+			AutoSequence=1;			//Go for launch
+		}	
 		//Other sensors etc can go here
 		//Button multipress status
 		if(System_state_Global&0x80) {		//A "control" button press

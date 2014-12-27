@@ -43,6 +43,10 @@
 
 #define MISSION_TIMEOUT 12600000UL /* 3.5 hours */
 
+#define COUNTDOWN_DELAY 1200	/*1.2 s between GoPro turn on and start of launch sequence */
+//GoPro stuff
+#define GOPRO_TRIGGER_TIME 450	/*450 ms delay */
+
 //#define SINGLE_LOGFILE
 #ifndef SINGLE_LOGFILE
  #define LOGFILE_NAME print_string
