@@ -67,6 +67,15 @@ void SysTick_Configuration(void) {
 	SysTick_CLKSourceConfig(SysTick_CLKSource_HCLK_Div8);   //SYSTICK AHB1/8
 }
 
+/**
+  * @brief  This function fixed the alignment of the gyro axes to launcher space co-ordinates
+  * @param  Pointers to each of the axes
+  * @retval None
+  */
+void Realign_Axes(int16_t* x, int16_t* y, int16_t* z) {
+	int16_t x_=*x,y_=*y,z_=*z;
+	*z=x_;*x=-y_;*y=-z_;
+}
 
 /**
   * @brief  This function handles ADC1-2 interrupt requests.- Should only be from the analog watchdog
@@ -121,6 +130,7 @@ __attribute__((externally_visible)) void SysTick_Handler(void)
 		Flipbytes(y);
 		uint16_t z=*((uint16_t*)&L3GD20_Data_Buffer[6]);
 		Flipbytes(z);
+		Realign_Axes(&x,&y,&z);				//Moves from gyro co-ordinates to launcher space co-ordinates
 		Gyro_XY_Rate=Gyro_XY_Rate*0.99+0.01*L3GD20_GAIN*((float)(*(int16_t*)&x)*(float)(*(int16_t*)&x)+(float)(*(int16_t*)&y)*(float)(*(int16_t*)&y));
 		Gyro_Z_Rate=Gyro_Z_Rate*0.99+0.01*L3GD20_GAIN*((float)(*(int16_t*)&z)*(float)(*(int16_t*)&z));//1 second time constant on the Turn rate
 		Gyro_Temperature=50-*(int8_t*)L3GD20_Data_Buffer;//This signed 8 bit temperature is just transferred directly to the global
