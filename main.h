@@ -17,8 +17,10 @@
 #define SPIN_RATE_HIGH 300
 #define SPIN_RATE_LOW 165
 
-#define INDUCT_SENSE_LOW 0.2	/*need to check these values again*/
-#define INDUCT_SENSE_HIGH 0.46 
+#define INDUCT_SENSE_LOW 0.15	/*need to check these values again*/
+#define INDUCT_SENSE_HIGH 0.455 
+
+#define IND_DUTY 0.2		/*PWM duty cycle for ignition*/
 
 #define XY_RATE_LIMIT 10.0	/*10 degrees per second rps*/
 #define Z_RATE_LIMIT 30.0	/*30 around the vertical axis*/

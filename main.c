@@ -175,6 +175,9 @@ int main(void)
 		f_close(&FATFS_logfile);		//So we log that something went wrong in the logfile
 		shutdown();
 	}
+	//Setup the Timer for PWM
+	Init_Timer();
+	PWM_Set(IND_DUTY);
 	//Setup and test the silabs radio
 	uint8_t silab=si446x_setup();
 	if(silab!=0x44) {				//Should return the device code
