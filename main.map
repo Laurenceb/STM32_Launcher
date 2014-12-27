@@ -59,25 +59,25 @@ lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_sil.o)
 /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib/armv7-m/libc.a(lib_a-atexit.o)
                               /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib/armv7-m/libc.a(lib_a-__call_atexit.o) (atexit)
 /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/libgcc.a(_arm_addsubdf3.o)
-                              /tmp/cc9oRIFL.ltrans7.ltrans.o (__aeabi_dadd)
+                              /tmp/ccxZRFth.ltrans7.ltrans.o (__aeabi_dadd)
 /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/libgcc.a(_arm_muldivdf3.o)
-                              /tmp/cc9oRIFL.ltrans3.ltrans.o (__aeabi_dmul)
+                              /tmp/ccxZRFth.ltrans3.ltrans.o (__aeabi_dmul)
 /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/libgcc.a(_arm_cmpdf2.o)
-                              /tmp/cc9oRIFL.ltrans1.ltrans.o (__aeabi_dcmplt)
+                              /tmp/ccxZRFth.ltrans1.ltrans.o (__aeabi_dcmplt)
 /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/libgcc.a(_arm_fixunsdfsi.o)
-                              /tmp/cc9oRIFL.ltrans3.ltrans.o (__aeabi_d2uiz)
+                              /tmp/ccxZRFth.ltrans3.ltrans.o (__aeabi_d2uiz)
 /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/libgcc.a(_arm_truncdfsf2.o)
-                              /tmp/cc9oRIFL.ltrans0.ltrans.o (__aeabi_d2f)
+                              /tmp/ccxZRFth.ltrans0.ltrans.o (__aeabi_d2f)
 /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/libgcc.a(_arm_addsubsf3.o)
-                              /tmp/cc9oRIFL.ltrans0.ltrans.o (__aeabi_fsub)
+                              /tmp/ccxZRFth.ltrans0.ltrans.o (__aeabi_fsub)
 /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/libgcc.a(_arm_muldivsf3.o)
-                              /tmp/cc9oRIFL.ltrans0.ltrans.o (__aeabi_fmul)
+                              /tmp/ccxZRFth.ltrans0.ltrans.o (__aeabi_fmul)
 /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/libgcc.a(_arm_cmpsf2.o)
-                              /tmp/cc9oRIFL.ltrans0.ltrans.o (__aeabi_fcmpeq)
+                              /tmp/ccxZRFth.ltrans0.ltrans.o (__aeabi_fcmpeq)
 /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/libgcc.a(_arm_fixunssfsi.o)
-                              /tmp/cc9oRIFL.ltrans0.ltrans.o (__aeabi_f2uiz)
+                              /tmp/ccxZRFth.ltrans0.ltrans.o (__aeabi_f2uiz)
 /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib/armv7-m/libc.a(lib_a-malloc.o)
-                              /tmp/cc9oRIFL.ltrans1.ltrans.o (malloc)
+                              /tmp/ccxZRFth.ltrans1.ltrans.o (malloc)
 /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib/armv7-m/libc.a(lib_a-mallocr.o)
                               /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib/armv7-m/libc.a(lib_a-malloc.o) (_malloc_r)
 /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib/armv7-m/libc.a(lib_a-mlock.o)
@@ -85,7 +85,7 @@ lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_sil.o)
 /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib/armv7-m/libc.a(lib_a-sbrkr.o)
                               /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib/armv7-m/libc.a(lib_a-mallocr.o) (_sbrk_r)
 /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib/armv7-m/libc.a(lib_a-strlen.o)
-                              /tmp/cc9oRIFL.ltrans3.ltrans.o (strlen)
+                              /tmp/ccxZRFth.ltrans3.ltrans.o (strlen)
 /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib/armv7-m/libc.a(lib_a-freer.o)
                               /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib/armv7-m/libc.a(lib_a-malloc.o) (_free_r)
 /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib/armv7-m/libc.a(lib_a-reent.o)
@@ -133,32 +133,32 @@ Discarded input sections
  .ARM.attributes
                 0x00000000       0x1b /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib/armv7-m/crt0.o
  .text          0x00000000        0x0 Silabs/si446x.o (symbol from plugin)
- .text          0x00000000        0x0 /tmp/cc9oRIFL.ltrans0.ltrans.o
+ .text          0x00000000        0x0 /tmp/ccxZRFth.ltrans0.ltrans.o
  .bss.Block_Read_count
-                0x00000000        0x4 /tmp/cc9oRIFL.ltrans0.ltrans.o
- .text          0x00000000        0x0 /tmp/cc9oRIFL.ltrans1.ltrans.o
- .data          0x00000000        0x0 /tmp/cc9oRIFL.ltrans1.ltrans.o
- .text          0x00000000        0x0 /tmp/cc9oRIFL.ltrans2.ltrans.o
- .data          0x00000000        0x0 /tmp/cc9oRIFL.ltrans2.ltrans.o
- .text          0x00000000        0x0 /tmp/cc9oRIFL.ltrans3.ltrans.o
- .text.power_off_.5597
-                0x00000000       0x64 /tmp/cc9oRIFL.ltrans3.ltrans.o
- .text          0x00000000        0x0 /tmp/cc9oRIFL.ltrans4.ltrans.o
- .text          0x00000000        0x0 /tmp/cc9oRIFL.ltrans5.ltrans.o
- .text          0x00000000        0x0 /tmp/cc9oRIFL.ltrans6.ltrans.o
- .text          0x00000000        0x0 /tmp/cc9oRIFL.ltrans7.ltrans.o
+                0x00000000        0x4 /tmp/ccxZRFth.ltrans0.ltrans.o
+ .text          0x00000000        0x0 /tmp/ccxZRFth.ltrans1.ltrans.o
+ .data          0x00000000        0x0 /tmp/ccxZRFth.ltrans1.ltrans.o
+ .text          0x00000000        0x0 /tmp/ccxZRFth.ltrans2.ltrans.o
+ .data          0x00000000        0x0 /tmp/ccxZRFth.ltrans2.ltrans.o
+ .text          0x00000000        0x0 /tmp/ccxZRFth.ltrans3.ltrans.o
+ .text.power_off_.5611
+                0x00000000       0x64 /tmp/ccxZRFth.ltrans3.ltrans.o
+ .text          0x00000000        0x0 /tmp/ccxZRFth.ltrans4.ltrans.o
+ .text          0x00000000        0x0 /tmp/ccxZRFth.ltrans5.ltrans.o
+ .text          0x00000000        0x0 /tmp/ccxZRFth.ltrans6.ltrans.o
+ .text          0x00000000        0x0 /tmp/ccxZRFth.ltrans7.ltrans.o
  .text.UsageFaultException
-                0x00000000        0x2 /tmp/cc9oRIFL.ltrans7.ltrans.o
+                0x00000000        0x2 /tmp/ccxZRFth.ltrans7.ltrans.o
  .text.BusFaultException
-                0x00000000        0x2 /tmp/cc9oRIFL.ltrans7.ltrans.o
+                0x00000000        0x2 /tmp/ccxZRFth.ltrans7.ltrans.o
  .text.MemManageException
-                0x00000000        0x2 /tmp/cc9oRIFL.ltrans7.ltrans.o
+                0x00000000        0x2 /tmp/ccxZRFth.ltrans7.ltrans.o
  .text.HardFaultException
-                0x00000000        0x2 /tmp/cc9oRIFL.ltrans7.ltrans.o
+                0x00000000        0x2 /tmp/ccxZRFth.ltrans7.ltrans.o
  .text.NMIException
-                0x00000000        0x2 /tmp/cc9oRIFL.ltrans7.ltrans.o
- .text          0x00000000        0x0 /tmp/cc9oRIFL.ltrans8.ltrans.o
- .data          0x00000000        0x0 /tmp/cc9oRIFL.ltrans8.ltrans.o
+                0x00000000        0x2 /tmp/ccxZRFth.ltrans7.ltrans.o
+ .text          0x00000000        0x0 /tmp/ccxZRFth.ltrans8.ltrans.o
+ .data          0x00000000        0x0 /tmp/ccxZRFth.ltrans8.ltrans.o
  .data          0x00000000        0x0 /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/libgcc.a(_arm_addsubdf3.o)
  .bss           0x00000000        0x0 /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/libgcc.a(_arm_addsubdf3.o)
  .data          0x00000000        0x0 /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/libgcc.a(_arm_muldivdf3.o)
@@ -218,6 +218,7 @@ Discarded input sections
  .text          0x00000000        0x0 Util/USB/usb_pwr.o (symbol from plugin)
  .text          0x00000000        0x0 Util/USB/usb_scsi.o (symbol from plugin)
  .text          0x00000000        0x0 Util/buffer.o (symbol from plugin)
+ .text          0x00000000        0x0 Util/crc.o (symbol from plugin)
  .text          0x00000000        0x0 Util/delay.o (symbol from plugin)
  .text          0x00000000        0x0 Util/fat_fs/option/ccsbcs.o (symbol from plugin)
  .text          0x00000000        0x0 Util/fat_fs/src/fattime.o (symbol from plugin)
@@ -926,15 +927,15 @@ LOAD /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/crti.o
 LOAD /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/crtbegin.o
 LOAD /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib/armv7-m/crt0.o
 LOAD Silabs/si446x.o
-LOAD /tmp/cc9oRIFL.ltrans0.ltrans.o
-LOAD /tmp/cc9oRIFL.ltrans1.ltrans.o
-LOAD /tmp/cc9oRIFL.ltrans2.ltrans.o
-LOAD /tmp/cc9oRIFL.ltrans3.ltrans.o
-LOAD /tmp/cc9oRIFL.ltrans4.ltrans.o
-LOAD /tmp/cc9oRIFL.ltrans5.ltrans.o
-LOAD /tmp/cc9oRIFL.ltrans6.ltrans.o
-LOAD /tmp/cc9oRIFL.ltrans7.ltrans.o
-LOAD /tmp/cc9oRIFL.ltrans8.ltrans.o
+LOAD /tmp/ccxZRFth.ltrans0.ltrans.o
+LOAD /tmp/ccxZRFth.ltrans1.ltrans.o
+LOAD /tmp/ccxZRFth.ltrans2.ltrans.o
+LOAD /tmp/ccxZRFth.ltrans3.ltrans.o
+LOAD /tmp/ccxZRFth.ltrans4.ltrans.o
+LOAD /tmp/ccxZRFth.ltrans5.ltrans.o
+LOAD /tmp/ccxZRFth.ltrans6.ltrans.o
+LOAD /tmp/ccxZRFth.ltrans7.ltrans.o
+LOAD /tmp/ccxZRFth.ltrans8.ltrans.o
 LOAD /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/libgcc.a
 LOAD /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib/armv7-m/libc.a
 LOAD Ublox/ubx.o
@@ -950,6 +951,7 @@ LOAD Util/USB/usb_prop.o
 LOAD Util/USB/usb_pwr.o
 LOAD Util/USB/usb_scsi.o
 LOAD Util/buffer.o
+LOAD Util/crc.o
 LOAD Util/delay.o
 LOAD Util/fat_fs/option/ccsbcs.o
 LOAD Util/fat_fs/src/fattime.o
@@ -1241,289 +1243,289 @@ LOAD /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/crtn.o
                 0x0800103c                __fixunssfsi
  *(.text.*)
  .text.atoiRamRom.4073
-                0x0800107c       0x20 /tmp/cc9oRIFL.ltrans0.ltrans.o
+                0x0800107c       0x20 /tmp/ccxZRFth.ltrans0.ltrans.o
  .text.rprintfChar.4076
-                0x0800109c       0x1c /tmp/cc9oRIFL.ltrans0.ltrans.o
+                0x0800109c       0x1c /tmp/ccxZRFth.ltrans0.ltrans.o
  .text.Resume_Init.4219
-                0x080010b8       0x30 /tmp/cc9oRIFL.ltrans0.ltrans.o
+                0x080010b8       0x30 /tmp/ccxZRFth.ltrans0.ltrans.o
  .text.Resume.4214
-                0x080010e8       0x88 /tmp/cc9oRIFL.ltrans0.ltrans.o
+                0x080010e8       0x88 /tmp/ccxZRFth.ltrans0.ltrans.o
  .text.Get_Max_Lun
-                0x08001170       0x18 /tmp/cc9oRIFL.ltrans0.ltrans.o
+                0x08001170       0x18 /tmp/ccxZRFth.ltrans0.ltrans.o
                 0x08001170                Get_Max_Lun
  .text.MASS_Get_Interface_Setting
-                0x08001188        0xc /tmp/cc9oRIFL.ltrans0.ltrans.o
+                0x08001188        0xc /tmp/ccxZRFth.ltrans0.ltrans.o
                 0x08001188                MASS_Get_Interface_Setting
  .text.MASS_Status_Out
-                0x08001194        0x2 /tmp/cc9oRIFL.ltrans0.ltrans.o
+                0x08001194        0x2 /tmp/ccxZRFth.ltrans0.ltrans.o
                 0x08001194                MASS_Status_Out
  .text.MASS_Status_In
-                0x08001196        0x2 /tmp/cc9oRIFL.ltrans0.ltrans.o
+                0x08001196        0x2 /tmp/ccxZRFth.ltrans0.ltrans.o
                 0x08001196                MASS_Status_In
  .text.Mass_Storage_SetDeviceAddress
-                0x08001198        0xc /tmp/cc9oRIFL.ltrans0.ltrans.o
+                0x08001198        0xc /tmp/ccxZRFth.ltrans0.ltrans.o
                 0x08001198                Mass_Storage_SetDeviceAddress
- .text.stm32_dma_transfer.5577.4054
-                0x080011a4       0xc8 /tmp/cc9oRIFL.ltrans0.ltrans.o
+ .text.stm32_dma_transfer.5591.4054
+                0x080011a4       0xc8 /tmp/ccxZRFth.ltrans0.ltrans.o
  .text.MASS_Reset
-                0x0800126c       0xe0 /tmp/cc9oRIFL.ltrans0.ltrans.o
+                0x0800126c       0xe0 /tmp/ccxZRFth.ltrans0.ltrans.o
                 0x0800126c                MASS_Reset
  .text.Mass_Storage_SetConfiguration
-                0x0800134c       0x30 /tmp/cc9oRIFL.ltrans0.ltrans.o
+                0x0800134c       0x30 /tmp/ccxZRFth.ltrans0.ltrans.o
                 0x0800134c                Mass_Storage_SetConfiguration
  .text.MASS_NoData_Setup
-                0x0800137c       0x4c /tmp/cc9oRIFL.ltrans0.ltrans.o
+                0x0800137c       0x4c /tmp/ccxZRFth.ltrans0.ltrans.o
                 0x0800137c                MASS_NoData_Setup
  .text.MASS_GetDeviceDescriptor
-                0x080013c8        0xc /tmp/cc9oRIFL.ltrans0.ltrans.o
+                0x080013c8        0xc /tmp/ccxZRFth.ltrans0.ltrans.o
                 0x080013c8                MASS_GetDeviceDescriptor
  .text.MASS_GetConfigDescriptor
-                0x080013d4        0xc /tmp/cc9oRIFL.ltrans0.ltrans.o
+                0x080013d4        0xc /tmp/ccxZRFth.ltrans0.ltrans.o
                 0x080013d4                MASS_GetConfigDescriptor
  .text.MASS_GetStringDescriptor
-                0x080013e0       0x20 /tmp/cc9oRIFL.ltrans0.ltrans.o
+                0x080013e0       0x20 /tmp/ccxZRFth.ltrans0.ltrans.o
                 0x080013e0                MASS_GetStringDescriptor
  .text.I2C1_Request_Job
-                0x08001400       0x58 /tmp/cc9oRIFL.ltrans0.ltrans.o
+                0x08001400       0x58 /tmp/ccxZRFth.ltrans0.ltrans.o
                 0x08001400                I2C1_Request_Job
  .text.rprintf2RamRom
-                0x08001458      0x404 /tmp/cc9oRIFL.ltrans0.ltrans.o
+                0x08001458      0x404 /tmp/ccxZRFth.ltrans0.ltrans.o
                 0x08001458                rprintf2RamRom
- .text.stm32_spi_rw.5566
-                0x0800185c       0x24 /tmp/cc9oRIFL.ltrans0.ltrans.o
-                0x0800185c                stm32_spi_rw.5566
- .text.rcvr_spi.5569
-                0x08001880        0x6 /tmp/cc9oRIFL.ltrans0.ltrans.o
-                0x08001880                rcvr_spi.5569
+ .text.stm32_spi_rw.5580
+                0x0800185c       0x24 /tmp/ccxZRFth.ltrans0.ltrans.o
+                0x0800185c                stm32_spi_rw.5580
+ .text.rcvr_spi.5583
+                0x08001880        0x6 /tmp/ccxZRFth.ltrans0.ltrans.o
+                0x08001880                rcvr_spi.5583
  *fill*         0x08001886        0x2 00
  .text.release_spi
-                0x08001888       0x18 /tmp/cc9oRIFL.ltrans0.ltrans.o
+                0x08001888       0x18 /tmp/ccxZRFth.ltrans0.ltrans.o
                 0x08001888                release_spi
  .text.rcvr_datablock
-                0x080018a0       0x54 /tmp/cc9oRIFL.ltrans0.ltrans.o
+                0x080018a0       0x54 /tmp/ccxZRFth.ltrans0.ltrans.o
                 0x080018a0                rcvr_datablock
- .text.xmit_datablock.part.1.5582
-                0x080018f4       0x2c /tmp/cc9oRIFL.ltrans0.ltrans.o
-                0x080018f4                xmit_datablock.part.1.5582
- .text.wait_ready.5571
-                0x08001920       0x28 /tmp/cc9oRIFL.ltrans0.ltrans.o
-                0x08001920                wait_ready.5571
- .text.send_cmd.5573
-                0x08001948       0x90 /tmp/cc9oRIFL.ltrans0.ltrans.o
-                0x08001948                send_cmd.5573
+ .text.xmit_datablock.part.1.5596
+                0x080018f4       0x2c /tmp/ccxZRFth.ltrans0.ltrans.o
+                0x080018f4                xmit_datablock.part.1.5596
+ .text.wait_ready.5585
+                0x08001920       0x28 /tmp/ccxZRFth.ltrans0.ltrans.o
+                0x08001920                wait_ready.5585
+ .text.send_cmd.5587
+                0x08001948       0x90 /tmp/ccxZRFth.ltrans0.ltrans.o
+                0x08001948                send_cmd.5587
  .text.disk_read
-                0x080019d8       0xa0 /tmp/cc9oRIFL.ltrans0.ltrans.o
+                0x080019d8       0xa0 /tmp/ccxZRFth.ltrans0.ltrans.o
                 0x080019d8                disk_read
  .text.disk_timerproc
-                0x08001a78       0x48 /tmp/cc9oRIFL.ltrans0.ltrans.o
+                0x08001a78       0x48 /tmp/ccxZRFth.ltrans0.ltrans.o
                 0x08001a78                disk_timerproc
- .text.validate.5219
-                0x08001ac0       0x2c /tmp/cc9oRIFL.ltrans0.ltrans.o
-                0x08001ac0                validate.5219
- .text.counter_to_struct.5480
-                0x08001aec       0xa8 /tmp/cc9oRIFL.ltrans0.ltrans.o
-                0x08001aec                counter_to_struct.5480
- .text.isDST.5462
-                0x08001b94       0x2a /tmp/cc9oRIFL.ltrans0.ltrans.o
-                0x08001b94                isDST.5462
+ .text.validate.5233
+                0x08001ac0       0x2c /tmp/ccxZRFth.ltrans0.ltrans.o
+                0x08001ac0                validate.5233
+ .text.counter_to_struct.5494
+                0x08001aec       0xa8 /tmp/ccxZRFth.ltrans0.ltrans.o
+                0x08001aec                counter_to_struct.5494
+ .text.isDST.5476
+                0x08001b94       0x2a /tmp/ccxZRFth.ltrans0.ltrans.o
+                0x08001b94                isDST.5476
  *fill*         0x08001bbe        0x2 00
  .text.rtc_gettime
-                0x08001bc0       0x74 /tmp/cc9oRIFL.ltrans0.ltrans.o
+                0x08001bc0       0x74 /tmp/ccxZRFth.ltrans0.ltrans.o
                 0x08001bc0                rtc_gettime
  .text.get_fattime
-                0x08001c34       0x40 /tmp/cc9oRIFL.ltrans0.ltrans.o
+                0x08001c34       0x40 /tmp/ccxZRFth.ltrans0.ltrans.o
                 0x08001c34                get_fattime
  .text.clust2sect
-                0x08001c74       0x18 /tmp/cc9oRIFL.ltrans0.ltrans.o
+                0x08001c74       0x18 /tmp/ccxZRFth.ltrans0.ltrans.o
                 0x08001c74                clust2sect
- .text.mem_cpy.5150
-                0x08001c8c       0x12 /tmp/cc9oRIFL.ltrans0.ltrans.o
-                0x08001c8c                mem_cpy.5150
+ .text.mem_cpy.5164
+                0x08001c8c       0x12 /tmp/ccxZRFth.ltrans0.ltrans.o
+                0x08001c8c                mem_cpy.5164
  *fill*         0x08001c9e        0x2 00
- .text.unlikely.ff_convert.part.0.5083
-                0x08001ca0       0x24 /tmp/cc9oRIFL.ltrans0.ltrans.o
-                0x08001ca0                ff_convert.part.0.5083
- .text.Delay    0x08001cc4       0x18 /tmp/cc9oRIFL.ltrans0.ltrans.o
+ .text.unlikely.ff_convert.part.0.5097
+                0x08001ca0       0x24 /tmp/ccxZRFth.ltrans0.ltrans.o
+                0x08001ca0                ff_convert.part.0.5097
+ .text.Delay    0x08001cc4       0x18 /tmp/ccxZRFth.ltrans0.ltrans.o
                 0x08001cc4                Delay
  .text.Pop_From_Buffer
-                0x08001cdc       0x1c /tmp/cc9oRIFL.ltrans0.ltrans.o
+                0x08001cdc       0x1c /tmp/ccxZRFth.ltrans0.ltrans.o
                 0x08001cdc                Pop_From_Buffer
  .text.Add_To_Buffer
-                0x08001cf8       0x48 /tmp/cc9oRIFL.ltrans0.ltrans.o
+                0x08001cf8       0x48 /tmp/ccxZRFth.ltrans0.ltrans.o
                 0x08001cf8                Add_To_Buffer
  .text.Bot_Abort.part.2.4582
-                0x08001d40       0x18 /tmp/cc9oRIFL.ltrans0.ltrans.o
+                0x08001d40       0x18 /tmp/ccxZRFth.ltrans0.ltrans.o
                 0x08001d40                Bot_Abort.part.2.4582
  .text.USB_Istr
-                0x08001d58      0x118 /tmp/cc9oRIFL.ltrans0.ltrans.o
+                0x08001d58      0x118 /tmp/ccxZRFth.ltrans0.ltrans.o
                 0x08001d58                USB_Istr
- .text.Set_CSW  0x08001e70       0x3c /tmp/cc9oRIFL.ltrans0.ltrans.o
+ .text.Set_CSW  0x08001e70       0x3c /tmp/ccxZRFth.ltrans0.ltrans.o
                 0x08001e70                Set_CSW
  .text.Transfer_Data_Request
-                0x08001eac       0x34 /tmp/cc9oRIFL.ltrans0.ltrans.o
+                0x08001eac       0x34 /tmp/ccxZRFth.ltrans0.ltrans.o
                 0x08001eac                Transfer_Data_Request
  .text.IntToUnicode.4365
-                0x08001ee0       0x2a /tmp/cc9oRIFL.ltrans0.ltrans.o
+                0x08001ee0       0x2a /tmp/ccxZRFth.ltrans0.ltrans.o
                 0x08001ee0                IntToUnicode.4365
  *fill*         0x08001f0a        0x6 00
  .text.startup.main
-                0x08001f10      0xe20 /tmp/cc9oRIFL.ltrans1.ltrans.o
+                0x08001f10      0xe20 /tmp/ccxZRFth.ltrans1.ltrans.o
                 0x08001f10                main
  .text.disk_write
-                0x08002d30       0xcc /tmp/cc9oRIFL.ltrans2.ltrans.o
+                0x08002d30       0xcc /tmp/ccxZRFth.ltrans2.ltrans.o
                 0x08002d30                disk_write
  .text.SCSI_Write10_Cmd
-                0x08002dfc      0x144 /tmp/cc9oRIFL.ltrans2.ltrans.o
+                0x08002dfc      0x144 /tmp/ccxZRFth.ltrans2.ltrans.o
                 0x08002dfc                SCSI_Write10_Cmd
- .text.move_window.5209
-                0x08002f40       0x76 /tmp/cc9oRIFL.ltrans2.ltrans.o
-                0x08002f40                move_window.5209
- .text.put_fat  0x08002fb6       0xf2 /tmp/cc9oRIFL.ltrans2.ltrans.o
+ .text.move_window.5223
+                0x08002f40       0x76 /tmp/ccxZRFth.ltrans2.ltrans.o
+                0x08002f40                move_window.5223
+ .text.put_fat  0x08002fb6       0xf2 /tmp/ccxZRFth.ltrans2.ltrans.o
                 0x08002fb6                put_fat
- .text.get_fat  0x080030a8       0xc8 /tmp/cc9oRIFL.ltrans2.ltrans.o
+ .text.get_fat  0x080030a8       0xc8 /tmp/ccxZRFth.ltrans2.ltrans.o
                 0x080030a8                get_fat
- .text.create_chain.5288.4140
-                0x08003170       0x9a /tmp/cc9oRIFL.ltrans2.ltrans.o
- .text.unlikely.dir_next.5292
-                0x0800320a       0xfa /tmp/cc9oRIFL.ltrans2.ltrans.o
-                0x0800320a                dir_next.5292
+ .text.create_chain.5302.4140
+                0x08003170       0x9a /tmp/ccxZRFth.ltrans2.ltrans.o
+ .text.unlikely.dir_next.5306
+                0x0800320a       0xfa /tmp/ccxZRFth.ltrans2.ltrans.o
+                0x0800320a                dir_next.5306
  .text.f_write.constprop.10.4095
-                0x08003304      0x154 /tmp/cc9oRIFL.ltrans2.ltrans.o
+                0x08003304      0x154 /tmp/ccxZRFth.ltrans2.ltrans.o
  .text.__fat_print_char
-                0x08003458       0x18 /tmp/cc9oRIFL.ltrans2.ltrans.o
+                0x08003458       0x18 /tmp/ccxZRFth.ltrans2.ltrans.o
                 0x08003458                __fat_print_char
  .text.f_puts.constprop.4
-                0x08003470       0x2a /tmp/cc9oRIFL.ltrans2.ltrans.o
+                0x08003470       0x2a /tmp/ccxZRFth.ltrans2.ltrans.o
                 0x08003470                f_puts.constprop.4
  *fill*         0x0800349a        0x2 00
  .text.unlikely.f_lseek.constprop.7
-                0x0800349c      0x180 /tmp/cc9oRIFL.ltrans2.ltrans.o
+                0x0800349c      0x180 /tmp/ccxZRFth.ltrans2.ltrans.o
                 0x0800349c                f_lseek.constprop.7
- .text.unlikely.dir_sdi.5256
-                0x0800361c       0x84 /tmp/cc9oRIFL.ltrans2.ltrans.o
-                0x0800361c                dir_sdi.5256
+ .text.unlikely.dir_sdi.5270
+                0x0800361c       0x84 /tmp/ccxZRFth.ltrans2.ltrans.o
+                0x0800361c                dir_sdi.5270
  .text.SCSI_Invalid_Cmd
-                0x080036a0       0x3c /tmp/cc9oRIFL.ltrans2.ltrans.o
+                0x080036a0       0x3c /tmp/ccxZRFth.ltrans2.ltrans.o
                 0x080036a0                SCSI_Invalid_Cmd
  .text.MASS_init
-                0x080036dc       0x70 /tmp/cc9oRIFL.ltrans3.ltrans.o
+                0x080036dc       0x70 /tmp/ccxZRFth.ltrans3.ltrans.o
                 0x080036dc                MASS_init
  .text.__usart_send_char
-                0x0800374c       0x1c /tmp/cc9oRIFL.ltrans3.ltrans.o
+                0x0800374c       0x1c /tmp/ccxZRFth.ltrans3.ltrans.o
                 0x0800374c                __usart_send_char
  .text.__str_print_char
-                0x08003768       0x2c /tmp/cc9oRIFL.ltrans3.ltrans.o
+                0x08003768       0x2c /tmp/ccxZRFth.ltrans3.ltrans.o
                 0x08003768                __str_print_char
  .text.si446x_spi_state_machine.constprop.23
-                0x08003794      0x1f0 /tmp/cc9oRIFL.ltrans3.ltrans.o
+                0x08003794      0x1f0 /tmp/ccxZRFth.ltrans3.ltrans.o
                 0x08003794                si446x_spi_state_machine.constprop.23
  .text.si446x_setup
-                0x08003984      0x710 /tmp/cc9oRIFL.ltrans3.ltrans.o
+                0x08003984      0x710 /tmp/ccxZRFth.ltrans3.ltrans.o
                 0x08003984                si446x_setup
  .text.ReadADC1_noblock.constprop.3
-                0x08004094       0x20 /tmp/cc9oRIFL.ltrans3.ltrans.o
+                0x08004094       0x20 /tmp/ccxZRFth.ltrans3.ltrans.o
                 0x08004094                ReadADC1_noblock.constprop.3
  .text.Bytes_In_DMA_Buffer.constprop.2
-                0x080040b4       0x2c /tmp/cc9oRIFL.ltrans3.ltrans.o
+                0x080040b4       0x2c /tmp/ccxZRFth.ltrans3.ltrans.o
                 0x080040b4                Bytes_In_DMA_Buffer.constprop.2
  .text.Usart_Send_Str
-                0x080040e0       0x16 /tmp/cc9oRIFL.ltrans3.ltrans.o
+                0x080040e0       0x16 /tmp/ccxZRFth.ltrans3.ltrans.o
                 0x080040e0                Usart_Send_Str
  *fill*         0x080040f6        0x2 00
- .text.power_on.5564
-                0x080040f8       0xf0 /tmp/cc9oRIFL.ltrans3.ltrans.o
-                0x080040f8                power_on.5564
+ .text.power_on.5578
+                0x080040f8       0xf0 /tmp/ccxZRFth.ltrans3.ltrans.o
+                0x080040f8                power_on.5578
  .text.I2C_Config
-                0x080041e8      0x138 /tmp/cc9oRIFL.ltrans3.ltrans.o
+                0x080041e8      0x138 /tmp/ccxZRFth.ltrans3.ltrans.o
                 0x080041e8                I2C_Config
  .text.shutdown
-                0x08004320       0x10 /tmp/cc9oRIFL.ltrans3.ltrans.o
+                0x08004320       0x10 /tmp/ccxZRFth.ltrans3.ltrans.o
                 0x08004320                shutdown
  .text.Read_Memory
-                0x08004330      0x134 /tmp/cc9oRIFL.ltrans3.ltrans.o
+                0x08004330      0x134 /tmp/ccxZRFth.ltrans3.ltrans.o
                 0x08004330                Read_Memory
- .text.unlikely.check_fs.5226
-                0x08004464       0x88 /tmp/cc9oRIFL.ltrans3.ltrans.o
-                0x08004464                check_fs.5226
+ .text.unlikely.check_fs.5240
+                0x08004464       0x88 /tmp/ccxZRFth.ltrans3.ltrans.o
+                0x08004464                check_fs.5240
  .text.MASS_Data_Setup.4089
-                0x080044ec       0x38 /tmp/cc9oRIFL.ltrans4.ltrans.o
+                0x080044ec       0x38 /tmp/ccxZRFth.ltrans4.ltrans.o
  .text.Mass_Storage_ClearFeature.4099
-                0x08004524       0x18 /tmp/cc9oRIFL.ltrans4.ltrans.o
+                0x08004524       0x18 /tmp/ccxZRFth.ltrans4.ltrans.o
  .text.si446x_state_machine
-                0x0800453c      0x1ac /tmp/cc9oRIFL.ltrans4.ltrans.o
+                0x0800453c      0x1ac /tmp/ccxZRFth.ltrans4.ltrans.o
                 0x0800453c                si446x_state_machine
  .text.SCSI_Address_Management
-                0x080046e8       0x74 /tmp/cc9oRIFL.ltrans4.ltrans.o
+                0x080046e8       0x74 /tmp/ccxZRFth.ltrans4.ltrans.o
                 0x080046e8                SCSI_Address_Management
  .text.SCSI_Read10_Cmd
-                0x0800475c       0x6c /tmp/cc9oRIFL.ltrans4.ltrans.o
+                0x0800475c       0x6c /tmp/ccxZRFth.ltrans4.ltrans.o
                 0x0800475c                SCSI_Read10_Cmd
  .text.EP1_IN_Callback.4009
-                0x080047c8       0x5c /tmp/cc9oRIFL.ltrans4.ltrans.o
+                0x080047c8       0x5c /tmp/ccxZRFth.ltrans4.ltrans.o
  .text.unlikely.disk_initialize
-                0x08004824      0x148 /tmp/cc9oRIFL.ltrans4.ltrans.o
+                0x08004824      0x148 /tmp/ccxZRFth.ltrans4.ltrans.o
                 0x08004824                disk_initialize
- .text.unlikely.chk_mounted.5230
-                0x0800496c      0x314 /tmp/cc9oRIFL.ltrans4.ltrans.o
-                0x0800496c                chk_mounted.5230
+ .text.unlikely.chk_mounted.5244
+                0x0800496c      0x314 /tmp/ccxZRFth.ltrans4.ltrans.o
+                0x0800496c                chk_mounted.5244
  .text.MAL_GetStatus
-                0x08004c80       0xc4 /tmp/cc9oRIFL.ltrans4.ltrans.o
+                0x08004c80       0xc4 /tmp/ccxZRFth.ltrans4.ltrans.o
                 0x08004c80                MAL_GetStatus
  .text.send_string_to_silabs.constprop.24
-                0x08004d44       0x24 /tmp/cc9oRIFL.ltrans4.ltrans.o
+                0x08004d44       0x24 /tmp/ccxZRFth.ltrans4.ltrans.o
                 0x08004d44                send_string_to_silabs.constprop.24
  .text.EP2_OUT_Callback.4097
-                0x08004d68      0x310 /tmp/cc9oRIFL.ltrans5.ltrans.o
- .text.unlikely.dir_find.part.4.5296
-                0x08005078      0x180 /tmp/cc9oRIFL.ltrans5.ltrans.o
-                0x08005078                dir_find.part.4.5296
- .text.unlikely.follow_path.5302
-                0x080051f8      0x294 /tmp/cc9oRIFL.ltrans5.ltrans.o
-                0x080051f8                follow_path.5302
+                0x08004d68      0x310 /tmp/ccxZRFth.ltrans5.ltrans.o
+ .text.unlikely.dir_find.part.4.5310
+                0x08005078      0x180 /tmp/ccxZRFth.ltrans5.ltrans.o
+                0x08005078                dir_find.part.4.5310
+ .text.unlikely.follow_path.5316
+                0x080051f8      0x294 /tmp/ccxZRFth.ltrans5.ltrans.o
+                0x080051f8                follow_path.5316
  .text.f_close.constprop.8
-                0x0800548c      0x194 /tmp/cc9oRIFL.ltrans6.ltrans.o
+                0x0800548c      0x194 /tmp/ccxZRFth.ltrans6.ltrans.o
                 0x0800548c                f_close.constprop.8
  .text.unlikely.f_open.constprop.12
-                0x08005620      0x404 /tmp/cc9oRIFL.ltrans6.ltrans.o
+                0x08005620      0x404 /tmp/ccxZRFth.ltrans6.ltrans.o
                 0x08005620                f_open.constprop.12
  .text.unlikely.f_stat.constprop.6
-                0x08005a24      0x13c /tmp/cc9oRIFL.ltrans6.ltrans.o
+                0x08005a24      0x13c /tmp/ccxZRFth.ltrans6.ltrans.o
                 0x08005a24                f_stat.constprop.6
  .text.USB_LP_CAN1_RX0_IRQHandler
-                0x08005b60        0x4 /tmp/cc9oRIFL.ltrans7.ltrans.o
+                0x08005b60        0x4 /tmp/ccxZRFth.ltrans7.ltrans.o
                 0x08005b60                USB_LP_CAN1_RX0_IRQHandler
  .text.USB_HP_CAN1_TX_IRQHandler
-                0x08005b64        0x4 /tmp/cc9oRIFL.ltrans7.ltrans.o
+                0x08005b64        0x4 /tmp/ccxZRFth.ltrans7.ltrans.o
                 0x08005b64                USB_HP_CAN1_TX_IRQHandler
  .text.SysTick_Handler
-                0x08005b68      0x4e0 /tmp/cc9oRIFL.ltrans7.ltrans.o
+                0x08005b68      0x4e0 /tmp/ccxZRFth.ltrans7.ltrans.o
                 0x08005b68                SysTick_Handler
  .text.ADC1_2_IRQHandler
-                0x08006048       0x6c /tmp/cc9oRIFL.ltrans7.ltrans.o
+                0x08006048       0x6c /tmp/ccxZRFth.ltrans7.ltrans.o
                 0x08006048                ADC1_2_IRQHandler
  .text.I2C1_ER_IRQHandler
-                0x080060b4       0xf4 /tmp/cc9oRIFL.ltrans7.ltrans.o
+                0x080060b4       0xf4 /tmp/ccxZRFth.ltrans7.ltrans.o
                 0x080060b4                I2C1_ER_IRQHandler
  .text.I2C1_EV_IRQHandler
-                0x080061a8      0x4d8 /tmp/cc9oRIFL.ltrans7.ltrans.o
+                0x080061a8      0x4d8 /tmp/ccxZRFth.ltrans7.ltrans.o
                 0x080061a8                I2C1_EV_IRQHandler
  .text.EXTI15_10_IRQHandler
-                0x08006680       0x34 /tmp/cc9oRIFL.ltrans7.ltrans.o
+                0x08006680       0x34 /tmp/ccxZRFth.ltrans7.ltrans.o
                 0x08006680                EXTI15_10_IRQHandler
  .text.DMA1_Channel4_IRQHandler
-                0x080066b4       0x30 /tmp/cc9oRIFL.ltrans7.ltrans.o
+                0x080066b4       0x30 /tmp/ccxZRFth.ltrans7.ltrans.o
                 0x080066b4                DMA1_Channel4_IRQHandler
  .text.DMA1_Channel5_IRQHandler
-                0x080066e4       0x30 /tmp/cc9oRIFL.ltrans7.ltrans.o
+                0x080066e4       0x30 /tmp/ccxZRFth.ltrans7.ltrans.o
                 0x080066e4                DMA1_Channel5_IRQHandler
  .text.EXTI0_IRQHandler
-                0x08006714       0x34 /tmp/cc9oRIFL.ltrans7.ltrans.o
+                0x08006714       0x34 /tmp/ccxZRFth.ltrans7.ltrans.o
                 0x08006714                EXTI0_IRQHandler
  .text.USART3_IRQHandler
-                0x08006748       0x78 /tmp/cc9oRIFL.ltrans7.ltrans.o
+                0x08006748       0x78 /tmp/ccxZRFth.ltrans7.ltrans.o
                 0x08006748                USART3_IRQHandler
  .text.USART1_IRQHandler
-                0x080067c0       0x34 /tmp/cc9oRIFL.ltrans8.ltrans.o
+                0x080067c0       0x34 /tmp/ccxZRFth.ltrans8.ltrans.o
                 0x080067c0                USART1_IRQHandler
  .text.malloc   0x080067f4       0x10 /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib/armv7-m/libc.a(lib_a-malloc.o)
                 0x080067f4                malloc
@@ -2028,27 +2030,27 @@ LOAD /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/crtn.o
  .text._sbrk    0x08008c78       0x34 /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib/armv7-m/libnosys.a(sbrk.o)
                 0x08008c78                _sbrk
  *(.rodata)
- .rodata        0x08008cac       0x20 /tmp/cc9oRIFL.ltrans0.ltrans.o
- .rodata        0x08008ccc        0xc /tmp/cc9oRIFL.ltrans1.ltrans.o
-                0x08008ccc                DaysInMonth.5514
- .rodata        0x08008cd8       0xa8 /tmp/cc9oRIFL.ltrans3.ltrans.o
- .rodata        0x08008d80      0x440 /tmp/cc9oRIFL.ltrans5.ltrans.o
- .rodata        0x080091c0      0x10e /tmp/cc9oRIFL.ltrans6.ltrans.o
-                0x080091c0                LfnOfs.5433
-                0x080091ce                Tbl.5093
+ .rodata        0x08008cac       0x20 /tmp/ccxZRFth.ltrans0.ltrans.o
+ .rodata        0x08008ccc        0xc /tmp/ccxZRFth.ltrans1.ltrans.o
+                0x08008ccc                DaysInMonth.5528
+ .rodata        0x08008cd8       0xa8 /tmp/ccxZRFth.ltrans3.ltrans.o
+ .rodata        0x08008d80      0x440 /tmp/ccxZRFth.ltrans5.ltrans.o
+ .rodata        0x080091c0      0x10e /tmp/ccxZRFth.ltrans6.ltrans.o
+                0x080091c0                LfnOfs.5447
+                0x080091ce                Tbl.5107
  *(.rodata*)
  .rodata.str1.1
-                0x080092ce        0x6 /tmp/cc9oRIFL.ltrans0.ltrans.o
+                0x080092ce        0x6 /tmp/ccxZRFth.ltrans0.ltrans.o
  .rodata.MASS_DeviceDescriptor
-                0x080092d4       0x12 /tmp/cc9oRIFL.ltrans0.ltrans.o
+                0x080092d4       0x12 /tmp/ccxZRFth.ltrans0.ltrans.o
  .rodata.str1.1
-                0x080092e6      0x1e0 /tmp/cc9oRIFL.ltrans1.ltrans.o
+                0x080092e6      0x1e0 /tmp/ccxZRFth.ltrans1.ltrans.o
  .rodata.str1.1
-                0x080094c6       0x10 /tmp/cc9oRIFL.ltrans5.ltrans.o
+                0x080094c6       0x10 /tmp/ccxZRFth.ltrans5.ltrans.o
  .rodata.str1.1
-                0x00000000        0x9 /tmp/cc9oRIFL.ltrans6.ltrans.o
+                0x00000000        0x9 /tmp/ccxZRFth.ltrans6.ltrans.o
  .rodata.L3GD20_setup
-                0x080094d6        0x6 /tmp/cc9oRIFL.ltrans7.ltrans.o
+                0x080094d6        0x6 /tmp/ccxZRFth.ltrans7.ltrans.o
  .rodata.str1.4
                 0x080094dc        0x4 /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib/armv7-m/libc.a(lib_a-impure.o)
  *(.glue_7)
@@ -2095,25 +2097,25 @@ LOAD /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/crtn.o
                 0x20000000                _sdata = .
                 0x20000000                _data = .
  *(.data)
- .data          0x20000000       0x18 /tmp/cc9oRIFL.ltrans0.ltrans.o
+ .data          0x20000000       0x18 /tmp/ccxZRFth.ltrans0.ltrans.o
                 0x20000015                Device_Table
- .data          0x20000018       0x44 /tmp/cc9oRIFL.ltrans3.ltrans.o
+ .data          0x20000018       0x44 /tmp/ccxZRFth.ltrans3.ltrans.o
                 0x20000034                String_Descriptor
- .data          0x2000005c       0x70 /tmp/cc9oRIFL.ltrans4.ltrans.o
+ .data          0x2000005c       0x70 /tmp/ccxZRFth.ltrans4.ltrans.o
                 0x2000005c                User_Standard_Requests
                 0x20000080                Device_Property
                 0x200000b0                pEpInt_IN
- .data          0x200000cc       0x90 /tmp/cc9oRIFL.ltrans5.ltrans.o
+ .data          0x200000cc       0x90 /tmp/ccxZRFth.ltrans5.ltrans.o
                 0x20000114                Scsi_Sense_Data
                 0x20000140                pEpInt_OUT
- .data          0x2000015c        0x1 /tmp/cc9oRIFL.ltrans6.ltrans.o
-                0x2000015c                Stat.5708
+ .data          0x2000015c        0x1 /tmp/ccxZRFth.ltrans6.ltrans.o
+                0x2000015c                Stat.5722
  *fill*         0x2000015d        0x3 00
- .data          0x20000160       0x20 /tmp/cc9oRIFL.ltrans7.ltrans.o
+ .data          0x20000160       0x20 /tmp/ccxZRFth.ltrans7.ltrans.o
                 0x20000160                I2C_jobs
  *(.data.*)
  .data.Active_freq
-                0x20000180        0x4 /tmp/cc9oRIFL.ltrans3.ltrans.o
+                0x20000180        0x4 /tmp/ccxZRFth.ltrans3.ltrans.o
  .data.__malloc_av_
                 0x20000184      0x408 /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib/armv7-m/libc.a(lib_a-mallocr.o)
                 0x20000184                __malloc_av_
@@ -2147,29 +2149,29 @@ LOAD /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/crtn.o
                 0x200009d8                _sbss = .
                 0x200009d8                _bss = .
  *(.bss)
- .bss           0x200009d8       0x90 /tmp/cc9oRIFL.ltrans0.ltrans.o
+ .bss           0x200009d8       0x90 /tmp/ccxZRFth.ltrans0.ltrans.o
                 0x20000a64                wIstr
- .bss           0x20000a68      0xa10 /tmp/cc9oRIFL.ltrans1.ltrans.o
+ .bss           0x20000a68      0xa10 /tmp/ccxZRFth.ltrans1.ltrans.o
                 0x20000e90                bootsource
-                0x20000e94                rputchar.5790
+                0x20000e94                rputchar.5804
                 0x20000e98                Data_Buffer
                 0x20000e9c                Millis
                 0x20000ea0                Battery_Voltage
-                0x20000ea4                FatFs.5435
+                0x20000ea4                FatFs.5449
                 0x200010dc                FATFS_info
                 0x200010fc                FATFS_logfile
                 0x20001320                print_string
                 0x20001420                Jobs
                 0x20001424                Completed_Jobs
                 0x2000145c                Gps_Buffer
- .bss           0x20001478       0x1c /tmp/cc9oRIFL.ltrans2.ltrans.o
+ .bss           0x20001478       0x1c /tmp/ccxZRFth.ltrans2.ltrans.o
                 0x2000147c                TransferState
                 0x2000148c                Sd_Spi_Called_From_USB_MSC
- .bss           0x20001494       0x24 /tmp/cc9oRIFL.ltrans3.ltrans.o
- .bss           0x200014b8       0x34 /tmp/cc9oRIFL.ltrans4.ltrans.o
+ .bss           0x20001494       0x24 /tmp/ccxZRFth.ltrans3.ltrans.o
+ .bss           0x200014b8       0x34 /tmp/ccxZRFth.ltrans4.ltrans.o
                 0x200014d8                Channel_rx
-                0x200014dc                Timer1.5703
- .bss           0x200014ec       0x94 /tmp/cc9oRIFL.ltrans5.ltrans.o
+                0x200014dc                Timer1.5717
+ .bss           0x200014ec       0x94 /tmp/ccxZRFth.ltrans5.ltrans.o
                 0x200014ec                CBW
                 0x2000150c                Bulk_Data_Buff
                 0x2000154c                Data_Len
@@ -2179,32 +2181,32 @@ LOAD /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/crtn.o
                 0x20001564                SCSI_BlkLen
                 0x20001568                Mass_Block_Count
                 0x20001570                Mass_Block_Size
- .bss           0x20001580        0x1 /tmp/cc9oRIFL.ltrans6.ltrans.o
-                0x20001580                CardType.5709
+ .bss           0x20001580        0x1 /tmp/ccxZRFth.ltrans6.ltrans.o
+                0x20001580                CardType.5723
  *fill*         0x20001581        0x3 00
- .bss           0x20001584       0x64 /tmp/cc9oRIFL.ltrans7.ltrans.o
+ .bss           0x20001584       0x64 /tmp/ccxZRFth.ltrans7.ltrans.o
                 0x20001585                L3GD20_Data_Buffer
                 0x2000159c                AFROESC_Data_Buffer
                 0x200015bc                AFROESC_Throttle
                 0x200015d8                Silabs_spi_state
                 0x200015d9                Silabs_driver_state
                 0x200015dc                Silabs_Tx_Buffer
- .bss           0x200015e8        0xc /tmp/cc9oRIFL.ltrans8.ltrans.o
+ .bss           0x200015e8        0xc /tmp/ccxZRFth.ltrans8.ltrans.o
  *(.bss.*)
  .bss.bIntPackSOF
-                0x200015f4        0x1 /tmp/cc9oRIFL.ltrans0.ltrans.o
+                0x200015f4        0x1 /tmp/ccxZRFth.ltrans0.ltrans.o
  .bss.file_opened
-                0x200015f5        0x1 /tmp/cc9oRIFL.ltrans1.ltrans.o
+                0x200015f5        0x1 /tmp/ccxZRFth.ltrans1.ltrans.o
  *fill*         0x200015f6        0x2 00
  .bss.bDeviceState
-                0x200015f8        0x4 /tmp/cc9oRIFL.ltrans1.ltrans.o
+                0x200015f8        0x4 /tmp/ccxZRFth.ltrans1.ltrans.o
                 0x200015f8                bDeviceState
- .bss.Status    0x200015fc        0x4 /tmp/cc9oRIFL.ltrans1.ltrans.o
+ .bss.Status    0x200015fc        0x4 /tmp/ccxZRFth.ltrans1.ltrans.o
                 0x200015fc                Status
- .bss.Max_Lun   0x20001600        0x4 /tmp/cc9oRIFL.ltrans5.ltrans.o
+ .bss.Max_Lun   0x20001600        0x4 /tmp/ccxZRFth.ltrans5.ltrans.o
                 0x20001600                Max_Lun
  .bss.Page00_Inquiry_Data
-                0x20001604        0x5 /tmp/cc9oRIFL.ltrans5.ltrans.o
+                0x20001604        0x5 /tmp/ccxZRFth.ltrans5.ltrans.o
  *fill*         0x20001609        0x3 00
  .bss.__malloc_max_total_mem
                 0x2000160c        0x4 /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib/armv7-m/libc.a(lib_a-mallocr.o)
@@ -2309,15 +2311,15 @@ LOAD /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/crtn.o
 
 .comment        0x00000000       0x70
  *(.comment)
- .comment       0x00000000       0x71 /tmp/cc9oRIFL.ltrans0.ltrans.o
- .comment       0x00000000       0x71 /tmp/cc9oRIFL.ltrans1.ltrans.o
- .comment       0x00000000       0x71 /tmp/cc9oRIFL.ltrans2.ltrans.o
- .comment       0x00000000       0x71 /tmp/cc9oRIFL.ltrans3.ltrans.o
- .comment       0x00000000       0x71 /tmp/cc9oRIFL.ltrans4.ltrans.o
- .comment       0x00000000       0x71 /tmp/cc9oRIFL.ltrans5.ltrans.o
- .comment       0x00000000       0x71 /tmp/cc9oRIFL.ltrans6.ltrans.o
- .comment       0x00000000       0x71 /tmp/cc9oRIFL.ltrans7.ltrans.o
- .comment       0x00000000       0x71 /tmp/cc9oRIFL.ltrans8.ltrans.o
+ .comment       0x00000000       0x71 /tmp/ccxZRFth.ltrans0.ltrans.o
+ .comment       0x00000000       0x71 /tmp/ccxZRFth.ltrans1.ltrans.o
+ .comment       0x00000000       0x71 /tmp/ccxZRFth.ltrans2.ltrans.o
+ .comment       0x00000000       0x71 /tmp/ccxZRFth.ltrans3.ltrans.o
+ .comment       0x00000000       0x71 /tmp/ccxZRFth.ltrans4.ltrans.o
+ .comment       0x00000000       0x71 /tmp/ccxZRFth.ltrans5.ltrans.o
+ .comment       0x00000000       0x71 /tmp/ccxZRFth.ltrans6.ltrans.o
+ .comment       0x00000000       0x71 /tmp/ccxZRFth.ltrans7.ltrans.o
+ .comment       0x00000000       0x71 /tmp/ccxZRFth.ltrans8.ltrans.o
  .comment       0x00000000       0x70 lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(misc.o)
                                  0x71 (size before relaxing)
  .comment       0x00000000       0x71 lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_adc.o)
@@ -2345,23 +2347,23 @@ LOAD /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/crtn.o
  .ARM.attributes
                 0x00000000       0x1d /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/crti.o
  .ARM.attributes
-                0x0000001d       0x31 /tmp/cc9oRIFL.ltrans0.ltrans.o
+                0x0000001d       0x31 /tmp/ccxZRFth.ltrans0.ltrans.o
  .ARM.attributes
-                0x0000004e       0x31 /tmp/cc9oRIFL.ltrans1.ltrans.o
+                0x0000004e       0x31 /tmp/ccxZRFth.ltrans1.ltrans.o
  .ARM.attributes
-                0x0000007f       0x31 /tmp/cc9oRIFL.ltrans2.ltrans.o
+                0x0000007f       0x31 /tmp/ccxZRFth.ltrans2.ltrans.o
  .ARM.attributes
-                0x000000b0       0x31 /tmp/cc9oRIFL.ltrans3.ltrans.o
+                0x000000b0       0x31 /tmp/ccxZRFth.ltrans3.ltrans.o
  .ARM.attributes
-                0x000000e1       0x31 /tmp/cc9oRIFL.ltrans4.ltrans.o
+                0x000000e1       0x31 /tmp/ccxZRFth.ltrans4.ltrans.o
  .ARM.attributes
-                0x00000112       0x31 /tmp/cc9oRIFL.ltrans5.ltrans.o
+                0x00000112       0x31 /tmp/ccxZRFth.ltrans5.ltrans.o
  .ARM.attributes
-                0x00000143       0x31 /tmp/cc9oRIFL.ltrans6.ltrans.o
+                0x00000143       0x31 /tmp/ccxZRFth.ltrans6.ltrans.o
  .ARM.attributes
-                0x00000174       0x31 /tmp/cc9oRIFL.ltrans7.ltrans.o
+                0x00000174       0x31 /tmp/ccxZRFth.ltrans7.ltrans.o
  .ARM.attributes
-                0x000001a5       0x31 /tmp/cc9oRIFL.ltrans8.ltrans.o
+                0x000001a5       0x31 /tmp/ccxZRFth.ltrans8.ltrans.o
  .ARM.attributes
                 0x000001d6       0x1d /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/libgcc.a(_arm_addsubdf3.o)
  .ARM.attributes
@@ -2509,200 +2511,200 @@ OUTPUT(main.elf elf32-littlearm)
 Cross Reference Table
 
 Symbol                                            File
-ADC1_2_IRQHandler                                 /tmp/cc9oRIFL.ltrans7.ltrans.o
+ADC1_2_IRQHandler                                 /tmp/ccxZRFth.ltrans7.ltrans.o
                                                   lib/CMSIS_CM3/startup/gcc/startup_stm32f10x_md.o
 ADC_AnalogWatchdogCmd                             lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_adc.o)
 ADC_AnalogWatchdogSingleChannelConfig             lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_adc.o)
 ADC_AnalogWatchdogThresholdsConfig                lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_adc.o)
 ADC_AutoInjectedConvCmd                           lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_adc.o)
 ADC_ClearFlag                                     lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_adc.o)
-                                                  /tmp/cc9oRIFL.ltrans7.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans7.ltrans.o
 ADC_ClearITPendingBit                             lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_adc.o)
-                                                  /tmp/cc9oRIFL.ltrans7.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans7.ltrans.o
 ADC_Cmd                                           lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_adc.o)
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
 ADC_DMACmd                                        lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_adc.o)
 ADC_DeInit                                        lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_adc.o)
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
 ADC_DiscModeChannelCountConfig                    lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_adc.o)
 ADC_DiscModeCmd                                   lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_adc.o)
 ADC_ExternalTrigConvCmd                           lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_adc.o)
 ADC_ExternalTrigInjectedConvCmd                   lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_adc.o)
 ADC_ExternalTrigInjectedConvConfig                lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_adc.o)
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
 ADC_GetCalibrationStatus                          lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_adc.o)
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
 ADC_GetConversionValue                            lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_adc.o)
-                                                  /tmp/cc9oRIFL.ltrans7.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans7.ltrans.o
 ADC_GetDualModeConversionValue                    lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_adc.o)
 ADC_GetFlagStatus                                 lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_adc.o)
-                                                  /tmp/cc9oRIFL.ltrans7.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans7.ltrans.o
 ADC_GetITStatus                                   lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_adc.o)
-                                                  /tmp/cc9oRIFL.ltrans7.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans7.ltrans.o
 ADC_GetInjectedConversionValue                    lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_adc.o)
-                                                  /tmp/cc9oRIFL.ltrans7.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans7.ltrans.o
 ADC_GetResetCalibrationStatus                     lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_adc.o)
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
 ADC_GetSoftwareStartConvStatus                    lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_adc.o)
 ADC_GetSoftwareStartInjectedConvCmdStatus         lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_adc.o)
 ADC_ITConfig                                      lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_adc.o)
 ADC_Init                                          lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_adc.o)
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
 ADC_InjectedChannelConfig                         lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_adc.o)
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
 ADC_InjectedDiscModeCmd                           lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_adc.o)
 ADC_InjectedSequencerLengthConfig                 lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_adc.o)
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
 ADC_RegularChannelConfig                          lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_adc.o)
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
 ADC_ResetCalibration                              lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_adc.o)
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
 ADC_SetInjectedOffset                             lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_adc.o)
 ADC_SoftwareStartConvCmd                          lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_adc.o)
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
 ADC_SoftwareStartInjectedConvCmd                  lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_adc.o)
-                                                  /tmp/cc9oRIFL.ltrans7.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans7.ltrans.o
 ADC_StartCalibration                              lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_adc.o)
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
 ADC_StructInit                                    lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_adc.o)
 ADC_TempSensorVrefintCmd                          lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_adc.o)
-AFROESC_Data_Buffer                               /tmp/cc9oRIFL.ltrans7.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
-AFROESC_Throttle                                  /tmp/cc9oRIFL.ltrans7.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
-Add_To_Buffer                                     /tmp/cc9oRIFL.ltrans0.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans8.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans4.ltrans.o
+AFROESC_Data_Buffer                               /tmp/ccxZRFth.ltrans7.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
+AFROESC_Throttle                                  /tmp/ccxZRFth.ltrans7.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
+Add_To_Buffer                                     /tmp/ccxZRFth.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans8.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans4.ltrans.o
 BKP_ClearFlag                                     lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_bkp.o)
 BKP_ClearITPendingBit                             lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_bkp.o)
 BKP_DeInit                                        lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_bkp.o)
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
 BKP_GetFlagStatus                                 lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_bkp.o)
 BKP_GetITStatus                                   lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_bkp.o)
 BKP_ITConfig                                      lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_bkp.o)
 BKP_RTCOutputConfig                               lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_bkp.o)
 BKP_ReadBackupRegister                            lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_bkp.o)
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
 BKP_SetRTCCalibrationValue                        lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_bkp.o)
 BKP_TamperPinCmd                                  lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_bkp.o)
 BKP_TamperPinLevelConfig                          lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_bkp.o)
 BKP_WriteBackupRegister                           lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_bkp.o)
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
-Battery_Voltage                                   /tmp/cc9oRIFL.ltrans1.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans7.ltrans.o
-Bot_Abort.part.2.4582                             /tmp/cc9oRIFL.ltrans0.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans5.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans4.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans2.ltrans.o
-Bot_State                                         /tmp/cc9oRIFL.ltrans5.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans4.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans2.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans0.ltrans.o
-Bulk_Data_Buff                                    /tmp/cc9oRIFL.ltrans5.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans2.ltrans.o
-BusFaultException                                 /tmp/cc9oRIFL.ltrans7.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
+Battery_Voltage                                   /tmp/ccxZRFth.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans7.ltrans.o
+Bot_Abort.part.2.4582                             /tmp/ccxZRFth.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans5.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans4.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans2.ltrans.o
+Bot_State                                         /tmp/ccxZRFth.ltrans5.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans4.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans2.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans0.ltrans.o
+Bulk_Data_Buff                                    /tmp/ccxZRFth.ltrans5.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans2.ltrans.o
+BusFaultException                                 /tmp/ccxZRFth.ltrans7.ltrans.o
 BusFault_Handler                                  lib/CMSIS_CM3/startup/gcc/startup_stm32f10x_md.o
 ByteSwap                                          lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_regs.o)
                                                   lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_core.o)
-Bytes_In_DMA_Buffer.constprop.2                   /tmp/cc9oRIFL.ltrans3.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
+Bytes_In_DMA_Buffer.constprop.2                   /tmp/ccxZRFth.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
 CAN1_RX1_IRQHandler                               lib/CMSIS_CM3/startup/gcc/startup_stm32f10x_md.o
 CAN1_SCE_IRQHandler                               lib/CMSIS_CM3/startup/gcc/startup_stm32f10x_md.o
-CBW                                               /tmp/cc9oRIFL.ltrans5.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans4.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans2.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans0.ltrans.o
-CSW                                               /tmp/cc9oRIFL.ltrans5.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans2.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans0.ltrans.o
+CBW                                               /tmp/ccxZRFth.ltrans5.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans4.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans2.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans0.ltrans.o
+CSW                                               /tmp/ccxZRFth.ltrans5.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans2.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans0.ltrans.o
 CTR_HP                                            lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_int.o)
-                                                  /tmp/cc9oRIFL.ltrans7.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans7.ltrans.o
 CTR_LP                                            lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_int.o)
-                                                  /tmp/cc9oRIFL.ltrans0.ltrans.o
-CardType.5709                                     /tmp/cc9oRIFL.ltrans6.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans4.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans2.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans0.ltrans.o
-Channel_rx                                        /tmp/cc9oRIFL.ltrans4.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans0.ltrans.o
+CardType.5723                                     /tmp/ccxZRFth.ltrans6.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans4.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans2.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans0.ltrans.o
+Channel_rx                                        /tmp/ccxZRFth.ltrans4.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
 ClearDTOG_RX                                      lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_regs.o)
-                                                  /tmp/cc9oRIFL.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans0.ltrans.o
                                                   lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_core.o)
 ClearDTOG_TX                                      lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_regs.o)
-                                                  /tmp/cc9oRIFL.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans0.ltrans.o
                                                   lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_core.o)
 ClearEPDoubleBuff                                 lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_regs.o)
 ClearEP_CTR_RX                                    lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_regs.o)
 ClearEP_CTR_TX                                    lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_regs.o)
 ClearEP_KIND                                      lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_regs.o)
 Clear_Status_Out                                  lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_regs.o)
-                                                  /tmp/cc9oRIFL.ltrans0.ltrans.o
-Completed_Jobs                                    /tmp/cc9oRIFL.ltrans1.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans7.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans0.ltrans.o
+Completed_Jobs                                    /tmp/ccxZRFth.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans7.ltrans.o
 DBGMCU_Config                                     lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_dbgmcu.o)
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
 DBGMCU_GetDEVID                                   lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_dbgmcu.o)
 DBGMCU_GetREVID                                   lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_dbgmcu.o)
 DMA1_Channel1_IRQHandler                          lib/CMSIS_CM3/startup/gcc/startup_stm32f10x_md.o
 DMA1_Channel2_IRQHandler                          lib/CMSIS_CM3/startup/gcc/startup_stm32f10x_md.o
 DMA1_Channel3_IRQHandler                          lib/CMSIS_CM3/startup/gcc/startup_stm32f10x_md.o
-DMA1_Channel4_IRQHandler                          /tmp/cc9oRIFL.ltrans7.ltrans.o
+DMA1_Channel4_IRQHandler                          /tmp/ccxZRFth.ltrans7.ltrans.o
                                                   lib/CMSIS_CM3/startup/gcc/startup_stm32f10x_md.o
-DMA1_Channel5_IRQHandler                          /tmp/cc9oRIFL.ltrans7.ltrans.o
+DMA1_Channel5_IRQHandler                          /tmp/ccxZRFth.ltrans7.ltrans.o
                                                   lib/CMSIS_CM3/startup/gcc/startup_stm32f10x_md.o
 DMA1_Channel6_IRQHandler                          lib/CMSIS_CM3/startup/gcc/startup_stm32f10x_md.o
 DMA1_Channel7_IRQHandler                          lib/CMSIS_CM3/startup/gcc/startup_stm32f10x_md.o
 DMA_ClearFlag                                     lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_dma.o)
-                                                  /tmp/cc9oRIFL.ltrans7.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans7.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
 DMA_ClearITPendingBit                             lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_dma.o)
-                                                  /tmp/cc9oRIFL.ltrans7.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans7.ltrans.o
 DMA_Cmd                                           lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_dma.o)
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans0.ltrans.o
 DMA_DeInit                                        lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_dma.o)
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans0.ltrans.o
 DMA_GetCurrDataCounter                            lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_dma.o)
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
 DMA_GetFlagStatus                                 lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_dma.o)
-                                                  /tmp/cc9oRIFL.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans0.ltrans.o
 DMA_GetITStatus                                   lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_dma.o)
-                                                  /tmp/cc9oRIFL.ltrans7.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans7.ltrans.o
 DMA_ITConfig                                      lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_dma.o)
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
 DMA_Init                                          lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_dma.o)
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans0.ltrans.o
 DMA_StructInit                                    lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_dma.o)
-Data_Buffer                                       /tmp/cc9oRIFL.ltrans1.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans2.ltrans.o
-Data_Len                                          /tmp/cc9oRIFL.ltrans5.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans2.ltrans.o
+Data_Buffer                                       /tmp/ccxZRFth.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans2.ltrans.o
+Data_Len                                          /tmp/ccxZRFth.ltrans5.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans2.ltrans.o
 Data_Mul_MaxPacketSize                            lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_core.o)
-DaysInMonth.5514                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans0.ltrans.o
+DaysInMonth.5528                                  /tmp/ccxZRFth.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans0.ltrans.o
 DebugMon_Handler                                  lib/CMSIS_CM3/startup/gcc/startup_stm32f10x_md.o
 Default_Handler                                   lib/CMSIS_CM3/startup/gcc/startup_stm32f10x_md.o
-Delay                                             /tmp/cc9oRIFL.ltrans0.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
-Device_Info                                       /tmp/cc9oRIFL.ltrans0.ltrans.o
+Delay                                             /tmp/ccxZRFth.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
+Device_Info                                       /tmp/ccxZRFth.ltrans0.ltrans.o
                                                   lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_init.o)
-Device_Property                                   /tmp/cc9oRIFL.ltrans4.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans0.ltrans.o
+Device_Property                                   /tmp/ccxZRFth.ltrans4.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans0.ltrans.o
                                                   lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_init.o)
                                                   lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_core.o)
-Device_Table                                      /tmp/cc9oRIFL.ltrans0.ltrans.o
+Device_Table                                      /tmp/ccxZRFth.ltrans0.ltrans.o
                                                   lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_core.o)
 EPindex                                           lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_int.o)
                                                   lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_init.o)
-EXTI0_IRQHandler                                  /tmp/cc9oRIFL.ltrans7.ltrans.o
+EXTI0_IRQHandler                                  /tmp/ccxZRFth.ltrans7.ltrans.o
                                                   lib/CMSIS_CM3/startup/gcc/startup_stm32f10x_md.o
-EXTI15_10_IRQHandler                              /tmp/cc9oRIFL.ltrans7.ltrans.o
+EXTI15_10_IRQHandler                              /tmp/ccxZRFth.ltrans7.ltrans.o
                                                   lib/CMSIS_CM3/startup/gcc/startup_stm32f10x_md.o
 EXTI1_IRQHandler                                  lib/CMSIS_CM3/startup/gcc/startup_stm32f10x_md.o
 EXTI2_IRQHandler                                  lib/CMSIS_CM3/startup/gcc/startup_stm32f10x_md.o
@@ -2711,59 +2713,59 @@ EXTI4_IRQHandler                                  lib/CMSIS_CM3/startup/gcc/star
 EXTI9_5_IRQHandler                                lib/CMSIS_CM3/startup/gcc/startup_stm32f10x_md.o
 EXTI_ClearFlag                                    lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_exti.o)
 EXTI_ClearITPendingBit                            lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_exti.o)
-                                                  /tmp/cc9oRIFL.ltrans7.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans7.ltrans.o
 EXTI_DeInit                                       lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_exti.o)
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
 EXTI_GenerateSWInterrupt                          lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_exti.o)
-                                                  /tmp/cc9oRIFL.ltrans4.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans4.ltrans.o
 EXTI_GetFlagStatus                                lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_exti.o)
 EXTI_GetITStatus                                  lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_exti.o)
-                                                  /tmp/cc9oRIFL.ltrans7.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans7.ltrans.o
 EXTI_Init                                         lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_exti.o)
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
 EXTI_StructInit                                   lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_exti.o)
-FATFS_info                                        /tmp/cc9oRIFL.ltrans1.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans6.ltrans.o
-FATFS_logfile                                     /tmp/cc9oRIFL.ltrans1.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans6.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans2.ltrans.o
+FATFS_info                                        /tmp/ccxZRFth.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans6.ltrans.o
+FATFS_logfile                                     /tmp/ccxZRFth.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans6.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans2.ltrans.o
 FLASH_IRQHandler                                  lib/CMSIS_CM3/startup/gcc/startup_stm32f10x_md.o
-FatFs.5435                                        /tmp/cc9oRIFL.ltrans1.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans4.ltrans.o
+FatFs.5449                                        /tmp/ccxZRFth.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans4.ltrans.o
 FreeUserBuffer                                    lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_regs.o)
 GPIO_AFIODeInit                                   lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_gpio.o)
 GPIO_DeInit                                       lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_gpio.o)
 GPIO_ETH_MediaInterfaceConfig                     lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_gpio.o)
 GPIO_EXTILineConfig                               lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_gpio.o)
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
 GPIO_EventOutputCmd                               lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_gpio.o)
 GPIO_EventOutputConfig                            lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_gpio.o)
 GPIO_Init                                         lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_gpio.o)
-                                                  /tmp/cc9oRIFL.ltrans7.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans7.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
 GPIO_PinLockConfig                                lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_gpio.o)
 GPIO_PinRemapConfig                               lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_gpio.o)
 GPIO_ReadInputData                                lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_gpio.o)
 GPIO_ReadInputDataBit                             lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_gpio.o)
-                                                  /tmp/cc9oRIFL.ltrans7.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans7.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
 GPIO_ReadOutputData                               lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_gpio.o)
 GPIO_ReadOutputDataBit                            lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_gpio.o)
 GPIO_ResetBits                                    lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_gpio.o)
-                                                  /tmp/cc9oRIFL.ltrans6.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans6.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans0.ltrans.o
 GPIO_SetBits                                      lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_gpio.o)
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans0.ltrans.o
 GPIO_StructInit                                   lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_gpio.o)
 GPIO_Write                                        lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_gpio.o)
 GPIO_WriteBit                                     lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_gpio.o)
-                                                  /tmp/cc9oRIFL.ltrans7.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans7.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
 GetBTABLE                                         lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_regs.o)
 GetCNTR                                           lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_regs.o)
 GetDADDR                                          lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_regs.o)
@@ -2790,146 +2792,146 @@ GetFNR                                            lib/STM32_USB-FS-Device_Driver
 GetISTR                                           lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_regs.o)
 GetRxStallStatus                                  lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_regs.o)
 GetTxStallStatus                                  lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_regs.o)
-Get_Max_Lun                                       /tmp/cc9oRIFL.ltrans0.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans4.ltrans.o
-Gps_Buffer                                        /tmp/cc9oRIFL.ltrans1.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
-HardFaultException                                /tmp/cc9oRIFL.ltrans7.ltrans.o
+Get_Max_Lun                                       /tmp/ccxZRFth.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans4.ltrans.o
+Gps_Buffer                                        /tmp/ccxZRFth.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
+HardFaultException                                /tmp/ccxZRFth.ltrans7.ltrans.o
 HardFault_Handler                                 lib/CMSIS_CM3/startup/gcc/startup_stm32f10x_md.o
-I2C1_ER_IRQHandler                                /tmp/cc9oRIFL.ltrans7.ltrans.o
+I2C1_ER_IRQHandler                                /tmp/ccxZRFth.ltrans7.ltrans.o
                                                   lib/CMSIS_CM3/startup/gcc/startup_stm32f10x_md.o
-I2C1_EV_IRQHandler                                /tmp/cc9oRIFL.ltrans7.ltrans.o
+I2C1_EV_IRQHandler                                /tmp/ccxZRFth.ltrans7.ltrans.o
                                                   lib/CMSIS_CM3/startup/gcc/startup_stm32f10x_md.o
-I2C1_Request_Job                                  /tmp/cc9oRIFL.ltrans0.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans7.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
+I2C1_Request_Job                                  /tmp/ccxZRFth.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans7.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
 I2C2_ER_IRQHandler                                lib/CMSIS_CM3/startup/gcc/startup_stm32f10x_md.o
 I2C2_EV_IRQHandler                                lib/CMSIS_CM3/startup/gcc/startup_stm32f10x_md.o
 I2C_ARPCmd                                        lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_i2c.o)
 I2C_AcknowledgeConfig                             lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_i2c.o)
-                                                  /tmp/cc9oRIFL.ltrans7.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans7.ltrans.o
 I2C_CalculatePEC                                  lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_i2c.o)
 I2C_CheckEvent                                    lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_i2c.o)
 I2C_ClearFlag                                     lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_i2c.o)
 I2C_ClearITPendingBit                             lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_i2c.o)
 I2C_Cmd                                           lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_i2c.o)
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
-I2C_Config                                        /tmp/cc9oRIFL.ltrans3.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans7.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
+I2C_Config                                        /tmp/ccxZRFth.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans7.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
 I2C_DMACmd                                        lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_i2c.o)
 I2C_DMALastTransferCmd                            lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_i2c.o)
 I2C_DeInit                                        lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_i2c.o)
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
 I2C_DualAddressCmd                                lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_i2c.o)
 I2C_FastModeDutyCycleConfig                       lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_i2c.o)
 I2C_GeneralCallCmd                                lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_i2c.o)
 I2C_GenerateSTART                                 lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_i2c.o)
-                                                  /tmp/cc9oRIFL.ltrans7.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans7.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans0.ltrans.o
 I2C_GenerateSTOP                                  lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_i2c.o)
-                                                  /tmp/cc9oRIFL.ltrans7.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans7.ltrans.o
 I2C_GetFlagStatus                                 lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_i2c.o)
 I2C_GetITStatus                                   lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_i2c.o)
 I2C_GetLastEvent                                  lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_i2c.o)
 I2C_GetPEC                                        lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_i2c.o)
 I2C_ITConfig                                      lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_i2c.o)
-                                                  /tmp/cc9oRIFL.ltrans7.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans7.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans0.ltrans.o
 I2C_Init                                          lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_i2c.o)
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
 I2C_OwnAddress2Config                             lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_i2c.o)
 I2C_PECPositionConfig                             lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_i2c.o)
 I2C_ReadRegister                                  lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_i2c.o)
 I2C_ReceiveData                                   lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_i2c.o)
-                                                  /tmp/cc9oRIFL.ltrans7.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans7.ltrans.o
 I2C_SMBusAlertConfig                              lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_i2c.o)
 I2C_Send7bitAddress                               lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_i2c.o)
-                                                  /tmp/cc9oRIFL.ltrans7.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans7.ltrans.o
 I2C_SendData                                      lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_i2c.o)
-                                                  /tmp/cc9oRIFL.ltrans7.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans7.ltrans.o
 I2C_SoftwareResetCmd                              lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_i2c.o)
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
 I2C_StretchClockCmd                               lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_i2c.o)
 I2C_StructInit                                    lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_i2c.o)
 I2C_TransmitPEC                                   lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_i2c.o)
-I2C_jobs                                          /tmp/cc9oRIFL.ltrans7.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
+I2C_jobs                                          /tmp/ccxZRFth.ltrans7.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
 I2S_Cmd                                           lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_spi.o)
 I2S_Init                                          lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_spi.o)
 I2S_StructInit                                    lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_spi.o)
 IWDG_Enable                                       lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_iwdg.o)
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
 IWDG_GetFlagStatus                                lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_iwdg.o)
 IWDG_ReloadCounter                                lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_iwdg.o)
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
 IWDG_SetPrescaler                                 lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_iwdg.o)
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
 IWDG_SetReload                                    lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_iwdg.o)
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
 IWDG_WriteAccessCmd                               lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_iwdg.o)
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
 In0_Process                                       lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_core.o)
                                                   lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_int.o)
-IntToUnicode.4365                                 /tmp/cc9oRIFL.ltrans0.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
-Jobs                                              /tmp/cc9oRIFL.ltrans1.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans7.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans0.ltrans.o
-L3GD20_Data_Buffer                                /tmp/cc9oRIFL.ltrans7.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
-LfnOfs.5433                                       /tmp/cc9oRIFL.ltrans6.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans5.ltrans.o
-MAL_GetStatus                                     /tmp/cc9oRIFL.ltrans4.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans5.ltrans.o
-MASS_GetConfigDescriptor                          /tmp/cc9oRIFL.ltrans0.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans4.ltrans.o
-MASS_GetDeviceDescriptor                          /tmp/cc9oRIFL.ltrans0.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans4.ltrans.o
-MASS_GetStringDescriptor                          /tmp/cc9oRIFL.ltrans0.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans4.ltrans.o
-MASS_Get_Interface_Setting                        /tmp/cc9oRIFL.ltrans0.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans4.ltrans.o
-MASS_NoData_Setup                                 /tmp/cc9oRIFL.ltrans0.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans4.ltrans.o
-MASS_Reset                                        /tmp/cc9oRIFL.ltrans0.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans4.ltrans.o
-MASS_Status_In                                    /tmp/cc9oRIFL.ltrans0.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans4.ltrans.o
-MASS_Status_Out                                   /tmp/cc9oRIFL.ltrans0.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans4.ltrans.o
-MASS_init                                         /tmp/cc9oRIFL.ltrans3.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans4.ltrans.o
-Mass_Block_Count                                  /tmp/cc9oRIFL.ltrans5.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans4.ltrans.o
-Mass_Block_Size                                   /tmp/cc9oRIFL.ltrans5.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans4.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans2.ltrans.o
-Mass_Storage_SetConfiguration                     /tmp/cc9oRIFL.ltrans0.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans4.ltrans.o
-Mass_Storage_SetDeviceAddress                     /tmp/cc9oRIFL.ltrans0.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans4.ltrans.o
-Max_Lun                                           /tmp/cc9oRIFL.ltrans5.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans0.ltrans.o
-MemManageException                                /tmp/cc9oRIFL.ltrans7.ltrans.o
+IntToUnicode.4365                                 /tmp/ccxZRFth.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
+Jobs                                              /tmp/ccxZRFth.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans7.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans0.ltrans.o
+L3GD20_Data_Buffer                                /tmp/ccxZRFth.ltrans7.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
+LfnOfs.5447                                       /tmp/ccxZRFth.ltrans6.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans5.ltrans.o
+MAL_GetStatus                                     /tmp/ccxZRFth.ltrans4.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans5.ltrans.o
+MASS_GetConfigDescriptor                          /tmp/ccxZRFth.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans4.ltrans.o
+MASS_GetDeviceDescriptor                          /tmp/ccxZRFth.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans4.ltrans.o
+MASS_GetStringDescriptor                          /tmp/ccxZRFth.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans4.ltrans.o
+MASS_Get_Interface_Setting                        /tmp/ccxZRFth.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans4.ltrans.o
+MASS_NoData_Setup                                 /tmp/ccxZRFth.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans4.ltrans.o
+MASS_Reset                                        /tmp/ccxZRFth.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans4.ltrans.o
+MASS_Status_In                                    /tmp/ccxZRFth.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans4.ltrans.o
+MASS_Status_Out                                   /tmp/ccxZRFth.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans4.ltrans.o
+MASS_init                                         /tmp/ccxZRFth.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans4.ltrans.o
+Mass_Block_Count                                  /tmp/ccxZRFth.ltrans5.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans4.ltrans.o
+Mass_Block_Size                                   /tmp/ccxZRFth.ltrans5.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans4.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans2.ltrans.o
+Mass_Storage_SetConfiguration                     /tmp/ccxZRFth.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans4.ltrans.o
+Mass_Storage_SetDeviceAddress                     /tmp/ccxZRFth.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans4.ltrans.o
+Max_Lun                                           /tmp/ccxZRFth.ltrans5.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans0.ltrans.o
+MemManageException                                /tmp/ccxZRFth.ltrans7.ltrans.o
 MemManage_Handler                                 lib/CMSIS_CM3/startup/gcc/startup_stm32f10x_md.o
-Millis                                            /tmp/cc9oRIFL.ltrans1.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans7.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
-NMIException                                      /tmp/cc9oRIFL.ltrans7.ltrans.o
+Millis                                            /tmp/ccxZRFth.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans7.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
+NMIException                                      /tmp/ccxZRFth.ltrans7.ltrans.o
 NMI_Handler                                       lib/CMSIS_CM3/startup/gcc/startup_stm32f10x_md.o
 NOP_Process                                       lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_core.o)
-                                                  /tmp/cc9oRIFL.ltrans5.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans4.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans5.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans4.ltrans.o
 NVIC_Init                                         lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(misc.o)
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
 NVIC_PriorityGroupConfig                          lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(misc.o)
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
 NVIC_SetVectorTable                               lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(misc.o)
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
 NVIC_SystemLPConfig                               lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(misc.o)
 Out0_Process                                      lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_core.o)
                                                   lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_int.o)
@@ -2938,32 +2940,32 @@ PMAToUserBufferCopy                               lib/STM32_USB-FS-Device_Driver
                                                   lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_core.o)
 PVD_IRQHandler                                    lib/CMSIS_CM3/startup/gcc/startup_stm32f10x_md.o
 PWR_BackupAccessCmd                               lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_pwr.o)
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
 PWR_ClearFlag                                     lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_pwr.o)
 PWR_DeInit                                        lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_pwr.o)
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
 PWR_EnterSTANDBYMode                              lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_pwr.o)
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
 PWR_EnterSTOPMode                                 lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_pwr.o)
 PWR_GetFlagStatus                                 lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_pwr.o)
 PWR_PVDCmd                                        lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_pwr.o)
 PWR_PVDLevelConfig                                lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_pwr.o)
 PWR_WakeUpPinCmd                                  lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_pwr.o)
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
 PendSV_Handler                                    lib/CMSIS_CM3/startup/gcc/startup_stm32f10x_md.o
-Pop_From_Buffer                                   /tmp/cc9oRIFL.ltrans0.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans7.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
+Pop_From_Buffer                                   /tmp/ccxZRFth.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans7.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
 Post0_Process                                     lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_core.o)
 RCC_ADCCLKConfig                                  lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_rcc.o)
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
 RCC_AHBPeriphClockCmd                             lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_rcc.o)
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
 RCC_APB1PeriphClockCmd                            lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_rcc.o)
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
 RCC_APB1PeriphResetCmd                            lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_rcc.o)
                                                   lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_usart.o)
                                                   lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_tim.o)
@@ -2971,8 +2973,8 @@ RCC_APB1PeriphResetCmd                            lib/STM32F10x_StdPeriph_Driver
                                                   lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_pwr.o)
                                                   lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_i2c.o)
 RCC_APB2PeriphClockCmd                            lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_rcc.o)
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
 RCC_APB2PeriphResetCmd                            lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_rcc.o)
                                                   lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_usart.o)
                                                   lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_tim.o)
@@ -2991,17 +2993,17 @@ RCC_GetClocksFreq                                 lib/STM32F10x_StdPeriph_Driver
                                                   lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_spi.o)
                                                   lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_i2c.o)
 RCC_GetFlagStatus                                 lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_rcc.o)
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
 RCC_GetITStatus                                   lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_rcc.o)
 RCC_GetSYSCLKSource                               lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_rcc.o)
 RCC_HCLKConfig                                    lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_rcc.o)
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
 RCC_HSEConfig                                     lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_rcc.o)
 RCC_HSICmd                                        lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_rcc.o)
 RCC_IRQHandler                                    lib/CMSIS_CM3/startup/gcc/startup_stm32f10x_md.o
 RCC_ITConfig                                      lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_rcc.o)
 RCC_LSEConfig                                     lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_rcc.o)
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
 RCC_LSICmd                                        lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_rcc.o)
 RCC_MCOConfig                                     lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_rcc.o)
 RCC_PCLK1Config                                   lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_rcc.o)
@@ -3009,12 +3011,12 @@ RCC_PCLK2Config                                   lib/STM32F10x_StdPeriph_Driver
 RCC_PLLCmd                                        lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_rcc.o)
 RCC_PLLConfig                                     lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_rcc.o)
 RCC_RTCCLKCmd                                     lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_rcc.o)
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
 RCC_RTCCLKConfig                                  lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_rcc.o)
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
 RCC_SYSCLKConfig                                  lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_rcc.o)
 RCC_USBCLKConfig                                  lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_rcc.o)
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
 RCC_WaitForHSEStartUp                             lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_rcc.o)
 RTCAlarm_IRQHandler                               lib/CMSIS_CM3/startup/gcc/startup_stm32f10x_md.o
 RTC_ClearFlag                                     lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_rtc.o)
@@ -3022,7 +3024,7 @@ RTC_ClearITPendingBit                             lib/STM32F10x_StdPeriph_Driver
 RTC_EnterConfigMode                               lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_rtc.o)
 RTC_ExitConfigMode                                lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_rtc.o)
 RTC_GetCounter                                    lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_rtc.o)
-                                                  /tmp/cc9oRIFL.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans0.ltrans.o
 RTC_GetDivider                                    lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_rtc.o)
 RTC_GetFlagStatus                                 lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_rtc.o)
 RTC_GetITStatus                                   lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_rtc.o)
@@ -3030,59 +3032,59 @@ RTC_IRQHandler                                    lib/CMSIS_CM3/startup/gcc/star
 RTC_ITConfig                                      lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_rtc.o)
 RTC_SetAlarm                                      lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_rtc.o)
 RTC_SetCounter                                    lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_rtc.o)
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
 RTC_SetPrescaler                                  lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_rtc.o)
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
 RTC_WaitForLastTask                               lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_rtc.o)
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
 RTC_WaitForSynchro                                lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_rtc.o)
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
-ReadADC1_noblock.constprop.3                      /tmp/cc9oRIFL.ltrans3.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans7.ltrans.o
-Read_Memory                                       /tmp/cc9oRIFL.ltrans3.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans4.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
+ReadADC1_noblock.constprop.3                      /tmp/ccxZRFth.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans7.ltrans.o
+Read_Memory                                       /tmp/ccxZRFth.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans4.ltrans.o
 Reset_Handler                                     lib/CMSIS_CM3/startup/gcc/startup_stm32f10x_md.o
-SCSI_Address_Management                           /tmp/cc9oRIFL.ltrans4.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans2.ltrans.o
-SCSI_BlkLen                                       /tmp/cc9oRIFL.ltrans5.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans4.ltrans.o
-SCSI_Invalid_Cmd                                  /tmp/cc9oRIFL.ltrans2.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans5.ltrans.o
-SCSI_LBA                                          /tmp/cc9oRIFL.ltrans5.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans4.ltrans.o
-SCSI_Read10_Cmd                                   /tmp/cc9oRIFL.ltrans4.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans5.ltrans.o
-SCSI_Write10_Cmd                                  /tmp/cc9oRIFL.ltrans2.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans5.ltrans.o
+SCSI_Address_Management                           /tmp/ccxZRFth.ltrans4.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans2.ltrans.o
+SCSI_BlkLen                                       /tmp/ccxZRFth.ltrans5.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans4.ltrans.o
+SCSI_Invalid_Cmd                                  /tmp/ccxZRFth.ltrans2.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans5.ltrans.o
+SCSI_LBA                                          /tmp/ccxZRFth.ltrans5.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans4.ltrans.o
+SCSI_Read10_Cmd                                   /tmp/ccxZRFth.ltrans4.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans5.ltrans.o
+SCSI_Write10_Cmd                                  /tmp/ccxZRFth.ltrans2.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans5.ltrans.o
 SPI1_IRQHandler                                   lib/CMSIS_CM3/startup/gcc/startup_stm32f10x_md.o
 SPI2_IRQHandler                                   lib/CMSIS_CM3/startup/gcc/startup_stm32f10x_md.o
 SPI_BiDirectionalLineConfig                       lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_spi.o)
 SPI_CalculateCRC                                  lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_spi.o)
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
 SPI_Cmd                                           lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_spi.o)
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
 SPI_DataSizeConfig                                lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_spi.o)
 SPI_GetCRC                                        lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_spi.o)
 SPI_GetCRCPolynomial                              lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_spi.o)
 SPI_I2S_ClearFlag                                 lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_spi.o)
 SPI_I2S_ClearITPendingBit                         lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_spi.o)
 SPI_I2S_DMACmd                                    lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_spi.o)
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans0.ltrans.o
 SPI_I2S_DeInit                                    lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_spi.o)
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
 SPI_I2S_GetFlagStatus                             lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_spi.o)
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans0.ltrans.o
 SPI_I2S_GetITStatus                               lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_spi.o)
 SPI_I2S_ITConfig                                  lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_spi.o)
 SPI_I2S_ReceiveData                               lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_spi.o)
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans0.ltrans.o
 SPI_I2S_SendData                                  lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_spi.o)
-                                                  /tmp/cc9oRIFL.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans0.ltrans.o
 SPI_Init                                          lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_spi.o)
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
 SPI_NSSInternalSoftwareConfig                     lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_spi.o)
 SPI_SSOutputCmd                                   lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_spi.o)
 SPI_StructInit                                    lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_spi.o)
@@ -3093,19 +3095,19 @@ SaveRState                                        lib/STM32_USB-FS-Device_Driver
 SaveState                                         lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_init.o)
 SaveTState                                        lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_int.o)
                                                   lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_core.o)
-Scsi_Sense_Data                                   /tmp/cc9oRIFL.ltrans5.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans4.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans2.ltrans.o
-Sd_Spi_Called_From_USB_MSC                        /tmp/cc9oRIFL.ltrans2.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans4.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans0.ltrans.o
+Scsi_Sense_Data                                   /tmp/ccxZRFth.ltrans5.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans4.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans2.ltrans.o
+Sd_Spi_Called_From_USB_MSC                        /tmp/ccxZRFth.ltrans2.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans4.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans0.ltrans.o
 SetBTABLE                                         lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_regs.o)
-                                                  /tmp/cc9oRIFL.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans0.ltrans.o
 SetCNTR                                           lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_regs.o)
 SetDADDR                                          lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_regs.o)
 SetDeviceAddress                                  lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_core.o)
-                                                  /tmp/cc9oRIFL.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans0.ltrans.o
 SetDouBleBuffEPStall                              lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_regs.o)
 SetENDPOINT                                       lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_regs.o)
 SetEPAddress                                      lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_regs.o)
@@ -3118,72 +3120,72 @@ SetEPDblBuffAddr                                  lib/STM32_USB-FS-Device_Driver
 SetEPDblBuffCount                                 lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_regs.o)
 SetEPDoubleBuff                                   lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_regs.o)
 SetEPRxAddr                                       lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_regs.o)
-                                                  /tmp/cc9oRIFL.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans0.ltrans.o
 SetEPRxCount                                      lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_regs.o)
-                                                  /tmp/cc9oRIFL.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans0.ltrans.o
                                                   lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_core.o)
 SetEPRxStatus                                     lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_regs.o)
-                                                  /tmp/cc9oRIFL.ltrans5.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans4.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans2.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans5.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans4.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans2.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans0.ltrans.o
 SetEPRxValid                                      lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_regs.o)
-                                                  /tmp/cc9oRIFL.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans0.ltrans.o
 SetEPTxAddr                                       lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_regs.o)
-                                                  /tmp/cc9oRIFL.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans0.ltrans.o
 SetEPTxCount                                      lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_regs.o)
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
                                                   lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_sil.o)
                                                   lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_core.o)
 SetEPTxStatus                                     lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_regs.o)
-                                                  /tmp/cc9oRIFL.ltrans5.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans4.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans2.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans5.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans4.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans2.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans0.ltrans.o
                                                   lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_core.o)
 SetEPTxValid                                      lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_regs.o)
 SetEPType                                         lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_regs.o)
-                                                  /tmp/cc9oRIFL.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans0.ltrans.o
 SetEP_KIND                                        lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_regs.o)
 SetISTR                                           lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_regs.o)
-Set_CSW                                           /tmp/cc9oRIFL.ltrans0.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans5.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans4.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans2.ltrans.o
+Set_CSW                                           /tmp/ccxZRFth.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans5.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans4.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans2.ltrans.o
 Set_Status_Out                                    lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_regs.o)
 Setup0_Process                                    lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_core.o)
                                                   lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_int.o)
-Silabs_Tx_Buffer                                  /tmp/cc9oRIFL.ltrans7.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans4.ltrans.o
-Silabs_driver_state                               /tmp/cc9oRIFL.ltrans7.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
-Silabs_spi_state                                  /tmp/cc9oRIFL.ltrans7.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
+Silabs_Tx_Buffer                                  /tmp/ccxZRFth.ltrans7.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans4.ltrans.o
+Silabs_driver_state                               /tmp/ccxZRFth.ltrans7.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
+Silabs_spi_state                                  /tmp/ccxZRFth.ltrans7.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
 Standard_ClearFeature                             lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_core.o)
 Standard_GetConfiguration                         lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_core.o)
 Standard_GetDescriptorData                        lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_core.o)
-                                                  /tmp/cc9oRIFL.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans0.ltrans.o
 Standard_GetInterface                             lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_core.o)
 Standard_GetStatus                                lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_core.o)
 Standard_SetConfiguration                         lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_core.o)
 Standard_SetDeviceFeature                         lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_core.o)
 Standard_SetEndPointFeature                       lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_core.o)
 Standard_SetInterface                             lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_core.o)
-Stat.5708                                         /tmp/cc9oRIFL.ltrans6.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans4.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans2.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans0.ltrans.o
-Status                                            /tmp/cc9oRIFL.ltrans1.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans2.ltrans.o
+Stat.5722                                         /tmp/ccxZRFth.ltrans6.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans4.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans2.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans0.ltrans.o
+Status                                            /tmp/ccxZRFth.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans2.ltrans.o
 StatusInfo                                        lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_core.o)
-String_Descriptor                                 /tmp/cc9oRIFL.ltrans3.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans0.ltrans.o
+String_Descriptor                                 /tmp/ccxZRFth.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans0.ltrans.o
 SysTick_CLKSourceConfig                           lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(misc.o)
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
-SysTick_Handler                                   /tmp/cc9oRIFL.ltrans7.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
+SysTick_Handler                                   /tmp/ccxZRFth.ltrans7.ltrans.o
                                                   lib/CMSIS_CM3/startup/gcc/startup_stm32f10x_md.o
 SystemInit_ExtMemCtl_Dummy                        lib/CMSIS_CM3/startup/gcc/startup_stm32f10x_md.o
 TAMPER_IRQHandler                                 lib/CMSIS_CM3/startup/gcc/startup_stm32f10x_md.o
@@ -3281,59 +3283,59 @@ TIM_TimeBaseInit                                  lib/STM32F10x_StdPeriph_Driver
 TIM_TimeBaseStructInit                            lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_tim.o)
 TIM_UpdateDisableConfig                           lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_tim.o)
 TIM_UpdateRequestConfig                           lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_tim.o)
-Tbl.5093                                          /tmp/cc9oRIFL.ltrans6.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans5.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans0.ltrans.o
-Timer1.5703                                       /tmp/cc9oRIFL.ltrans4.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans0.ltrans.o
+Tbl.5107                                          /tmp/ccxZRFth.ltrans6.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans5.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans0.ltrans.o
+Timer1.5717                                       /tmp/ccxZRFth.ltrans4.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans0.ltrans.o
 ToWord                                            lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_regs.o)
 ToggleDTOG_RX                                     lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_regs.o)
 ToggleDTOG_TX                                     lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_regs.o)
-TransferState                                     /tmp/cc9oRIFL.ltrans2.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
-Transfer_Data_Request                             /tmp/cc9oRIFL.ltrans0.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans5.ltrans.o
-USART1_IRQHandler                                 /tmp/cc9oRIFL.ltrans8.ltrans.o
+TransferState                                     /tmp/ccxZRFth.ltrans2.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
+Transfer_Data_Request                             /tmp/ccxZRFth.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans5.ltrans.o
+USART1_IRQHandler                                 /tmp/ccxZRFth.ltrans8.ltrans.o
                                                   lib/CMSIS_CM3/startup/gcc/startup_stm32f10x_md.o
 USART2_IRQHandler                                 lib/CMSIS_CM3/startup/gcc/startup_stm32f10x_md.o
-USART3_IRQHandler                                 /tmp/cc9oRIFL.ltrans7.ltrans.o
+USART3_IRQHandler                                 /tmp/ccxZRFth.ltrans7.ltrans.o
                                                   lib/CMSIS_CM3/startup/gcc/startup_stm32f10x_md.o
 USART_ClearFlag                                   lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_usart.o)
 USART_ClearITPendingBit                           lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_usart.o)
-                                                  /tmp/cc9oRIFL.ltrans8.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans7.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans8.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans7.ltrans.o
 USART_ClockInit                                   lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_usart.o)
 USART_ClockStructInit                             lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_usart.o)
 USART_Cmd                                         lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_usart.o)
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
 USART_DMACmd                                      lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_usart.o)
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
 USART_DeInit                                      lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_usart.o)
 USART_GetFlagStatus                               lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_usart.o)
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
 USART_GetITStatus                                 lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_usart.o)
-                                                  /tmp/cc9oRIFL.ltrans8.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans7.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans8.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans7.ltrans.o
 USART_HalfDuplexCmd                               lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_usart.o)
 USART_ITConfig                                    lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_usart.o)
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
 USART_Init                                        lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_usart.o)
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
 USART_IrDACmd                                     lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_usart.o)
 USART_IrDAConfig                                  lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_usart.o)
 USART_LINBreakDetectLengthConfig                  lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_usart.o)
 USART_LINCmd                                      lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_usart.o)
 USART_ReceiveData                                 lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_usart.o)
-                                                  /tmp/cc9oRIFL.ltrans8.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans7.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans8.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans7.ltrans.o
 USART_ReceiverWakeUpCmd                           lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_usart.o)
 USART_SendBreak                                   lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_usart.o)
 USART_SendData                                    lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_usart.o)
-                                                  /tmp/cc9oRIFL.ltrans7.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans7.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
 USART_SetAddress                                  lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_usart.o)
 USART_SetGuardTime                                lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_usart.o)
 USART_SetPrescaler                                lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_usart.o)
@@ -3342,29 +3344,29 @@ USART_SmartCardNACKCmd                            lib/STM32F10x_StdPeriph_Driver
 USART_StructInit                                  lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_usart.o)
 USART_WakeUpConfig                                lib/STM32F10x_StdPeriph_Driver/libstm32fw.a(stm32f10x_usart.o)
 USBWakeUp_IRQHandler                              lib/CMSIS_CM3/startup/gcc/startup_stm32f10x_md.o
-USB_HP_CAN1_TX_IRQHandler                         /tmp/cc9oRIFL.ltrans7.ltrans.o
+USB_HP_CAN1_TX_IRQHandler                         /tmp/ccxZRFth.ltrans7.ltrans.o
                                                   lib/CMSIS_CM3/startup/gcc/startup_stm32f10x_md.o
 USB_Init                                          lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_init.o)
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
-USB_Istr                                          /tmp/cc9oRIFL.ltrans0.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans7.ltrans.o
-USB_LP_CAN1_RX0_IRQHandler                        /tmp/cc9oRIFL.ltrans7.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
+USB_Istr                                          /tmp/ccxZRFth.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans7.ltrans.o
+USB_LP_CAN1_RX0_IRQHandler                        /tmp/ccxZRFth.ltrans7.ltrans.o
                                                   lib/CMSIS_CM3/startup/gcc/startup_stm32f10x_md.o
 USB_SIL_Init                                      lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_sil.o)
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
 USB_SIL_Read                                      lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_sil.o)
-                                                  /tmp/cc9oRIFL.ltrans5.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans5.ltrans.o
 USB_SIL_Write                                     lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_sil.o)
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans0.ltrans.o
-UsageFaultException                               /tmp/cc9oRIFL.ltrans7.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans0.ltrans.o
+UsageFaultException                               /tmp/ccxZRFth.ltrans7.ltrans.o
 UsageFault_Handler                                lib/CMSIS_CM3/startup/gcc/startup_stm32f10x_md.o
-Usart_Send_Str                                    /tmp/cc9oRIFL.ltrans3.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
+Usart_Send_Str                                    /tmp/ccxZRFth.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
 UserToPMABufferCopy                               lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_mem.o)
                                                   lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_sil.o)
                                                   lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_core.o)
-User_Standard_Requests                            /tmp/cc9oRIFL.ltrans4.ltrans.o
+User_Standard_Requests                            /tmp/ccxZRFth.ltrans4.ltrans.o
                                                   lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_init.o)
 WWDG_IRQHandler                                   lib/CMSIS_CM3/startup/gcc/startup_stm32f10x_md.o
 _Jv_RegisterClasses                               /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/crtbegin.o
@@ -3377,70 +3379,70 @@ __aeabi_cfcmpeq                                   /home/laurence/ARM-GCC/bin/../
 __aeabi_cfcmple                                   /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/libgcc.a(_arm_cmpsf2.o)
 __aeabi_cfrcmple                                  /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/libgcc.a(_arm_cmpsf2.o)
 __aeabi_d2f                                       /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/libgcc.a(_arm_truncdfsf2.o)
-                                                  /tmp/cc9oRIFL.ltrans7.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans7.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans0.ltrans.o
 __aeabi_d2uiz                                     /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/libgcc.a(_arm_fixunsdfsi.o)
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
 __aeabi_dadd                                      /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/libgcc.a(_arm_addsubdf3.o)
-                                                  /tmp/cc9oRIFL.ltrans7.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans7.ltrans.o
 __aeabi_dcmpeq                                    /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/libgcc.a(_arm_cmpdf2.o)
 __aeabi_dcmpge                                    /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/libgcc.a(_arm_cmpdf2.o)
 __aeabi_dcmpgt                                    /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/libgcc.a(_arm_cmpdf2.o)
-                                                  /tmp/cc9oRIFL.ltrans7.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans7.ltrans.o
 __aeabi_dcmple                                    /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/libgcc.a(_arm_cmpdf2.o)
 __aeabi_dcmplt                                    /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/libgcc.a(_arm_cmpdf2.o)
-                                                  /tmp/cc9oRIFL.ltrans7.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans7.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
 __aeabi_ddiv                                      /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/libgcc.a(_arm_muldivdf3.o)
-                                                  /tmp/cc9oRIFL.ltrans7.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans7.ltrans.o
 __aeabi_dmul                                      /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/libgcc.a(_arm_muldivdf3.o)
-                                                  /tmp/cc9oRIFL.ltrans7.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans7.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
 __aeabi_drsub                                     /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/libgcc.a(_arm_addsubdf3.o)
 __aeabi_dsub                                      /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/libgcc.a(_arm_addsubdf3.o)
 __aeabi_f2d                                       /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/libgcc.a(_arm_addsubdf3.o)
-                                                  /tmp/cc9oRIFL.ltrans7.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans7.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
 __aeabi_f2uiz                                     /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/libgcc.a(_arm_fixunssfsi.o)
-                                                  /tmp/cc9oRIFL.ltrans7.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans7.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans0.ltrans.o
 __aeabi_fadd                                      /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/libgcc.a(_arm_addsubsf3.o)
-                                                  /tmp/cc9oRIFL.ltrans7.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans7.ltrans.o
 __aeabi_fcmpeq                                    /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/libgcc.a(_arm_cmpsf2.o)
-                                                  /tmp/cc9oRIFL.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans0.ltrans.o
 __aeabi_fcmpge                                    /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/libgcc.a(_arm_cmpsf2.o)
 __aeabi_fcmpgt                                    /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/libgcc.a(_arm_cmpsf2.o)
-                                                  /tmp/cc9oRIFL.ltrans7.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans7.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans0.ltrans.o
 __aeabi_fcmple                                    /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/libgcc.a(_arm_cmpsf2.o)
 __aeabi_fcmplt                                    /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/libgcc.a(_arm_cmpsf2.o)
-                                                  /tmp/cc9oRIFL.ltrans7.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans7.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans0.ltrans.o
 __aeabi_fdiv                                      /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/libgcc.a(_arm_muldivsf3.o)
-                                                  /tmp/cc9oRIFL.ltrans7.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans7.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans0.ltrans.o
 __aeabi_fmul                                      /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/libgcc.a(_arm_muldivsf3.o)
-                                                  /tmp/cc9oRIFL.ltrans7.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans7.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans0.ltrans.o
 __aeabi_frsub                                     /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/libgcc.a(_arm_addsubsf3.o)
 __aeabi_fsub                                      /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/libgcc.a(_arm_addsubsf3.o)
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans0.ltrans.o
 __aeabi_i2d                                       /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/libgcc.a(_arm_addsubdf3.o)
 __aeabi_i2f                                       /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/libgcc.a(_arm_addsubsf3.o)
-                                                  /tmp/cc9oRIFL.ltrans7.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans7.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans0.ltrans.o
 __aeabi_l2d                                       /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/libgcc.a(_arm_addsubdf3.o)
 __aeabi_l2f                                       /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/libgcc.a(_arm_addsubsf3.o)
 __aeabi_ui2d                                      /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/libgcc.a(_arm_addsubdf3.o)
 __aeabi_ui2f                                      /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/libgcc.a(_arm_addsubsf3.o)
-                                                  /tmp/cc9oRIFL.ltrans7.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans7.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
 __aeabi_ul2d                                      /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/libgcc.a(_arm_addsubdf3.o)
 __aeabi_ul2f                                      /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/libgcc.a(_arm_addsubsf3.o)
 __bss_end__                                       /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib/armv7-m/crt0.o
@@ -3456,8 +3458,8 @@ __dso_handle                                      /home/laurence/ARM-GCC/bin/../
 __eqdf2                                           /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/libgcc.a(_arm_cmpdf2.o)
 __eqsf2                                           /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/libgcc.a(_arm_cmpsf2.o)
 __extendsfdf2                                     /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/libgcc.a(_arm_addsubdf3.o)
-__fat_print_char                                  /tmp/cc9oRIFL.ltrans2.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
+__fat_print_char                                  /tmp/ccxZRFth.ltrans2.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
 __fini_array_end                                  /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib/armv7-m/libc.a(lib_a-fini.o)
 __fini_array_start                                /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib/armv7-m/libc.a(lib_a-fini.o)
 __fixunsdfsi                                      /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/libgcc.a(_arm_fixunsdfsi.o)
@@ -3515,13 +3517,13 @@ __register_exitproc                               /home/laurence/ARM-GCC/bin/../
                                                   /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib/armv7-m/crt0.o
 __register_frame_info                             /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/crtbegin.o
 __stack                                           /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib/armv7-m/crt0.o
-__str_print_char                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
+__str_print_char                                  /tmp/ccxZRFth.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
 __subdf3                                          /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/libgcc.a(_arm_addsubdf3.o)
 __subsf3                                          /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/libgcc.a(_arm_addsubsf3.o)
 __truncdfsf2                                      /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/libgcc.a(_arm_truncdfsf2.o)
-__usart_send_char                                 /tmp/cc9oRIFL.ltrans3.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
+__usart_send_char                                 /tmp/ccxZRFth.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
 _ebss                                             lib/CMSIS_CM3/startup/gcc/startup_stm32f10x_md.o
 _edata                                            lib/CMSIS_CM3/startup/gcc/startup_stm32f10x_md.o
 _estack                                           lib/CMSIS_CM3/startup/gcc/startup_stm32f10x_md.o
@@ -3540,7 +3542,7 @@ _global_impure_ptr                                /home/laurence/ARM-GCC/bin/../
 _impure_ptr                                       /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib/armv7-m/libc.a(lib_a-impure.o)
                                                   /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib/armv7-m/libc.a(lib_a-reent.o)
                                                   /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib/armv7-m/libc.a(lib_a-malloc.o)
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
 _init                                             /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/armv7-m/crti.o
                                                   /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib/armv7-m/libc.a(lib_a-init.o)
 _mainCRTStartup                                   /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib/armv7-m/crt0.o
@@ -3560,41 +3562,41 @@ _start                                            /home/laurence/ARM-GCC/bin/../
 _wrapup_reent                                     /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib/armv7-m/libc.a(lib_a-reent.o)
 atexit                                            /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib/armv7-m/libc.a(lib_a-atexit.o)
                                                   /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib/armv7-m/libc.a(lib_a-__call_atexit.o)
-bDeviceState                                      /tmp/cc9oRIFL.ltrans1.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans0.ltrans.o
-bootsource                                        /tmp/cc9oRIFL.ltrans1.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans7.ltrans.o
-check_fs.5226                                     /tmp/cc9oRIFL.ltrans3.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans4.ltrans.o
-chk_mounted.5230                                  /tmp/cc9oRIFL.ltrans4.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans6.ltrans.o
+bDeviceState                                      /tmp/ccxZRFth.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans0.ltrans.o
+bootsource                                        /tmp/ccxZRFth.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans7.ltrans.o
+check_fs.5240                                     /tmp/ccxZRFth.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans4.ltrans.o
+chk_mounted.5244                                  /tmp/ccxZRFth.ltrans4.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans6.ltrans.o
 cleanup_glue                                      /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib/armv7-m/libc.a(lib_a-reent.o)
-clust2sect                                        /tmp/cc9oRIFL.ltrans0.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans2.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
-counter_to_struct.5480                            /tmp/cc9oRIFL.ltrans0.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
-dir_find.part.4.5296                              /tmp/cc9oRIFL.ltrans5.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans6.ltrans.o
-dir_next.5292                                     /tmp/cc9oRIFL.ltrans2.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans6.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans5.ltrans.o
-dir_sdi.5256                                      /tmp/cc9oRIFL.ltrans2.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans6.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans5.ltrans.o
-disk_initialize                                   /tmp/cc9oRIFL.ltrans4.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
-disk_read                                         /tmp/cc9oRIFL.ltrans0.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans4.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans2.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
-disk_timerproc                                    /tmp/cc9oRIFL.ltrans0.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans7.ltrans.o
-disk_write                                        /tmp/cc9oRIFL.ltrans2.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans6.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
+clust2sect                                        /tmp/ccxZRFth.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans2.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
+counter_to_struct.5494                            /tmp/ccxZRFth.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
+dir_find.part.4.5310                              /tmp/ccxZRFth.ltrans5.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans6.ltrans.o
+dir_next.5306                                     /tmp/ccxZRFth.ltrans2.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans6.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans5.ltrans.o
+dir_sdi.5270                                      /tmp/ccxZRFth.ltrans2.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans6.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans5.ltrans.o
+disk_initialize                                   /tmp/ccxZRFth.ltrans4.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
+disk_read                                         /tmp/ccxZRFth.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans4.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans2.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
+disk_timerproc                                    /tmp/ccxZRFth.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans7.ltrans.o
+disk_write                                        /tmp/ccxZRFth.ltrans2.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans6.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
 end                                               /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib/armv7-m/libnosys.a(sbrk.o)
                                                   lib/CMSIS_CM3/startup/gcc/startup_stm32f10x_md.o
 errno                                             /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib/armv7-m/libnosys.a(sbrk.o)
@@ -3602,121 +3604,121 @@ errno                                             /home/laurence/ARM-GCC/bin/../
                                                   /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib/armv7-m/libc.a(lib_a-sbrkr.o)
 exit                                              /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib/armv7-m/libc.a(lib_a-exit.o)
                                                   /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib/armv7-m/crt0.o
-f_close.constprop.8                               /tmp/cc9oRIFL.ltrans6.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
-f_lseek.constprop.7                               /tmp/cc9oRIFL.ltrans2.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
-f_open.constprop.12                               /tmp/cc9oRIFL.ltrans6.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
-f_puts.constprop.4                                /tmp/cc9oRIFL.ltrans2.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
-f_stat.constprop.6                                /tmp/cc9oRIFL.ltrans6.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
-ff_convert.part.0.5083                            /tmp/cc9oRIFL.ltrans0.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans6.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans5.ltrans.o
-follow_path.5302                                  /tmp/cc9oRIFL.ltrans5.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans6.ltrans.o
+f_close.constprop.8                               /tmp/ccxZRFth.ltrans6.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
+f_lseek.constprop.7                               /tmp/ccxZRFth.ltrans2.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
+f_open.constprop.12                               /tmp/ccxZRFth.ltrans6.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
+f_puts.constprop.4                                /tmp/ccxZRFth.ltrans2.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
+f_stat.constprop.6                                /tmp/ccxZRFth.ltrans6.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
+ff_convert.part.0.5097                            /tmp/ccxZRFth.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans6.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans5.ltrans.o
+follow_path.5316                                  /tmp/ccxZRFth.ltrans5.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans6.ltrans.o
 free                                              /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib/armv7-m/libc.a(lib_a-malloc.o)
                                                   /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib/armv7-m/libc.a(lib_a-__call_atexit.o)
 g_pfnVectors                                      lib/CMSIS_CM3/startup/gcc/startup_stm32f10x_md.o
-get_fat                                           /tmp/cc9oRIFL.ltrans2.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans6.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
-get_fattime                                       /tmp/cc9oRIFL.ltrans0.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans6.ltrans.o
+get_fat                                           /tmp/ccxZRFth.ltrans2.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans6.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
+get_fattime                                       /tmp/ccxZRFth.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans6.ltrans.o
 hardware_init_hook                                /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib/armv7-m/crt0.o
-isDST.5462                                        /tmp/cc9oRIFL.ltrans0.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
-main                                              /tmp/cc9oRIFL.ltrans1.ltrans.o
+isDST.5476                                        /tmp/ccxZRFth.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
+main                                              /tmp/ccxZRFth.ltrans1.ltrans.o
                                                   lib/CMSIS_CM3/startup/gcc/startup_stm32f10x_md.o
                                                   /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib/armv7-m/crt0.o
 malloc                                            /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib/armv7-m/libc.a(lib_a-malloc.o)
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
                                                   /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib/armv7-m/libc.a(lib_a-__atexit.o)
-mem_cpy.5150                                      /tmp/cc9oRIFL.ltrans0.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans6.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans2.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
+mem_cpy.5164                                      /tmp/ccxZRFth.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans6.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans2.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
 memset                                            /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib/armv7-m/libc.a(lib_a-memset.o)
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
                                                   /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib/armv7-m/crt0.o
-move_window.5209                                  /tmp/cc9oRIFL.ltrans2.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans6.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans5.ltrans.o
-pEpInt_IN                                         /tmp/cc9oRIFL.ltrans4.ltrans.o
+move_window.5223                                  /tmp/ccxZRFth.ltrans2.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans6.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans5.ltrans.o
+pEpInt_IN                                         /tmp/ccxZRFth.ltrans4.ltrans.o
                                                   lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_int.o)
-pEpInt_OUT                                        /tmp/cc9oRIFL.ltrans5.ltrans.o
+pEpInt_OUT                                        /tmp/ccxZRFth.ltrans5.ltrans.o
                                                   lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_int.o)
-pInformation                                      /tmp/cc9oRIFL.ltrans4.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans0.ltrans.o
+pInformation                                      /tmp/ccxZRFth.ltrans4.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans0.ltrans.o
                                                   lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_init.o)
                                                   lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_core.o)
 pProperty                                         lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_init.o)
                                                   lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_core.o)
 pUser_Standard_Requests                           lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_init.o)
                                                   lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_core.o)
-power_off_.5597                                   /tmp/cc9oRIFL.ltrans3.ltrans.o
-power_on.5564                                     /tmp/cc9oRIFL.ltrans3.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans4.ltrans.o
-print_string                                      /tmp/cc9oRIFL.ltrans1.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans4.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
-put_fat                                           /tmp/cc9oRIFL.ltrans2.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans6.ltrans.o
-rcvr_datablock                                    /tmp/cc9oRIFL.ltrans0.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans4.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
-rcvr_spi.5569                                     /tmp/cc9oRIFL.ltrans0.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans4.ltrans.o
-release_spi                                       /tmp/cc9oRIFL.ltrans0.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans6.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans4.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans2.ltrans.o
-rprintf2RamRom                                    /tmp/cc9oRIFL.ltrans0.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
-rputchar.5790                                     /tmp/cc9oRIFL.ltrans1.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans0.ltrans.o
-rtc_gettime                                       /tmp/cc9oRIFL.ltrans0.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
-send_cmd.5573                                     /tmp/cc9oRIFL.ltrans0.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans4.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans2.ltrans.o
-send_string_to_silabs.constprop.24                /tmp/cc9oRIFL.ltrans4.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
-shutdown                                          /tmp/cc9oRIFL.ltrans3.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans7.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
-si446x_setup                                      /tmp/cc9oRIFL.ltrans3.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
-si446x_spi_state_machine.constprop.23             /tmp/cc9oRIFL.ltrans3.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans7.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans4.ltrans.o
-si446x_state_machine                              /tmp/cc9oRIFL.ltrans4.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans7.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
+power_off_.5611                                   /tmp/ccxZRFth.ltrans3.ltrans.o
+power_on.5578                                     /tmp/ccxZRFth.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans4.ltrans.o
+print_string                                      /tmp/ccxZRFth.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans4.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
+put_fat                                           /tmp/ccxZRFth.ltrans2.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans6.ltrans.o
+rcvr_datablock                                    /tmp/ccxZRFth.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans4.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
+rcvr_spi.5583                                     /tmp/ccxZRFth.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans4.ltrans.o
+release_spi                                       /tmp/ccxZRFth.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans6.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans4.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans2.ltrans.o
+rprintf2RamRom                                    /tmp/ccxZRFth.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
+rputchar.5804                                     /tmp/ccxZRFth.ltrans1.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans0.ltrans.o
+rtc_gettime                                       /tmp/ccxZRFth.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
+send_cmd.5587                                     /tmp/ccxZRFth.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans4.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans2.ltrans.o
+send_string_to_silabs.constprop.24                /tmp/ccxZRFth.ltrans4.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
+shutdown                                          /tmp/ccxZRFth.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans7.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
+si446x_setup                                      /tmp/ccxZRFth.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
+si446x_spi_state_machine.constprop.23             /tmp/ccxZRFth.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans7.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans4.ltrans.o
+si446x_state_machine                              /tmp/ccxZRFth.ltrans4.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans7.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
 software_init_hook                                /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib/armv7-m/crt0.o
 start                                             /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib/armv7-m/crt0.o
-stm32_spi_rw.5566                                 /tmp/cc9oRIFL.ltrans0.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans2.ltrans.o
+stm32_spi_rw.5580                                 /tmp/ccxZRFth.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans2.ltrans.o
 strlen                                            /home/laurence/ARM-GCC/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib/armv7-m/libc.a(lib_a-strlen.o)
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
-validate.5219                                     /tmp/cc9oRIFL.ltrans0.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans6.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans2.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans1.ltrans.o
-wInterrupt_Mask                                   /tmp/cc9oRIFL.ltrans3.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
+validate.5233                                     /tmp/ccxZRFth.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans6.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans2.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans1.ltrans.o
+wInterrupt_Mask                                   /tmp/ccxZRFth.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans0.ltrans.o
                                                   lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_sil.o)
                                                   lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_init.o)
-wIstr                                             /tmp/cc9oRIFL.ltrans0.ltrans.o
+wIstr                                             /tmp/ccxZRFth.ltrans0.ltrans.o
                                                   lib/STM32_USB-FS-Device_Driver/libstm32usb.a(usb_int.o)
-wait_ready.5571                                   /tmp/cc9oRIFL.ltrans0.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans6.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans3.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans2.ltrans.o
-xmit_datablock.part.1.5582                        /tmp/cc9oRIFL.ltrans0.ltrans.o
-                                                  /tmp/cc9oRIFL.ltrans2.ltrans.o
+wait_ready.5585                                   /tmp/ccxZRFth.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans6.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans3.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans2.ltrans.o
+xmit_datablock.part.1.5596                        /tmp/ccxZRFth.ltrans0.ltrans.o
+                                                  /tmp/ccxZRFth.ltrans2.ltrans.o
