@@ -23,19 +23,21 @@
 #define XY_RATE_LIMIT 10.0	/*10 degrees per second rps*/
 #define Z_RATE_LIMIT 30.0	/*30 around the vertical axis*/
 #define LAUNCH_STABLE_PERIOD 12000 /*need 12 seconds of stability before a launch can go ahead*/
+#define PERMISSION_DURATION 45000 /*45 seconds duration for autolaunch*/
 
 #define LAUNCH_ALTITUDE 37000UL
 
 //Other important config
 #define CALLSIGN "Foo"
 
-#define CUTDOWN_COMMAND 7
-#define LAUNCH_COMMAND 0
+#define CUTDOWN_COMMAND 0
 
-#define LAUNCH_RECEIVED 6
-#define LAUNCH_REFUSED 5
-#define IGNITON_FLAG_BITS 3	/*bits 3 and 4 used for autolaunch feedback*/
-/*Bits 1 and 2 toggle when there is an uplink*/
+#define LAUNCH_COMMAND 7
+#define LAUNCH_PERMISSION 6
+#define LAUNCH_RECEIVED 5
+#define LAUNCH_REFUSED 4
+#define IGNITON_FLAG_BITS 2	/*bits 2 and 3 used for autolaunch feedback whilst permission is set*/
+#define UPLINK_TEST_BIT 1	/*Bit 1  toggles when there is an uplink*/
 
 #define MISSION_TIMEOUT 12600000UL /* 3.5 hours */
 

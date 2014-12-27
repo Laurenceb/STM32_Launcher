@@ -165,8 +165,8 @@ __attribute__((externally_visible)) void SysTick_Handler(void)
 			if(Spin_Rate_LPF<SPIN_RATE_LOW || Spin_Rate>SPIN_RATE_HIGH)
 				Ignition_Selftest=2;		//2==spin failure
 			else
-				Ignition_Selftest=(Ind_Voltage>INDUCT_SENSE_LOW && Ind_Voltage<INDUCT_SENSE_HIGH)?0:1;
-			if(Ignition_Selftest)
+				Ignition_Selftest=(Ind_Voltage>INDUCT_SENSE_LOW && Ind_Voltage<INDUCT_SENSE_HIGH)?1:3;//3==induction failure,1==all ok
+			if(Ignition_Selftest!=1)
 				AutoSequence=(IGNITION_END/10);	//Start ramping down the throttle immediatly
 			else
 				INDUCTION_ON;			//Turn on the ignition

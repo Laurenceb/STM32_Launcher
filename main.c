@@ -45,7 +45,7 @@ int main(void)
 	float sensor_data;
 	uint8_t UplinkFlags=0,CutFlags=0;
 	uint16_t UplinkBytes=0;				//Counters and flags for telemetry
-	uint32_t last_telemetry=0,cutofftime=0,indtest=0,badgyro=0;
+	uint32_t last_telemetry=0,cutofftime=0,indtest=0,badgyro=0,permission_time=0;
 	uint16_t sentence_counter=0;
 	//Cutdown config stuff here, atm uses hardcoded polygon defined in polygon.h
 	static const int32_t Geofence[UK_GEOFENCE_POINTS*2]=UK_GEOFENCE;
@@ -202,8 +202,12 @@ int main(void)
 		if(stat || n>1)
 			UplinkBytes+=n;			//Stores the amount of uplinked data
 		if(stat && strlen(str)==6 && !strncmp(str,"$$RO",4)) {//We recived something, here we process the data that was received, as long as it is '$$RO**'
-			if(str[4]=='K' && str[5]>47 && str[5]<56 )//Need to send "$$ROKx" where x is 0 to 7
-				UplinkFlags|=1<<(str[5]-48);//Set the correct flag bit			
+			if(str[4]=='K' && str[5]>47 && str[5]<56 ) {//Need to send "$$ROKx" where x is 0 to 7
+				if(str[5]-48!=UPLINK_TEST_BIT)
+					UplinkFlags|=1<<(str[5]-48);//Set the correct flag bit
+				else
+					UplinkFlags^=1<<UPLINK_TEST_BIT;//The test bit is toggled
+			}		
 		}
 		}
 		//Await a full set of GPS data (Lat,Long,Alt,Sat info)
@@ -214,18 +218,20 @@ int main(void)
 		Gps.packetflag=0x00;
 		//Test the Cutdown and update the appropriate bit in the Cut flags byte, check for cutdown conditions and process accordingly
 		CutFlags=(CutFlags&0xFE)|test_cutdown();//LSB is cut test status
-		if(!pointinpoly(Geofence, UK_GEOFENCE_POINTS, Gps.longitude, Gps.latitude) && Gps.latitude)//Check to see if we need to cutdown due to polygon here
-			CutFlags|=(1<<1)|(1<<7);	//Second bit means cutdown triggered due to polygon
-		if(UplinkFlags&(1<<CUTDOWN_COMMAND)) {	//Cutdown was requested
-			CutFlags|=(1<<2)|(1<<7);
-			UplinkFlags&=~(1<<CUTDOWN_COMMAND);//Wipe the bit
-		}
-		if(Millis>MISSION_TIMEOUT)		//Cutdown after a certain amount of uptime
-			CutFlags|=(1<<3)|(1<<7);
-		if(CutFlags&(1<<7)) {			//Upper bit triggers a cutdown
-			CutFlags&=~(1<<7);		//Wipe the bit
-			CUTDOWN;
-			cutofftime=Millis+6000;		//Cutter on for 6 seconds
+		if(!(CutFlags&0x0E)) {			//Only check if the cutdown has not already run
+			if(!pointinpoly(Geofence, UK_GEOFENCE_POINTS, Gps.longitude, Gps.latitude) && Gps.latitude)//Check to see if we need to cutdown due to polygon here
+				CutFlags|=(1<<1)|(1<<7);//Second bit means cutdown triggered due to polygon
+			if(UplinkFlags&(1<<CUTDOWN_COMMAND)) {//Cutdown was requested
+				CutFlags|=(1<<2)|(1<<7);
+				UplinkFlags&=~(1<<CUTDOWN_COMMAND);//Wipe the bit
+			}
+			if(Millis>MISSION_TIMEOUT)	//Cutdown after a certain amount of uptime
+				CutFlags|=(1<<3)|(1<<7);
+			if(CutFlags&(1<<7)) {		//Upper bit triggers a cutdown
+				CutFlags&=~(1<<7);	//Wipe the bit
+				CUTDOWN;
+				cutofftime=Millis+6000;	//Cutter on for 6 seconds
+			}
 		}
 		if(Millis>cutofftime && cutofftime) {	//Reset the cutdown later
 			CUTOFF;
@@ -244,21 +250,30 @@ int main(void)
 			indtest=Millis-500;
 		}
 		//This processed and checks the actual launch command
-		if(  (UplinkFlags&(1<<(LAUNCH_COMMAND)))) {
+		if( UplinkFlags&(1<<(LAUNCH_PERMISSION)) ) 
+			permission_time=Millis+PERMISSION_DURATION;//The permission command allows a launch to proceed at any point in this time window
+		if( Millis>permission_time )		//Wipe the bit after a certain amount of time
+			UplinkFlags&=~(1<<LAUNCH_PERMISSION);
+		else					//Load the Flag bits during the permission time
+			UplinkFlags|=(Ignition_Selftest&0x03)<<IGNITON_FLAG_BITS;//This should change from 0 to 1 following a launch, or 2 or 3 if autosequence fails
+		if( UplinkFlags&(1<<(LAUNCH_COMMAND)) && UplinkFlags&(1<<(LAUNCH_PERMISSION))) {//Need to send the command whilst the permission is valid
 			UplinkFlags&=~(1<<(LAUNCH_COMMAND));//Wipe the bit
-			UplinkFlags^=(1<<(LAUNCH_RECEIVED));//Notification bit is toggled
-			if( ((Gps.mslaltitude/1000) > LAUNCH_ALTITUDE) && ((Millis-badgyro)>LAUNCH_STABLE_PERIOD ) && (Auto_volt>INDUCT_SENSE_LOW && Auto_volt<INDUCT_SENSE_HIGH)) 
+			if( ((Gps.mslaltitude/1000) > LAUNCH_ALTITUDE) && ((Millis-badgyro)>LAUNCH_STABLE_PERIOD ) && (Auto_volt>INDUCT_SENSE_LOW && Auto_volt<INDUCT_SENSE_HIGH)) {
 				AutoSequence=1;		//Go for launch
-			else				//Launch refused
+				UplinkFlags^=(1<<(LAUNCH_RECEIVED));//Notification bit is toggled
+			} else				//Launch refused
 				UplinkFlags^=(1<<(LAUNCH_REFUSED));
 		}		
 		//Other sensors etc can go here
 		//Generate the Telemetry string
-		if(Millis-last_telemetry>15000) {	//Every 15 seconds
+		if(Millis-last_telemetry>25000) {	//Every 25 seconds
 			last_telemetry=Millis;
 			rtc_gettime(&RTC_time);		//Get the RTC time and put a timestamp on the start of the file
 			print_string[0]=0x00;		//Set string length to 0
-			printf("$$%s,%d,%02d:%02d,%3f,%3f,%1f,%1f,%1f,%1f,%1f,%d,%d,%2x,%2x,%1f,%2f\n",CALLSIGN,sentence_counter++,RTC_time.hour,RTC_time.min,(float)Gps.latitude*1e-7,(float)Gps.longitude*1e-7,(float)Gps.mslaltitude*1e-3,Battery_Voltage,Aux_Voltage,Gyro_XY_Rate,Gyro_Z_Rate,Gyro_Temperature,UplinkBytes,UplinkFlags,CutFlags,Auto_spin,Auto_volt);
+			printf("$$%s,%d,%02d:%02d,%3f,%3f,%1f,%1f,%1f,%1f,%1f,%d,%d,%2x,%2x,%1f,%2f,",CALLSIGN,sentence_counter++,RTC_time.hour,RTC_time.min,(float)Gps.latitude*1e-7,(float)Gps.longitude*1e-7,(float)Gps.mslaltitude*1e-3,Battery_Voltage,Aux_Voltage,Gyro_XY_Rate,Gyro_Z_Rate,Gyro_Temperature,UplinkBytes,UplinkFlags,CutFlags,Auto_spin,Auto_volt);
+			uint16_t checksum=string_CRC16_checksum (print_string);//Generate the checksum
+			printf("%04x\n",checksum);
+			send_string_to_silabs(print_string);//Output the string via the silabs
 		}
 		//Button multipress status
 		if(System_state_Global&0x80) {		//A "control" button press
