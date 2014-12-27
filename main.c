@@ -7,6 +7,7 @@
 #include "usart.h"
 #include "interrupts.h"
 #include "pwm.h"
+#include "pwr.h"
 #include "watchdog.h"
 #include "Ublox/ubx.h"
 #include "Util/rprintf.h"
@@ -139,16 +140,36 @@ int main(void)
 		shutdown();				//Abort after a single red flash ------------------ABORT 1
 	}
 	Watchdog_Reset();				//Card Init can take a second or two
+	//Setup and test the I2C
 	I2C_Config();					//Setup the I2C bus
 	sensors=detect_sensors();
 	if(sensors&((1<<L3GD20_CONFIG)|(1<<AFROESC_READ))!=((1<<L3GD20_CONFIG)|(1<<AFROESC_READ))) {
-		f_puts("I2C sensor detect error",&FATFS_logfile);
+		f_puts("I2C sensor detect error\r\n",&FATFS_logfile);
 		f_close(&FATFS_logfile);		//So we log that something went wrong in the logfile
 		shutdown();
 	}
+	//Setup and test the silabs radio
+	uint8_t silab=si446x_setup();
+	if(silab!=0x44) {				//Should return the device code
+		print_string[0]=0x00;
+		printf("Silabs: %02x\n",silab);
+		f_puts("Silabs detect error, got:",&FATFS_logfile);
+		f_puts(print_string,&FATFS_logfile);
+		f_close(&FATFS_logfile);		//So we log that something went wrong in the logfile
+		shutdown();
+	}						//Otherwise silabs is now initialised, and can be used via its buffers
+	printf("Hello from rockoon project\n");		//Test the silabs RTTY
+	send_string_to_silabs(print_string);		//Send the string
 	rtc_gettime(&RTC_time);				//Get the RTC time and put a timestamp on the start of the file
 	print_string[0]=0x00;				//Set string length to 0
 	printf("%02d-%02d-%02dT%02d:%02d:%02d\n",RTC_time.year,RTC_time.month,RTC_time.mday,RTC_time.hour,RTC_time.min,RTC_time.sec);//ISO 8601 timestamp header
+	printf("Battery: %3fV\n",Battery_Voltage);	//Get the battery voltage using blocking regular conversion and print
+	printf("Time");					//Print out a header for columns that are present in the CSV file
+	printf("Lat,Long,Alt,Voltage,Aux_Voltage,XY_Gyro,Z_Gyro,Temperature,Uplink(Bytes),Uplink_CommandFlags,Cutdown,Spin,Ind,Button press\r\n");
+	if(file_opened) {
+		f_puts(print_string,&FATFS_logfile);
+		print_string[0]=0x00;			//Set string length to 0
+	}
 	//Todo, await GPS fix here?
 	Gps.packetflag=0x00;			//Reset
 	while(Gps.packetflag!=REQUIRED_DATA) {	//Wait for all fix data
@@ -159,19 +180,33 @@ int main(void)
 	printf("%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld,%1x\r\n",\
 	Gps.latitude,Gps.longitude,Gps.mslaltitude,\
 	Gps.vnorth,Gps.veast,Gps.vdown,Gps.horizontal_error,Gps.vertical_error,Gps.speedacc,Gps.nosats);
-	printf("Battery: %3fV\n",Battery_Voltage);	//Get the battery voltage using blocking regular conversion and print
-	printf("Time");					//Print out a header for columns that are present in the CSV file
-	printf("Lat,Long,Alt,Voltage,Aux_Voltage,XY_Gyro,Z_Gyro,Temperature,Uplink(Bytes),Uplink_CommandFlags,Cutdown,Spin,Ind,Button press\r\n");
-	if(file_opened) {
-		f_puts(print_string,&FATFS_logfile);
-		print_string[0]=0x00;			//Set string length to 0
-	}
 	Millis=0;					//Reset system uptime, we have 50 days before overflow
 	while (1) {					//Main loop
 		Watchdog_Reset();			//Reset the watchdog each main loop iteration
 		while(1)
-			__WFI();			//Wait for some PPG data
-		
+			__WFI();			//Wait for something to happen - saves power 
+		//Check for Silabs uplinked data
+		{
+		uint8_t stat;
+		uint8_t str[10];			//For receiving uplinked data
+		uint8_t n=0;
+		do {
+			str[n]=(uint8_t)get_from_silabs_buffer(&stat);
+			n++;
+		} while(stat && n<=10);
+		if(stat || n>1)
+			UplinkBytes+=n;			//Stores the amount of uplinked data
+		if(stat && strlen(str)==6 && !strncmp(str,"$$RO",4)) {//We recived something, here we process the data that was received, as long as it is '$$RO**'
+			if(str[4]=='K' && str[5]>47 && str[5]<58 )//Need to send "$$ROKx" where x is 0 to 9
+				UplinkFlags|=1<<(str[5]-48);//Set the correct flag bit			
+		}
+		}
+		//Await a full set of GPS data (Lat,Long,Alt,Sat info)
+		while(Gps.packetflag!=REQUIRED_DATA) {	//Wait for all fix data
+			while(Bytes_In_DMA_Buffer(&Gps_Buffer))//Dump all the data
+				Gps_Process_Byte((uint8_t)(Pop_From_Buffer(&Gps_Buffer)),&Gps);
+		}
+		Gps.packetflag=0x00;
 		//Other sensors etc can go here
 		//Button multipress status
 		if(System_state_Global&0x80) {		//A "control" button press
@@ -182,7 +217,7 @@ int main(void)
 		}
 		 printf(",%d\n",system_state);		//Terminating newline
 		//Can do other things with the system state here
-		system_state=0;				//Reset this
+		system_state=0;				//Reset thisc string functions
 		if(file_opened  & 0x01) {
 			f_puts(print_string,&FATFS_logfile);
 			print_string[0]=0x00;		//Set string length to 0

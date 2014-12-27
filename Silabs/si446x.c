@@ -12,6 +12,12 @@ uint32_t Active_channel = DEFAULT_CHANNEL;
 int8_t Outdiv = 4;
 
 //Interface functions go here
+uint8_t send_string_to_silabs(uint8_t* str) {
+	for(;*str;str++)
+		Add_To_Buffer( *str, &Silabs_Tx_Buffer );
+	EXTI_GenerateSWInterrupt(EXTI_Line0);
+}
+
 uint8_t add_to_silabs_buffer(uint8_t data) {
 	Add_To_Buffer( data, &Silabs_Tx_Buffer );
 	EXTI_GenerateSWInterrupt(EXTI_Line0);
@@ -33,9 +39,9 @@ uint8_t silabs_cts_jammed(void) {/* More than 20 milliseconds of jammed CTS caus
 /**
   * @brief  This function handles silabs config
   * @param  None
-  * @retval None
+  * @retval Part number - used for self test
   */
-void si446x_setup(void) {
+uint8_t si446x_setup(void) {
 	GPIO_InitTypeDef    GPIO_InitStructure;
 	USART_InitTypeDef   USART_InitStructure;
 	SPI_InitTypeDef   SPI_InitStructure;
@@ -171,9 +177,10 @@ void si446x_setup(void) {
 	SDN_LOW;/* Radio is now reset */
 
 	/* Configure the radio ready for use, use simple busy wait logic here, as only has to happen once */
+	uint8_t part=0;
 	{
 	uint8_t tx_buffer[16];
-	uint8_t rx_buffer[10];
+	uint8_t rx_buffer[12];
 	//divide VCXO_FREQ into its bytes; MSB first
 	uint8_t x3 = VCXO_FREQ / 0x1000000;
 	uint8_t x2 = (VCXO_FREQ - x3 * 0x1000000) / 0x10000;
@@ -190,9 +197,10 @@ void si446x_setup(void) {
 		__WFI();
 	//read the device part number info
 	memcpy(tx_buffer, (uint8_t [1]){0x01}, 1*sizeof(uint8_t));
-	si446x_spi_state_machine( &Silabs_spi_state, 1, tx_buffer, 10, rx_buffer, NULL );
+	si446x_spi_state_machine( &Silabs_spi_state, 1, tx_buffer, 12, rx_buffer, NULL );
 	while(Silabs_spi_state)
 		__WFI();
+	part=rx_buffer[3];//Should be 0x44
 	//Setup the GPIO pin, note that GPIO1 defaults to CTS, but we need to reset and set GPIO0 to TX direct mode mod input
 	memcpy(tx_buffer, (uint8_t [8]){0x13, 0x04, 0x00, 0x01, 0x01, 0x00, 0x11, 0x00}, 8*sizeof(uint8_t));//GPIO0 in, 1 CTS, rest dis, NIRQ unchanged
 	si446x_spi_state_machine( &Silabs_spi_state, 8, tx_buffer, 0, rx_buffer, NULL );
@@ -207,6 +215,7 @@ void si446x_setup(void) {
 		__WFI();
 	}
 	EXTI_Init(&EXTI_InitStructure);	/* Only enable the NIRQ once everything is configured */
+	return part;			/* Return the part number */
 }
 
 /**

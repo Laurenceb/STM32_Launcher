@@ -18,6 +18,7 @@
 #define SDN_LOW  GPIO_WriteBit(GPIOB,GPIO_Pin_9,Bit_RESET)
 #define SDN_HIGH GPIO_WriteBit(GPIOB,GPIO_Pin_9,Bit_SET)
 
+uint8_t send_string_to_silabs(uint8_t* str);
 uint8_t add_to_silabs_buffer(uint8_t data);
 uint8_t get_from_silabs_buffer(uint8_t* status);
 uint8_t silabs_cts_jammed(void);
@@ -27,5 +28,5 @@ void si446x_state_machine(uint8_t *state_, uint8_t reason );
 void si446x_set_modem(void);
 void si446x_set_deviation_channel(uint32_t deviation, uint32_t channel_space);
 void si446x_set_frequency(uint32_t freq);
-void si446x_setup(void);
+uint8_t si446x_setup(void);
 

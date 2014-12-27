@@ -14,6 +14,9 @@
 #define CUTDOWN GPIO_WriteBit(GPIOA,GPIO_Pin_15,Bit_RESET)
 #define CUTOFF GPIO_WriteBit(GPIOA,GPIO_Pin_15,Bit_SET)
 
+#define GOPRO_TRIG_ON GPIO_WriteBit(GPIOB,GPIO_Pin_4,Bit_SET)
+#define GOPRO_TRIG_OFF GPIO_WriteBit(GPIOB,GPIO_Pin_4,Bit_RESET)
+
 extern uint8_t bootsource;
 
 void setup_gpio(void);
