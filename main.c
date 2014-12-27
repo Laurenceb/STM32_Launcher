@@ -261,6 +261,9 @@ int main(void)
 			}		
 		}
 		}
+		//If the Silabs locks up, detect this and reinitialise it
+		if(silabs_cts_jammed() || silab!=0x44)
+			silab=si446x_setup();
 		//Await a full set of GPS data (Lat,Long,Alt,Sat info)
 		while(Gps.packetflag!=REQUIRED_DATA) {	//Wait for all fix data
 			while(Bytes_In_DMA_Buffer(&Gps_Buffer))//Dump all the data
