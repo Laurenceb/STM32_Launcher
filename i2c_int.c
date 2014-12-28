@@ -9,6 +9,8 @@ volatile uint8_t L3GD20_Data_Buffer[8];
 volatile uint8_t AFROESC_Data_Buffer[7];
 volatile uint16_t AFROESC_Throttle;	//note that this is big endian 
 
+volatile buff_type Gyro_x_buffer,Gyro_y_buffer,Gyro_z_buffer;//Buffers for raw data
+
 //Globals for the driver
 volatile uint32_t Jobs,Completed_Jobs;	//used for task control (only ever access this from outside for polling Jobs/Reading Completed_Jobs)
 volatile uint8_t job;			//stores the current job
@@ -275,6 +277,10 @@ void I2C_Config() {			//Configure I2C1 for the sensor bus
  	GPIO_SetBits(GPIOB,I2C1_SCL);//Set bus scl high
 	Delay(10);
  	GPIO_SetBits(GPIOB,I2C1_SDA);//Set bus sda high
+	//Initialise the buffers
+	init_buffer(&Gyro_x_buffer, 32);
+	init_buffer(&Gyro_y_buffer, 32);
+	init_buffer(&Gyro_z_buffer, 32);
 	//Configure the hardware as alt function
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_OD;
 	GPIO_Init( GPIOB, &GPIO_InitStructure );
