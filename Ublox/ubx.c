@@ -8,7 +8,7 @@
 #include "ubx.h"
 
 volatile Ubx_Gps_Type Gps;			//These are global
-buff_type Gps_Buffer;
+volatile buff_type Gps_Buffer;
 
 /* - example trivial use
 	for(;;)

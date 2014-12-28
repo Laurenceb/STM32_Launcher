@@ -17,6 +17,8 @@ volatile buff_type Usart1_rx_buff;
 void Usarts_Init() {
     GPIO_InitTypeDef    GPIO_InitStructure;
     USART_InitTypeDef   USART_InitStructure;
+    // Initialise the buffers
+    init_buffer(&Usart1_rx_buff, 256);//Initialise the Usart1 Rx
     
     // Enable clock to GPIO and USART1 and USART2 peripherals - on different APBs
     RCC_APB2PeriphClockCmd(USART1_RCC_GPIO | USART1_RCC_USART, ENABLE);
@@ -41,6 +43,10 @@ void Usarts_Init() {
     // Configure USART2 peripheral - only buadrate is changed
     USART_InitStructure.USART_BaudRate = USART2_BAUD;
     USART_Init(USART2_USART, &USART_InitStructure );
+
+    init_buffer(&Gps_Buffer, 256);//Initialise the Usart2 Rx for the GPS 
+    //Configure the USART2 DMA etc
+    DMA_USART2_Configuration(&Gps_Buffer);
 
     /* Enable USART2 DMA Rx request */
     USART_DMACmd(USART2_USART, USART_DMAReq_Rx , ENABLE);

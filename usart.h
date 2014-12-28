@@ -4,6 +4,7 @@
 #include "stm32f10x.h"
 #include <stdio.h>
 #include "buffer.h"
+#include "ubx.h"
 
 extern volatile buff_type Usart1_rx_buff;
 

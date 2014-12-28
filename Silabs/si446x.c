@@ -50,6 +50,9 @@ uint8_t si446x_setup(void) {
 	NVIC_InitTypeDef   NVIC_InitStructure;
 
 	uint16_t dummyread;
+	// Initialise the Silabs buffers
+	init_buffer(&Silabs_Tx_Buffer, 256);//256 samples
+	init_buffer(&Silabs_Rx_Buffer, 256);//256 samples
     
 	// Enable clock to GPIO and USART3 peripherals - on different APBs
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB | RCC_APB2Periph_GPIOA, ENABLE);
