@@ -11,6 +11,7 @@
 #include "watchdog.h"
 #include "polygon.h"
 #include "crc.h"
+#include "wave.h"
 #include "si446x.h"
 #include "Ublox/ubx.h"
 #include "Util/rprintf.h"
@@ -35,8 +36,10 @@ UINT a;							//File bytes counter
 //FatFs filesystem globals go here
 FRESULT f_err_code;
 static FATFS FATFS_Obj;
-FIL FATFS_logfile;
+FIL FATFS_logfile,FATFS_wavfile_gyro;
 FILINFO FATFS_info;
+//Wave file stuffer
+wave_stuffer Gyro_wav_stuffer; 
 //volatile int bar[3] __attribute__ ((section (".noinit"))) ;//= 0xaa
 
 int main(void)
@@ -147,22 +150,46 @@ int main(void)
 			if(f_err_code==FR_DISK_ERR || f_err_code==FR_NOT_READY)
 				Usart_Send_Str((char*)"No uSD card inserted?\r\n");
 		}
-		else {					//We have a mounted card
-			f_err_code=f_lseek(&FATFS_logfile, PRE_SIZE);// Pre-allocate clusters
-			if (f_err_code || f_tell(&FATFS_logfile) != PRE_SIZE)// Check if the file size has been increased correctly
-				Usart_Send_Str((char*)"Pre-Allocation error\r\n");
-			else {
-				if((f_err_code=f_lseek(&FATFS_logfile, 0)))//Seek back to start of file to start writing
-					Usart_Send_Str((char*)"Seek error\r\n");
-				else
-					rprintfInit(__str_print_char);//Printf to the logfile
+		else {
+			print_string[strlen(print_string)-4]=0x00;//Wipe the .csv off the string
+			strcat(print_string,"_gyro.wav");
+			if((f_err_code=f_open(&FATFS_wavfile_gyro,LOGFILE_NAME,FA_CREATE_ALWAYS | FA_WRITE))) {//Present
+				printf("FatFs drive error %d\r\n",f_err_code);
+				if(f_err_code==FR_DISK_ERR || f_err_code==FR_NOT_READY)
+					Usart_Send_Str((char*)"No uSD card inserted?\r\n");
 			}
-			if(f_err_code)
-				f_close(&FATFS_logfile);//Close the already opened file on error
-			else
-				file_opened=1;		//So we know to close the file properly on shutdown
+			else {					//We have a mounted card
+				f_err_code=f_lseek(&FATFS_logfile, PRE_SIZE);// Pre-allocate clusters
+				if (f_err_code || f_tell(&FATFS_logfile) != PRE_SIZE)// Check if the file size has been increased correctly
+					Usart_Send_Str((char*)"Pre-Allocation error\r\n");
+				else {
+					if((f_err_code=f_lseek(&FATFS_logfile, 0)))//Seek back to start of file to start writing
+						Usart_Send_Str((char*)"Seek error\r\n");
+					else
+						rprintfInit(__str_print_char);//Printf to the logfile
+				}
+				if(f_err_code)
+					f_close(&FATFS_logfile);//Close the already opened file on error
+				else
+					file_opened=1;		//So we know to close the file properly on shutdown
+				if(file_opened==1) {
+					if (f_err_code || f_tell(&FATFS_wavfile_gyro) != PRE_SIZE)// Check if the file size has been increased correctly
+						Usart_Send_Str((char*)"Pre-Allocation error\r\n");
+					else {
+						if((f_err_code=f_lseek(&FATFS_logfile, 0)))//Seek back to start of file to start writing
+							Usart_Send_Str((char*)"Seek error\r\n");
+						else
+							rprintfInit(__str_print_char);//Printf to the logfile
+					}
+					if(f_err_code)
+						f_close(&FATFS_wavfile_gyro);//Close the already opened file on error
+					else
+						file_opened|=2;	//So we know to close the file properly on shutdown
+				}
+			}
 		}
 	}
+	f_err_code|=write_wave_header(&FATFS_wavfile_gyro, 3, 100, 16);
 	if(f_err_code) {				//There was an init error
 		shutdown();				//Abort after a single red flash ------------------ABORT 1
 	}
@@ -347,7 +374,15 @@ int main(void)
 		if( countdown_time && Millis>countdown_time ) {
 			countdown_time=0;
 			AutoSequence=1;			//Go for launch
-		}	
+		}
+		//Grab the data from the Gyro
+		while(bytes_in_buff(&Gyro_x_buffer)) {
+			uint16_t  data[3];
+			data[0]=Pop_From_Buffer(&Gyro_x_buffer);
+			data[1]=Pop_From_Buffer(&Gyro_y_buffer);
+			data[2]=Pop_From_Buffer(&Gyro_z_buffer);
+			write_wave_samples(&FATFS_wavfile_gyro, 3, 16, &Gyro_wav_stuffer, (uint16_t*) data);//Put the raw data into the wav file
+		}
 		//Other sensors etc can go here
 		//Button multipress status
 		if(System_state_Global&0x80) {		//A "control" button press
@@ -379,11 +414,8 @@ int main(void)
 			print_string[0]=0x00;		//Set string length to 0
 		}
 		//Deal with file size - may need to preallocate some more
-		if(f_size(&FATFS_logfile)-f_tell(&FATFS_logfile)<(PRE_SIZE/2)) {//More than half way through the pre-allocated area
-			DWORD size=f_tell(&FATFS_logfile);
-			f_lseek(&FATFS_logfile, f_size(&FATFS_logfile)+PRE_SIZE);//preallocate another PRE_SIZE
-			f_lseek(&FATFS_logfile, size);	//Seek back to where we were before
-		}
+		file_preallocation_control(&FATFS_logfile);
+		file_preallocation_control(&FATFS_wavfile_gyro);
                 if(Shutdown_System) {			//A system shutdown has been requested
 			if(file_opened)
 				shutdown_filesystem(Shutdown_System, file_opened);
@@ -434,3 +466,18 @@ uint8_t detect_sensors(void) {
 	sensors=Completed_Jobs;				//Which I2C jobs completed ok?
 	return sensors;
 }
+
+/**
+  * @brief  Ensures that we have significant preallocation on a file, useful to avoid significant delays on write
+  * @param  Pointer to the file
+  * @retval None
+  */
+void file_preallocation_control(FIL* file) {
+	if(f_size(file)-f_tell(file)<(PRE_SIZE/2)) {	//More than half way through the pre-allocated area
+		f_sync(file);				//Running a sync here minimizes risk of erranous data loss
+		DWORD size=f_tell(file);
+		f_lseek(file, f_size(file)+PRE_SIZE);	//Preallocate another PRE_SIZE
+		f_lseek(file, size);			//Seek back to where we were before
+	}
+}
+

@@ -70,7 +70,8 @@ enum{BUTTON_SOURCE=0,USB_SOURCE=1};
 void __fat_print_char(char c);
 void __str_print_char(char c);
 uint8_t detect_sensors(void);
+void file_preallocation_control(FIL* file);
 
 //fatfs globals
 extern volatile uint8_t file_opened;
-extern FIL FATFS_logfile;
+extern FIL FATFS_logfile,FATFS_wavfile_gyro;
