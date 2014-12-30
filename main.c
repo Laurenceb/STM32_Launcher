@@ -354,20 +354,21 @@ int main(void)
 			indtest=Millis-500;
 		}
 		//This processed and checks the actual launch command
-		if( UplinkFlags&(1<<(LAUNCH_PERMISSION)) ) 
+		if( UplinkFlags&(1<<(LAUNCH_PERMISSION)) ) {
 			permission_time=Millis+PERMISSION_DURATION;//The permission command allows a launch to proceed at any point in this time window
-		if( Millis>permission_time )		//Wipe the bit after a certain amount of time
-			UplinkFlags&=~(1<<LAUNCH_PERMISSION);
-		else					//Load the Flag bits during the permission time
+			UplinkFlags&=~(1<<LAUNCH_PERMISSION);//Wipe the bit immediatly
+		}
+		if( Millis<permission_time ) {//Load the Flag bits during the permission time
 			UplinkFlags|=(Ignition_Selftest&0x03)<<IGNITON_FLAG_BITS;//This should change from 0 to 1 following a launch, or 2 or 3 if autosequence fails
-		if( UplinkFlags&(1<<(LAUNCH_COMMAND)) && UplinkFlags&(1<<(LAUNCH_PERMISSION))) {//Need to send the command whilst the permission is valid
-			UplinkFlags&=~(1<<(LAUNCH_COMMAND));//Wipe the bit
-			if( ((Gps.mslaltitude/1000) > LAUNCH_ALTITUDE) && ((Millis-badgyro)>LAUNCH_STABLE_PERIOD ) && (Auto_volt>INDUCT_SENSE_LOW && Auto_volt<INDUCT_SENSE_HIGH)) {
-				countdown_time=Millis+COUNTDOWN_DELAY;
-				GOPRO_TRIG_ON;		//Turn the GoPro on the record the launch, it runs an autoexec.ash script
-				UplinkFlags^=(1<<(LAUNCH_RECEIVED));//Notification bit is toggled
-			} else				//Launch refused
-				UplinkFlags^=(1<<(LAUNCH_REFUSED));
+			if( UplinkFlags&(1<<(LAUNCH_COMMAND)) ) {//Need to send the command whilst the permission is valid
+				UplinkFlags&=~(1<<(LAUNCH_COMMAND));//Wipe the bit
+				if( ((Gps.mslaltitude/1000) > LAUNCH_ALTITUDE) && ((Millis-badgyro)>LAUNCH_STABLE_PERIOD ) && (Auto_volt>INDUCT_SENSE_LOW && Auto_volt<INDUCT_SENSE_HIGH)) {
+					countdown_time=Millis+COUNTDOWN_DELAY;
+					GOPRO_TRIG_ON;		//Turn the GoPro on the record the launch, it runs an autoexec.ash script
+					UplinkFlags^=(1<<(LAUNCH_RECEIVED));//Notification bit is toggled
+				} else				//Launch refused
+					UplinkFlags^=(1<<(LAUNCH_REFUSED));
+			}
 		}
 		if( countdown_time && Millis>countdown_time-COUNTDOWN_DELAY+GOPRO_TRIGGER_TIME )
 			GOPRO_TRIG_OFF;
