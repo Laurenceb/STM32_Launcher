@@ -354,10 +354,8 @@ int main(void)
 			indtest=Millis-500;
 		}
 		//This processed and checks the actual launch command
-		if( UplinkFlags&(1<<(LAUNCH_PERMISSION)) ) {
+		if( UplinkFlags&(1<<(LAUNCH_PERMISSION)) && !permission_time)
 			permission_time=Millis+PERMISSION_DURATION;//The permission command allows a launch to proceed at any point in this time window
-			UplinkFlags&=~(1<<LAUNCH_PERMISSION);//Wipe the bit immediatly
-		}
 		if( Millis<permission_time ) {//Load the Flag bits during the permission time
 			UplinkFlags|=(Ignition_Selftest&0x03)<<IGNITON_FLAG_BITS;//This should change from 0 to 1 following a launch, or 2 or 3 if autosequence fails
 			if( UplinkFlags&(1<<(LAUNCH_COMMAND)) ) {//Need to send the command whilst the permission is valid
@@ -369,6 +367,10 @@ int main(void)
 				} else				//Launch refused
 					UplinkFlags^=(1<<(LAUNCH_REFUSED));
 			}
+		}
+		else {
+			UplinkFlags&=~(1<<LAUNCH_PERMISSION);//Wipe the bit when time expires
+			permission_time=0;		//Reset this to zero
 		}
 		if( countdown_time && Millis>countdown_time-COUNTDOWN_DELAY+GOPRO_TRIGGER_TIME )
 			GOPRO_TRIG_OFF;
