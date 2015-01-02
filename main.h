@@ -34,14 +34,13 @@
 
 #define UPLINK_CALLSIGN "$$ROK"	/* This should be a 5 character callsign, first 4 characters are used for the hardware address filter */
 
-#define CUTDOWN_COMMAND 0
+#define CUTDOWN_COMMAND 0	/* Bit 0 (i.e. command 0) is used to request a cutdown */
 
-#define LAUNCH_COMMAND 7
-#define LAUNCH_PERMISSION 6
-#define LAUNCH_RECEIVED 5
-#define LAUNCH_REFUSED 4
-#define IGNITON_FLAG_BITS 2	/*bits 2 and 3 used for autolaunch feedback whilst permission is set*/
-#define UPLINK_TEST_BIT 1	/*Bit 1  toggles when there is an uplink*/
+#define LAUNCH_COMMAND 6
+#define LAUNCH_PERMISSION 7
+#define LAUNCH_REFUSED 2
+#define IGNITON_FLAG_BITS 3	/* Bits 3, 4, and 5 used for autolaunch feedback whilst permission is set*/
+#define UPLINK_TEST_BIT 1	/* Bit 1  toggles when there is an uplink*/
 
 #define MISSION_TIMEOUT 12600000UL /* 3.5 hours */
 

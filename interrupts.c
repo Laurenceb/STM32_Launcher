@@ -176,10 +176,14 @@ __attribute__((externally_visible)) void SysTick_Handler(void)
 		if(AutoSequence==(IGNITION_TEST/10)) {		//At this point we test the voltage and the rpm
 			Auto_spin=Spin_Rate_LPF;
 			Auto_volt=Ind_Voltage;
-			if(Spin_Rate_LPF<SPIN_RATE_LOW || Spin_Rate>SPIN_RATE_HIGH)
-				Ignition_Selftest=2;		//2==spin failure
-			else
-				Ignition_Selftest=(Ind_Voltage>INDUCT_SENSE_LOW && Ind_Voltage<INDUCT_SENSE_HIGH)?1:3;//3==induction failure,1==all ok
+			if(Gyro_XY_Rate>XY_RATE_LIMIT)
+				Ignition_Selftest=3;		//3==xy axis stability failure
+			else {
+				if(Spin_Rate_LPF<SPIN_RATE_LOW || Spin_Rate>SPIN_RATE_HIGH)
+					Ignition_Selftest=2;	//2==spin failure
+				else
+					Ignition_Selftest=(Ind_Voltage>INDUCT_SENSE_LOW && Ind_Voltage<INDUCT_SENSE_HIGH)?1:3;//3==induction failure,1==all ok
+			}
 			if(Ignition_Selftest!=1)
 				AutoSequence=(IGNITION_END/10);	//Start ramping down the throttle immediatly
 			else
