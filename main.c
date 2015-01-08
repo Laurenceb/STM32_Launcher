@@ -47,6 +47,7 @@ int main(void)
 	uint8_t system_state=0;				//used to track button press functionality
 	uint8_t sensors=0;
 	uint8_t repetition_counter=0;			//Used to detect any I2C lockup
+	uint8_t L3GD20_Data_Buffer_old[8];		//Used to test for noise in the gyro data (indicating that it is working)
 	float sensor_data;
 	uint8_t UplinkFlags=0,CutFlags=0;
 	uint16_t UplinkBytes=0;				//Counters and flags for telemetry
@@ -290,7 +291,6 @@ int main(void)
 	print_string[0]=0;				//Reset the print output
 	Millis=0;					//Reset system uptime, we have 50 days before overflow
 	while (1) {					//Main loop
-		Watchdog_Reset();			//Reset the watchdog each main loop iteration
 		__WFI();				//Wait for something to happen - saves power 
 		//Check for Silabs uplinked data, and process it
 		{
@@ -390,43 +390,27 @@ int main(void)
 		}
 		//Other sensors etc can go here
 		//Check for changed data
-		if(!I2C1error.error && repetition_counter<4) {
+		if(!I2C1error.error && repetition_counter<32) {
 			Watchdog_Reset();		//Reset the watchdog each main loop iteration if everything looks ok
-			if(memcmp(sfe_sensor_ref_buff,sfe_sensor_ref_buff_old,sizeof(sfe_sensor_ref_buff))) {//If data differs
-				//If the data differs, we may still have a problem with an individual sensor - so we need to check sensors individually
-				uint8_t jammed_sensor=0;
-					if( !memcmp(&fore_sensor_ref_buff[n][0],&fore_sensor_ref_buff_old[n][0],6) )
-						sensor_jam[n][0]++;
-					else
-						sensor_jam[n][0]=0;
-					if( sensor_jam[n][0] >= 32 )
-						jammed_sensor=1;	
-				if(!jammed_sensor)
-					repetition_counter=0;	//Some data differed for each sensor over the past 32 samples - should always occur by chance
-				else
-					repetition_counter++;	//We have a stuck sensor - Incriment the timeout
-			}
-			else
+			if(!memcmp(&L3GD20_Data_Buffer,&L3GD20_Data_Buffer_old,sizeof(L3GD20_Data_Buffer))) //If data differs
 				repetition_counter++;	//Incriment the lockup detector
-			memcpy(sfe_sensor_ref_buff_old,sfe_sensor_ref_buff,sizeof(sfe_sensor_ref_buff_old));//Copy sfe for reference
-			memcpy(fore_sensor_ref_buff_old,fore_sensor_ref_buff,sizeof(fore_sensor_ref_buff_old));//Copy forehead for reference
+			memcpy(&L3GD20_Data_Buffer_old,&L3GD20_Data_Buffer,sizeof(L3GD20_Data_Buffer_old));//Copy for reference
 		}
 		else {
+			uint8_t sensors;
 			do {
-				Sensors=0;		//Set this to zero to stop the systick firing off I2C1 writes
 				I2C1error.error=0;	//Reset both of these
 				repetition_counter=0;
 				I2C_Config();		//Setup the I2C bus
-				uint8_t sensors;
-				sensors=detect_sensors(1);//Search for connected sensors - argument means the i2c data output buffers are not reinitialised
+				sensors=detect_sensors();//Search for connected sensors - argument means the i2c data output buffers are not reinitialised
 				Delay(100000);
-				Sensors=sensors;
-				if(Sensors !=0xFF) {	//If it didn't work the first time - call the preallocator to force a file sync, saving all data
+				//If it didn't work the first time - call the preallocator to force a file sync, saving all data
+				if(sensors&((1<<L3GD20_CONFIG)|(1<<AFROESC_READ))!=((1<<L3GD20_CONFIG)|(1<<AFROESC_READ))) {	
 					f_sync(&FATFS_logfile);
 					f_sync(&FATFS_wavfile_gyro);
-				}
-			} while(Sensors !=0xFF);	//Loop forever if we dont find any sensors - watchdog will kill us in the end
-			Watchdog_Reset();
+				}			//Loop forever if we dont find correct sensors - watchdog will kill us in the end
+			} while(sensors&((1<<L3GD20_CONFIG)|(1<<AFROESC_READ))!=((1<<L3GD20_CONFIG)|(1<<AFROESC_READ)));	
+			Watchdog_Reset();		//Recovered ok, so reset
 		}
 		//Button multipress status
 		if(System_state_Global&0x80) {		//A "control" button press
