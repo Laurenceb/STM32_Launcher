@@ -277,10 +277,6 @@ void I2C_Config() {			//Configure I2C1 for the sensor bus
  	GPIO_SetBits(GPIOB,I2C1_SCL);//Set bus scl high
 	Delay(10);
  	GPIO_SetBits(GPIOB,I2C1_SDA);//Set bus sda high
-	//Initialise the buffers
-	init_buffer(&Gyro_x_buffer, 32);
-	init_buffer(&Gyro_y_buffer, 32);
-	init_buffer(&Gyro_z_buffer, 32);
 	//Configure the hardware as alt function
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_OD;
 	GPIO_Init( GPIOB, &GPIO_InitStructure );

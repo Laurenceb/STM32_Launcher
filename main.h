@@ -68,7 +68,7 @@ enum{BUTTON_SOURCE=0,USB_SOURCE=1};
 //function prototypes
 void __fat_print_char(char c);
 void __str_print_char(char c);
-uint8_t detect_sensors(void);
+uint8_t detect_sensors(uint8_t init);
 void file_preallocation_control(FIL* file);
 
 //fatfs globals

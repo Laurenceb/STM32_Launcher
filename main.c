@@ -198,7 +198,7 @@ int main(void)
 	Watchdog_Reset();				//Card Init can take a second or two
 	//Setup and test the I2C
 	I2C_Config();					//Setup the I2C bus
-	sensors=detect_sensors();
+	sensors=detect_sensors(0);
 	if(sensors&((1<<L3GD20_CONFIG)|(1<<AFROESC_READ))!=((1<<L3GD20_CONFIG)|(1<<AFROESC_READ))) {
 		f_puts("I2C sensor detect error\r\n",&FATFS_logfile);
 		f_close(&FATFS_logfile);		//So we log that something went wrong in the logfile
@@ -402,7 +402,7 @@ int main(void)
 				I2C1error.error=0;	//Reset both of these
 				repetition_counter=0;
 				I2C_Config();		//Setup the I2C bus
-				sensors=detect_sensors();//Search for connected sensors - argument means the i2c data output buffers are not reinitialised
+				sensors=detect_sensors(1);//Search for connected sensors - argument means the i2c data output buffers are not reinitialised
 				Delay(100000);
 				//If it didn't work the first time - call the preallocator to force a file sync, saving all data
 				if(sensors&((1<<L3GD20_CONFIG)|(1<<AFROESC_READ))!=((1<<L3GD20_CONFIG)|(1<<AFROESC_READ))) {	
@@ -483,7 +483,7 @@ void __str_print_char(char c) {
   * @param  None
   * @retval Bitmask of detected sensors
   */
-uint8_t detect_sensors(void) {
+uint8_t detect_sensors(uint8_t init) {
         uint32_t millis = Millis;
 	uint8_t sensors=0;
 	SCHEDULE_CONFIG;				//Run the I2C devices config
@@ -492,6 +492,12 @@ uint8_t detect_sensors(void) {
 	    return 0;
 	}
 	sensors=Completed_Jobs;				//Which I2C jobs completed ok?
+	//Initialise the buffers if all is ok and we are allowed to
+	if(!init && sensors&((1<<L3GD20_CONFIG)|(1<<AFROESC_READ))!=((1<<L3GD20_CONFIG)|(1<<AFROESC_READ))) {
+		init_buffer(&Gyro_x_buffer, 32);
+		init_buffer(&Gyro_y_buffer, 32);
+		init_buffer(&Gyro_z_buffer, 32);
+	}
 	return sensors;
 }
 
