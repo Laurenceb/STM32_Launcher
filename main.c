@@ -208,7 +208,7 @@ int main(void)
 	//Wait for packet to send (could be caught by watchdog if failure)
 	while(Silabs_driver_state);
 	if(f_err_code) {				//There was an init error
-		shutdown();				//Abort after a single red flash ------------------ABORT 1
+		shutdown();				//Abort, but only after sending over the radio, so we are still trackable
 	}
 	//Setup and test the I2C
 	I2C_Config();					//Setup the I2C bus
