@@ -192,21 +192,7 @@ int main(void)
 		}
 	}
 	f_err_code|=write_wave_header(&FATFS_wavfile_gyro, 3, 100, 16);
-	if(f_err_code) {				//There was an init error
-		shutdown();				//Abort after a single red flash ------------------ABORT 1
-	}
 	Watchdog_Reset();				//Card Init can take a second or two
-	//Setup and test the I2C
-	I2C_Config();					//Setup the I2C bus
-	sensors=detect_sensors(0);
-	if(sensors&((1<<L3GD20_CONFIG)|(1<<AFROESC_READ))!=((1<<L3GD20_CONFIG)|(1<<AFROESC_READ))) {
-		f_puts("I2C sensor detect error\r\n",&FATFS_logfile);
-		f_close(&FATFS_logfile);		//So we log that something went wrong in the logfile
-		shutdown();
-	}
-	//Setup the Timer for PWM
-	Init_Timer();
-	PWM_Set(IND_DUTY);
 	//Setup and test the silabs radio
 	uint8_t silab=si446x_setup();
 	if(silab!=0x44) {				//Should return the device code
@@ -219,6 +205,22 @@ int main(void)
 	}						//Otherwise silabs is now initialised, and can be used via its buffers
 	printf("Hello from rockoon project\n");		//Test the silabs RTTY
 	send_string_to_silabs(print_string);		//Send the string
+	//Wait for packet to send (could be caught by watchdog if failure)
+	while(Silabs_driver_state);
+	if(f_err_code) {				//There was an init error
+		shutdown();				//Abort after a single red flash ------------------ABORT 1
+	}
+	//Setup and test the I2C
+	I2C_Config();					//Setup the I2C bus
+	sensors=detect_sensors(0);
+	if(sensors&((1<<L3GD20_CONFIG)|(1<<AFROESC_READ))!=((1<<L3GD20_CONFIG)|(1<<AFROESC_READ))) {
+		f_puts("I2C sensor detect error\r\n",&FATFS_logfile);
+		f_close(&FATFS_logfile);		//So we log that something went wrong in the logfile
+		shutdown();
+	}
+	//Setup the Timer for PWM
+	Init_Timer();
+	PWM_Set(IND_DUTY);
 	rtc_gettime(&RTC_time);				//Get the RTC time and put a timestamp on the start of the file
 	print_string[0]=0x00;				//Set string length to 0
 	printf("%02d-%02d-%02dT%02d:%02d:%02d\n",RTC_time.year,RTC_time.month,RTC_time.mday,RTC_time.hour,RTC_time.min,RTC_time.sec);//ISO 8601 timestamp header
