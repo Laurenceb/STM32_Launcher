@@ -61,7 +61,10 @@ int main(void)
 	SystemInit();					//Sets up the clk
 	setup_gpio();					//Initialised pins, and detects boot source
 	DBGMCU_Config(DBGMCU_IWDG_STOP, ENABLE);	//Watchdog stopped during JTAG halt
-	if(RCC->CSR&RCC_CSR_IWDGRSTF) {			//Watchdog reset, turn off
+	PWR_BackupAccessCmd(ENABLE);/* Allow access to BKP Domain */
+	uint16_t shutdown_lock=BKP_ReadBackupRegister(BKP_DR1);	//Holds the shutdown lock setting
+	PWR_BackupAccessCmd(DISABLE);
+	if(RCC->CSR&RCC_CSR_IWDGRSTF && shutdown_lock!=SHUTDOWNLOCK_MAGIC) {//Watchdog reset, turn off
 		RCC->CSR|=RCC_CSR_RMVF;			//Reset the reset flags
 		shutdown();
 	}
@@ -86,8 +89,20 @@ int main(void)
 			nojack--;
 			Watchdog_Reset();		//Reset watchdog here, if we are stalled here the Millis timeout should catch us
 		}
+		PWR_BackupAccessCmd(ENABLE);		/* Allow access to BKP Domain */
+		BKP_WriteBackupRegister(BKP_DR1,0x0000);//Wipe the shutdown lock setting
+		PWR_BackupAccessCmd(DISABLE);
+		while(1) {
+			if(!(Millis%1000) && bDeviceState == SUSPENDED) {
+				Delay(100);
+				if(!GET_VBUS_STATE)
+					shutdown();
+				Watchdog_Reset();
+				__WFI();		//Sleep mode
+			}
+		}
 	}
-        if(!GET_PWR_STATE &&  !(CoreDebug->DHCSR&0x00000001)) {//Check here to make sure the power button is still pressed, if not, sleep if no debug
+        if(!GET_PWR_STATE && !(CoreDebug->DHCSR&0x00000001) && shutdown_lock!=SHUTDOWNLOCK_MAGIC) {//Check here to make sure the power button is still pressed, if not, sleep if no debug and not in always on flight mode
                 shutdown();                             //This means a glitch on the supply line, or a power glitch results in sleep
         }
 	// check to see if battery has enough charge to start
@@ -120,7 +135,6 @@ int main(void)
 			UINT br;
 			int8_t rtc_correction;
 			f_read(&FATFS_logfile, (void*)(&rtc_correction),sizeof(rtc_correction),&br);
-			f_close(&FATFS_logfile);	//Close the settings.dat file
 			//Use the setting to apply correction to the RTC
                         if(br && (rtc_correction<30) && (rtc_correction>-92) && rtc_correction ) {
                                 PWR_BackupAccessCmd(ENABLE);/* Allow access to BKP Domain */
@@ -140,6 +154,15 @@ int main(void)
                                 BKP_RTCOutputConfig(BKP_RTCOutputSource_CalibClock);/* Output a 512Hz reference clock on the TAMPER pin*/
                                 PWR_BackupAccessCmd(DISABLE);
                         }
+			if(br) {
+				f_read(&FATFS_logfile, (void*)(&shutdown_lock),sizeof(shutdown_lock),&br);/*This needs to be set with the same magic flag value*/
+				if(br==2) {
+                                	PWR_BackupAccessCmd(ENABLE);/* Allow access to BKP Domain */
+					BKP_WriteBackupRegister(BKP_DR1,shutdown_lock);//Wipe the shutdown lock setting
+                               		PWR_BackupAccessCmd(DISABLE);
+				}
+			}
+			f_close(&FATFS_logfile);	//Close the settings.dat file
 		}
 #ifndef SINGLE_LOGFILE
 		rtc_gettime(&RTC_time);			//Get the RTC time and put a timestamp on the start of the file
