@@ -12,9 +12,12 @@
 #define __INTERRUPTS_H
 
 #include "stm32f10x.h"
+#include "usb_istr.h"
+#include "usb_int.h"
 #include "i2c_int.h"
 #include "main.h"
 #include "adc.h"
+#include "pwr.h"
 
 //Externals
 extern volatile uint8_t Button_hold_tim,Low_Battery_Warning,System_state_Global,Shutdown_System;//Timer for On/Off/Control button functionality, battery warning, button function

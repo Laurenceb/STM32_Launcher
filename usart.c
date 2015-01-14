@@ -171,7 +171,7 @@ __attribute__((externally_visible)) void USART1_IRQHandler(void) {
     //Clear pending bit and read the data.
     USART_ClearITPendingBit(USART1, USART_IT_RXNE);
   }
-  Add_To_Buffer(&Usart1_rx_buff, (uint8_t)(USART_ReceiveData(USART1)&0x00FF));
+  Add_To_Buffer( (uint8_t)(USART_ReceiveData(USART1)&0x00FF), &Usart1_rx_buff );
 }
 
 //Private functions

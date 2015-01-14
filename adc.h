@@ -2,6 +2,7 @@
 
 void ADC_Configuration(void);
 uint16_t readADC1(uint8_t channel);
+void ReadADC1_noblock(uint8_t channel);
 
 #define BAT_FUDGE_FACTOR 1.0	/*The potential divider will not be 100% correct - need to calibrate for each pcb*/
 //Battery voltage divider is on pin1 on rockoon lancher board - also note config in gpio.h

@@ -12,6 +12,7 @@
 #include "polygon.h"
 #include "crc.h"
 #include "wave.h"
+#include "buffer.h"
 #include "si446x.h"
 #include "Ublox/ubx.h"
 #include "Util/rprintf.h"
@@ -48,7 +49,6 @@ int main(void)
 	uint8_t sensors=0;
 	uint8_t repetition_counter=0;			//Used to detect any I2C lockup
 	uint8_t L3GD20_Data_Buffer_old[8];		//Used to test for noise in the gyro data (indicating that it is working)
-	float sensor_data;
 	uint8_t UplinkFlags=0,CutFlags=0;
 	uint16_t UplinkBytes=0;				//Counters and flags for telemetry
 	uint32_t last_telemetry=0,cutofftime=0,indtest=0,badgyro=0,permission_time=0,countdown_time=0;
@@ -295,7 +295,7 @@ int main(void)
 		} while(stat && n<=10);
 		if(stat || n>1)
 			UplinkBytes+=n;			//Stores the amount of uplinked data
-		if(stat && strlen(str)==6 && !strncmp(str,&Silabs_Header,4)) {
+		if(stat && strlen(str)==6 && !strncmp(str,Silabs_Header,4)) {
 			print_string[0]=0;
 			printf("Rockoon project: received: %s\n",str);//Test the silabs RTTY - echo function
 			send_string_to_silabs(print_string);//Send the string
@@ -328,7 +328,7 @@ int main(void)
 		} while(stat && n<=10);
 		if(stat || n>1)
 			UplinkBytes+=n;			//Stores the amount of uplinked data
-		if(stat && strlen(str)==6 && !strncmp(str,&Silabs_Header,4)) {//We recived something, here we process the data that was received, as long as it is '$$RO**'
+		if(stat && strlen(str)==6 && !strncmp(str,Silabs_Header,4)) {//We recived something, here we process the data that was received, as long as it is '$$RO**'
 			if(str[4]==Silabs_Header[4] && str[5]>47 && str[5]<56 ) {//Need to send e.g. "$$ROKx" where x is 0 to 7
 				if(str[5]-48!=UPLINK_TEST_BIT)
 					UplinkFlags|=1<<(str[5]-48);//Set the correct flag bit
@@ -422,19 +422,20 @@ int main(void)
 			memcpy(&L3GD20_Data_Buffer_old,&L3GD20_Data_Buffer,sizeof(L3GD20_Data_Buffer_old));//Copy for reference
 		}
 		else {
-			uint8_t sensors;
+			uint8_t sensors_;
 			do {
 				I2C1error.error=0;	//Reset both of these
 				repetition_counter=0;
 				I2C_Config();		//Setup the I2C bus
-				sensors=detect_sensors(1);//Search for connected sensors - argument means the i2c data output buffers are not reinitialised
+				sensors_=detect_sensors(1);//Search for connected sensors -argument means the i2c data output buffers are not reinitialised
 				Delay(100000);
 				//If it didn't work the first time - call the preallocator to force a file sync, saving all data
-				if(sensors&((1<<L3GD20_CONFIG)|(1<<AFROESC_READ))!=((1<<L3GD20_CONFIG)|(1<<AFROESC_READ))) {	
+				if(sensors_&((1<<L3GD20_CONFIG)|(1<<AFROESC_READ))!=((1<<L3GD20_CONFIG)|(1<<AFROESC_READ))) {	
 					f_sync(&FATFS_logfile);
 					f_sync(&FATFS_wavfile_gyro);
 				}			//Loop forever if we dont find correct sensors - watchdog will kill us in the end
-			} while(sensors&((1<<L3GD20_CONFIG)|(1<<AFROESC_READ))!=((1<<L3GD20_CONFIG)|(1<<AFROESC_READ)));	
+			} while(sensors_&((1<<L3GD20_CONFIG)|(1<<AFROESC_READ))!=((1<<L3GD20_CONFIG)|(1<<AFROESC_READ)));
+			sensors=sensors_;	
 			Watchdog_Reset();		//Recovered ok, so reset
 		}
 		//Button multipress status
@@ -453,12 +454,12 @@ int main(void)
 			uint16_t checksum=string_CRC16_checksum (print_string);//Generate the checksum
 			printf("*%04x\n",checksum);
 			send_string_to_silabs(print_string);//Output the string via the silabs
-			uint8_t endhead=strchr(print_string,',');//Find end of the header
-			uint8_t endstring=strchr(print_string,'*');//Find end of formatted string
-			print_string[endstring]=0;	//End here also
+			uint8_t* endhead=strchr(print_string,',');//Find end of the header
+			uint8_t* endstring=strchr(print_string,'*');//Find end of formatted string
+			*endstring=0;	//End here also
 			print_string[0]=0;
 			printf("%d",Millis/1000);	
-			memcpy(&print_string[strlen(print_string)],&print_string[endhead],endstring-endhead+1);//Compress the contents backwards
+			memcpy(&print_string[strlen(print_string)],endhead,endstring-endhead+1);//Compress the contents backwards
 			printf(",%d\n",system_state);	//Adds the state and newline to the end of the string
 		}
 		system_state=0;				//Reset this

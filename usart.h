@@ -4,6 +4,7 @@
 #include "stm32f10x.h"
 #include <stdio.h>
 #include "buffer.h"
+#include "dma.h"
 #include "ubx.h"
 
 extern volatile buff_type Usart1_rx_buff;
@@ -51,4 +52,7 @@ void Usart_Send_Str(char* str);
 
 //Private functions
 void __usart_send_char(char data);
+void Gps_Send_Str(char* str);
+void Gps_Send_Utf8(char* str);
+void __gps_send_char(char data);
 

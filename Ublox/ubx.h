@@ -2,6 +2,7 @@
 #pragma once
 
 #include "stm32f10x.h"
+#include "../usart.h"
 #ifdef USE_LIBC_PRINTF
 	#include <stdio.h>
 #endif

@@ -21,7 +21,7 @@
 extern volatile uint8_t Channel_rx,Channel_tx,Silabs_spi_state,Silabs_driver_state;
 
 uint8_t send_string_to_silabs(uint8_t* str);
-uint8_t add_to_silabs_buffer(uint8_t data);
+void add_to_silabs_buffer(uint8_t data);
 uint8_t get_from_silabs_buffer(uint8_t* status);
 uint8_t silabs_cts_jammed(void);
 extern const uint8_t Silabs_Header[5];

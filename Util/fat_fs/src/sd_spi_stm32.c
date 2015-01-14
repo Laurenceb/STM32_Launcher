@@ -64,21 +64,21 @@
  #define GPIO_Mode_PWR            GPIO_Mode_Out_OD /* pull-up resistor at power FET */
  #define SOCKET_WP_CONNECTED      0		/*These are defined as 0 as they arent supported on CRT 1.0 pcb*/
  #define SOCKET_CP_CONNECTED      0
- #define SPI_SD                   SPI1
+ #define SPI_SD                   SPI2
  #define GPIO_CS                  GPIOB
  #define RCC_APB2Periph_GPIO_CS   RCC_APB2Periph_GPIOB
  #define GPIO_Pin_CS              GPIO_Pin_8
- #define DMA_Channel_SPI_SD_RX    DMA1_Channel2
- #define DMA_Channel_SPI_SD_TX    DMA1_Channel3
- #define DMA_FLAG_SPI_SD_TC_RX    DMA1_FLAG_TC2
- #define DMA_FLAG_SPI_SD_TC_TX    DMA1_FLAG_TC3
- #define GPIO_SPI_SD              GPIOA
- #define GPIO_Pin_SPI_SD_SCK      GPIO_Pin_5
- #define GPIO_Pin_SPI_SD_MISO     GPIO_Pin_6
- #define GPIO_Pin_SPI_SD_MOSI     GPIO_Pin_7
- #define RCC_APBPeriphClockCmd_SPI_SD  RCC_APB2PeriphClockCmd
- #define RCC_APBPeriph_SPI_SD     RCC_APB2Periph_SPI1
- /* - for SPI1 and half-speed APB2 with 24mhz operation: 24MHz/(4)=6mhz */
+ #define DMA_Channel_SPI_SD_RX    DMA1_Channel4
+ #define DMA_Channel_SPI_SD_TX    DMA1_Channel5
+ #define DMA_FLAG_SPI_SD_TC_RX    DMA1_FLAG_TC4
+ #define DMA_FLAG_SPI_SD_TC_TX    DMA1_FLAG_TC5
+ #define GPIO_SPI_SD              GPIOB
+ #define GPIO_Pin_SPI_SD_SCK      GPIO_Pin_13
+ #define GPIO_Pin_SPI_SD_MISO     GPIO_Pin_14
+ #define GPIO_Pin_SPI_SD_MOSI     GPIO_Pin_15
+ #define RCC_APBPeriphClockCmd_SPI_SD  RCC_APB1PeriphClockCmd
+ #define RCC_APBPeriph_SPI_SD     RCC_APB1Periph_SPI2
+ /* - for SPI2 and 1/8 speed APB1 with 24mhz operation: 3MHz/(2)=1.5mhz */
  #define SPI_BaudRatePrescaler_SPI_SD  SPI_BaudRatePrescaler_2/*Note that the ST perif lib defines prescale as F_APB/S_SPI*/
 
 #elif defined(USE_STM32_P103)
@@ -175,6 +175,7 @@
 /*--------------------------------------------------------------------------
 
    Module Private Functions and Variables
+
 
 
 ---------------------------------------------------------------------------*/
