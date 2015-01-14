@@ -49,12 +49,14 @@ COMPILE_OPTS = $(WARNINGS) $(TARGET_OPTS) $(MESSAGES) $(INCLUDE_DIRS) $(DEFINES)
 WARNINGS = -Wall -W -Wshadow -Wcast-qual -Wwrite-strings -Winline
 
 ifdef DEBUG
- TARGET_OPTS = -O3 -g3
  DEBUG_MACRO = -DDEBUG
-else	#Changed from O2 - optimisation split between control loop and rest of project, using a seperate makefile
+endif	#Changed from O2 - optimisation split between control loop and rest of project, using a seperate makefile
  TARGET_OPTS = $(OPTIMISE) -flto -finline -finline-functions-called-once -fuse-linker-plugin\
   -funroll-loops -fno-common -fno-rtti -fno-exceptions -ffunction-sections -fdata-sections
+ifdef DEBUG
+ TARGET_OPTS += -g3
 endif
+
 
 CC = arm-none-eabi-gcc
 CXX = arm-none-eabi-g++
@@ -100,7 +102,11 @@ MAIN_OBJS = $(sort \
  $(STARTUP_OBJ))
 
 #optimisation
+ifndef DEBUG
 $(MAIN_OBJS): OPTIMISE= -Os
+else
+$(MAIN_OBJS): OPTIMISE= -O2
+endif
 
 #all - output the size from the elf
 .PHONY: all

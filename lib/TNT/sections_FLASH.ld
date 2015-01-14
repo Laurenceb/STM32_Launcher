@@ -131,8 +131,8 @@ SECTIONS
     } >RAM
     
     PROVIDE ( end = _ebss );
-    PROVIDE ( _end = _ebss );   
-
+    PROVIDE ( _end = _ebss );
+    
     /* This is the user stack section 
     This is just to check that there is enough RAM left for the User mode stack
     It should generate an error if it's full.
