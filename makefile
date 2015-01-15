@@ -107,7 +107,7 @@ MAIN_OBJS = $(sort \
 ifndef DEBUG
 $(MAIN_OBJS): OPTIMISE= -Os
 else
-$(MAIN_OBJS): OPTIMISE= -O2
+$(MAIN_OBJS): OPTIMISE= -Og
 endif
 
 #all - output the size from the elf

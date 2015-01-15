@@ -573,7 +573,7 @@ void si446x_spi_state_machine( uint8_t *state_, uint8_t tx_bytes, uint8_t *tx_da
 				/* DMA1 channel5 configuration SPI2 TX ---------------------------------------------*/
 				DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)tx_data_local;
 				DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralDST;
-				DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Disable;
+				DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
 				DMA_Init(DMA1_Channel3, &DMA_InitStructure);
 				/* Enable the DMA complete callback interrupt here */
 				DMA_ClearFlag(DMA1_FLAG_TC3|DMA1_FLAG_HT3);  /* Make sure flags are clear */
@@ -588,7 +588,7 @@ void si446x_spi_state_machine( uint8_t *state_, uint8_t tx_bytes, uint8_t *tx_da
 				/* DMA1 channel4 configuration SPI2 RX ---------------------------------------------*/
 				DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)rx_data_local;
 				DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
-				DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Disable;
+				DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
 				DMA_Init(DMA1_Channel2, &DMA_InitStructure);
 				/* Enable the DMA complete callback interrupt here */
 				DMA_ClearFlag(DMA1_FLAG_TC2|DMA1_FLAG_HT2);  /* Make sure flags are clear */
