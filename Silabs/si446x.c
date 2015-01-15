@@ -166,10 +166,10 @@ uint8_t si446x_setup(void) {
 	NVIC_InitStructure.NVIC_IRQChannel = USART3_IRQn;//Tx  triggered interrupt
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x03;	//Third highest group - above the DMA
 	NVIC_Init(&NVIC_InitStructure);
-	NVIC_InitStructure.NVIC_IRQChannel = DMA1_Channel4_IRQn;//The DMA complete/half complete triggered interrupt	
+	NVIC_InitStructure.NVIC_IRQChannel = DMA1_Channel2_IRQn;//The DMA complete/half complete triggered interrupt	
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x04;	//4th subpriority
 	NVIC_Init(&NVIC_InitStructure);
-	NVIC_InitStructure.NVIC_IRQChannel = DMA1_Channel5_IRQn;//The DMA complete/half complete triggered interrupt	
+	NVIC_InitStructure.NVIC_IRQChannel = DMA1_Channel3_IRQn;//The DMA complete/half complete triggered interrupt	
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x05;	//5th subpriority
 	NVIC_Init(&NVIC_InitStructure);
 
@@ -580,6 +580,8 @@ void si446x_spi_state_machine( uint8_t *state_, uint8_t tx_bytes, uint8_t *tx_da
 				DMA_ITConfig(DMA1_Channel3, DMA_IT_TC, ENABLE);/* Interrupt on complete */
 				/* Enable DMA TX Channel */
 				DMA_Cmd(DMA1_Channel3, ENABLE);
+				/* Enable SPI TX/RX request */
+				SPI_I2S_DMACmd(SPI1, SPI_I2S_DMAReq_Tx, ENABLE);
 			}
 			else {
 				SPI1->DR=*tx_data_local;/* Directly write the command byte */
@@ -593,32 +595,40 @@ void si446x_spi_state_machine( uint8_t *state_, uint8_t tx_bytes, uint8_t *tx_da
 				DMA_ITConfig(DMA1_Channel2, DMA_IT_TC, ENABLE);/* Interrupt on complete */
 				/* Enable DMA RX Channel */
 				DMA_Cmd(DMA1_Channel2, ENABLE);
+				/* Enable SPI TX/RX request */
+				SPI_I2S_DMACmd(SPI1, SPI_I2S_DMAReq_Rx, ENABLE);
 			}
 			break;
-		case 1: /* We get here because the DMA transfer completed, portb, pin 11 */
+		case 1: /* We get here because the DMA transfer completed*/
+			*state_=2;/* Incriment the state */
+		case 2: /* portb, pin 11 must be high*/
 			if(tx_bytes_local) {/* Normal command/response comms */
 				DMA_Cmd(DMA1_Channel3, DISABLE);
+				/* Disable SPI TX/RX request */
+				SPI_I2S_DMACmd(SPI1, SPI_I2S_DMAReq_Tx, DISABLE);
 				DMA_ITConfig(DMA1_Channel3, DMA_IT_TC, DISABLE);
 				SPI_Cmd(SPI1, DISABLE);/* This clears NSS */
 				SPI_Cmd(SPI1, ENABLE);
 				CTS_Low=Millis;
 				if( GPIO_ReadInputDataBit( GPIOB, GPIO_Pin_11 ) )
-					*state_=2;
+					*state_=3;
 				/* Otherwise we await an interrupt to move us on to the next stage */
 				else
 					break;
 			}
 			else { 			/* Fast response mode, this is the final state */
+				/* Disable SPI TX/RX request */
+				SPI_I2S_DMACmd(SPI1, SPI_I2S_DMAReq_Rx, DISABLE);
 				DMA_Cmd(DMA1_Channel2, DISABLE);
 				DMA_ITConfig(DMA1_Channel2, DMA_IT_TC, DISABLE);
 				SPI_Cmd(SPI1, DISABLE);/* This clears NSS */
 				SPI_Cmd(SPI1, ENABLE);
 				*state_=0;	/* Back to the default state */
 			}
-		case 2: /* CTS cleared, time to read the data if there is any to read */
+		case 3: /* CTS cleared, time to read the data if there is any to read */
 			CTS_Low=0;
 			if( rx_bytes_local ) {
-				*state_=3;
+				*state_=4;
 				SPI1->DR = 0x44;/* Cases 0x44 to be transmitted to get command response back */
 				/* DMA1 channel4 configuration SPI2 RX ---------------------------------------------*/
 				DMA_InitStructure.DMA_MemoryBaseAddr = rx_data_local;
@@ -631,9 +641,13 @@ void si446x_spi_state_machine( uint8_t *state_, uint8_t tx_bytes, uint8_t *tx_da
 				DMA_ITConfig(DMA1_Channel2, DMA_IT_TC, ENABLE);/* Interrupt on complete */
 				/* Enable DMA RX Channel */
 				DMA_Cmd(DMA1_Channel2, ENABLE);
+				/* Enable SPI TX/RX request */
+				SPI_I2S_DMACmd(SPI1, SPI_I2S_DMAReq_Rx, ENABLE);
 				break;
 			}
-		case 3:
+		case 4:
+			/* Disable SPI TX/RX request */
+			SPI_I2S_DMACmd(SPI1, SPI_I2S_DMAReq_Rx, DISABLE);
 			DMA_Cmd(DMA1_Channel2, DISABLE);
 			DMA_ITConfig(DMA1_Channel2, DMA_IT_TC, DISABLE);
 			SPI_Cmd(SPI1, DISABLE);/* This clears NSS */
@@ -643,6 +657,7 @@ void si446x_spi_state_machine( uint8_t *state_, uint8_t tx_bytes, uint8_t *tx_da
 				(*callback_local)( &Silabs_driver_state, 0);/* The callback function with argument zero to show SPI callback */
 			break;
 		default:
+			SPI_I2S_DMACmd(SPI1, SPI_I2S_DMAReq_Rx|SPI_I2S_DMAReq_Tx, DISABLE);
 			DMA_Cmd(DMA1_Channel2, DISABLE);
 			DMA_Cmd(DMA1_Channel3, DISABLE);
 			*state_=0;	/* Should not happen */
@@ -684,7 +699,7 @@ __attribute__((externally_visible)) void EXTI15_10_IRQHandler(void) {
 	if(EXTI_GetITStatus(EXTI_Line11) != RESET) {/* Port B pin 11 is the CTS */
 		/* Clear the  EXTI line 11 pending bit */
 		EXTI_ClearITPendingBit(EXTI_Line11);
-		if( Silabs_spi_state==1 ) /* If we are waiting for the ISR */
+		if( Silabs_spi_state==2 ) /* If we are waiting for the ISR */
 			si446x_spi_state_machine( &Silabs_spi_state, 0, NULL, 0, NULL, NULL );
 	}
 }

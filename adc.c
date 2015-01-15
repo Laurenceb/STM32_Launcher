@@ -57,6 +57,7 @@ void ADC_Configuration(void)
 
   /* Now do the setup */
   ADC_Init(ADC1, &ADC_InitStructure);
+
   /* Enable ADC1 */
   ADC_Cmd(ADC1, ENABLE);
 
@@ -68,6 +69,19 @@ void ADC_Configuration(void)
   ADC_StartCalibration(ADC1);
   /* Check the end of ADC1 calibration */
   while(ADC_GetCalibrationStatus(ADC1));
+
+  /* Enable ADC2 */
+  ADC_Cmd(ADC2, ENABLE);
+
+  /* Enable ADC2 reset calibaration register */
+  ADC_ResetCalibration(ADC2);
+  /* Check the end of ADC2 reset calibration register */
+  while(ADC_GetResetCalibrationStatus(ADC2));
+  /* Start ADC2 calibaration */
+  ADC_StartCalibration(ADC2);
+  /* Check the end of ADC2 calibration */
+  while(ADC_GetCalibrationStatus(ADC2));
+
 }
 
 

@@ -110,6 +110,7 @@ int main(void)
 	Delay(100000);					//Sensor+inst amplifier takes about 100ms to stabilise after power on
 	if(Battery_Voltage<BATTERY_STARTUP_LIMIT)	//We will have to turn off
 		shutdown();
+	Watchdog_Reset();			//Card Init can take a second or two
 	// system has passed battery level check and so file can be opened
 	if((f_err_code = f_mount(0, &FATFS_Obj)))Usart_Send_Str((char*)"FatFs mount error\r\n");//This should only error if internal error
 	else {						//FATFS initialised ok, try init the card, this also sets up the SPI1
@@ -131,6 +132,7 @@ int main(void)
 			f_close(&FATFS_logfile);	//Close the time.txt file
 		}
 		// load settings if file exists
+		Watchdog_Reset();			//Card Init can take a second or two
 		if(!f_open(&FATFS_logfile,"settings.dat",FA_OPEN_EXISTING | FA_READ)) {
 			UINT br;
 			int8_t rtc_correction;
@@ -170,12 +172,14 @@ int main(void)
 		printf("%02d-%02d-%02dT%02d-%02d-%02d-%s.csv",RTC_time.year,RTC_time.month,RTC_time.mday,RTC_time.hour,RTC_time.min,RTC_time.sec,"Log");//Timestamp name
 		rprintfInit(__usart_send_char);		//Printf over the bluetooth
 #endif
+		Watchdog_Reset();			//Card Init can take a second or two
 		if((f_err_code=f_open(&FATFS_logfile,LOGFILE_NAME,FA_CREATE_ALWAYS | FA_WRITE))) {//Present
 			printf("FatFs drive error %d\r\n",f_err_code);
 			if(f_err_code==FR_DISK_ERR || f_err_code==FR_NOT_READY)
 				Usart_Send_Str((char*)"No uSD card inserted?\r\n");
 		}
 		else {
+			Watchdog_Reset();		//Card Init can take a second or two
 			print_string[strlen(print_string)-4]=0x00;//Wipe the .csv off the string
 			strcat(print_string,"_gyro.wav");
 			if((f_err_code=f_open(&FATFS_wavfile_gyro,LOGFILE_NAME,FA_CREATE_ALWAYS | FA_WRITE))) {//Present
@@ -198,6 +202,7 @@ int main(void)
 				else
 					file_opened=1;		//So we know to close the file properly on shutdown
 				if(file_opened==1) {
+					Watchdog_Reset();	//Card Init can take a second or two
 					if (f_err_code || f_tell(&FATFS_wavfile_gyro) != PRE_SIZE)// Check if the file size has been increased correctly
 						Usart_Send_Str((char*)"Pre-Allocation error\r\n");
 					else {

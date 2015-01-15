@@ -73,6 +73,8 @@ LDFLAGS = -Wl,--gc-sections,-Map=$(MAIN_MAP),-cref -T lib/TNT/TNT.ld -L lib\
  $(INCLUDE_DIRS) $(LIBRARY_DIRS) $(LIBM) -ffunction-sections -lnosys #-lstdc++
 ifndef DEBUG
 LDFLAGS += -flto -fuse-linker-plugin -Os
+else
+LDFLAGS += -g3
 endif
 
 AR = arm-none-eabi-ar

@@ -78,7 +78,7 @@
  #define GPIO_Pin_SPI_SD_MOSI     GPIO_Pin_15
  #define RCC_APBPeriphClockCmd_SPI_SD  RCC_APB1PeriphClockCmd
  #define RCC_APBPeriph_SPI_SD     RCC_APB1Periph_SPI2
- /* - for SPI2 and 1/8 speed APB1 with 24mhz operation: 3MHz/(2)=1.5mhz */
+ /* - for SPI2 and 1/8 speed APB1 with 24mhz operation: 3MHz/(1)=3mhz */
  #define SPI_BaudRatePrescaler_SPI_SD  SPI_BaudRatePrescaler_2/*Note that the ST perif lib defines prescale as F_APB/S_SPI*/
 
 #elif defined(USE_STM32_P103)
