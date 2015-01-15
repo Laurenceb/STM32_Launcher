@@ -18,6 +18,9 @@
 #define SDN_LOW  GPIO_WriteBit(GPIOB,GPIO_Pin_9,Bit_RESET)
 #define SDN_HIGH GPIO_WriteBit(GPIOB,GPIO_Pin_9,Bit_SET)
 
+#define NSEL_LOW  GPIO_WriteBit(GPIOA,GPIO_Pin_4,Bit_RESET)
+#define NSEL_HIGH GPIO_WriteBit(GPIOA,GPIO_Pin_4,Bit_SET)
+
 extern volatile uint8_t Channel_rx,Channel_tx,Silabs_spi_state,Silabs_driver_state;
 
 uint8_t send_string_to_silabs(uint8_t* str);

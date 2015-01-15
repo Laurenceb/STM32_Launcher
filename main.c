@@ -241,7 +241,7 @@ int main(void)
 	//Setup and test the I2C
 	I2C_Config();					//Setup the I2C bus
 	sensors=detect_sensors(0);
-	if(sensors&((1<<L3GD20_CONFIG)|(1<<AFROESC_READ))!=((1<<L3GD20_CONFIG)|(1<<AFROESC_READ))) {
+	if((sensors&((1<<L3GD20_CONFIG)|(1<<AFROESC_READ)))!=((1<<L3GD20_CONFIG)|(1<<AFROESC_READ))) {
 		f_puts("I2C sensor detect error\r\n",&FATFS_logfile);
 		f_close(&FATFS_logfile);		//So we log that something went wrong in the logfile
 		shutdown();

@@ -83,8 +83,15 @@ uint8_t si446x_setup(void) {
 	GPIO_InitStructure.GPIO_Mode    = GPIO_Mode_Out_PP;
 	GPIO_Init(GPIOB, &GPIO_InitStructure);
 
+	// Configure NSEL pin
+	GPIO_WriteBit(GPIOB,GPIO_Pin_9,Bit_SET);//Set it high
+	GPIO_InitStructure.GPIO_Pin     = GPIO_Pin_4;
+	GPIO_InitStructure.GPIO_Speed   = GPIO_Speed_50MHz;
+	GPIO_InitStructure.GPIO_Mode    = GPIO_Mode_Out_PP;
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
+
 	// Configure MOSI,SCLK,NSS pins (SPI2)
-	GPIO_InitStructure.GPIO_Pin     = GPIO_Pin_4|GPIO_Pin_5|GPIO_Pin_7;
+	GPIO_InitStructure.GPIO_Pin     = GPIO_Pin_5|GPIO_Pin_7;
 	GPIO_InitStructure.GPIO_Speed   = GPIO_Speed_50MHz;
 	GPIO_InitStructure.GPIO_Mode    = GPIO_Mode_AF_PP;
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
@@ -109,12 +116,12 @@ uint8_t si446x_setup(void) {
 	SPI_InitStructure.SPI_DataSize = SPI_DataSize_8b;
 	SPI_InitStructure.SPI_CPOL = SPI_CPOL_Low;
 	SPI_InitStructure.SPI_CPHA = SPI_CPHA_1Edge;
-	SPI_InitStructure.SPI_NSS = SPI_NSS_Hard;
-	SPI_InitStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_8; // 12MHz/8=1.5MHz, assumes 12Mhz PCLK2, i.e. 24mhz/2
+	SPI_InitStructure.SPI_NSS = SPI_NSS_Soft;//SPI_NSS_Hard;
+	SPI_InitStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_4; // 24MHz/4=6MHz, assumes 12Mhz PCLK2, i.e. 24mhz/2
 	SPI_InitStructure.SPI_FirstBit = SPI_FirstBit_MSB;
 	SPI_InitStructure.SPI_CRCPolynomial = 7;
 
-	SPI1->CR2 |= 0x04 ;	//NSS output enable
+	//SPI1->CR2 |= 0x04 ;	//NSS output enable
 	SPI_Init(SPI1, &SPI_InitStructure);
 	SPI_CalculateCRC(SPI1, DISABLE);
 	SPI_Cmd(SPI1, ENABLE);
@@ -180,6 +187,7 @@ uint8_t si446x_setup(void) {
 	while(Millis<t+15)
 		__WFI();
 	SDN_LOW;/* Radio is now reset */
+	while(GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_11)==0);/*Wait for CTS high after POR*/
 
 	/* Configure the radio ready for use, use simple busy wait logic here, as only has to happen once */
 	uint8_t part=0;
@@ -195,17 +203,17 @@ uint8_t si446x_setup(void) {
 	si446x_spi_state_machine( &Silabs_spi_state, 7, tx_buffer, 0, rx_buffer, NULL );
 	while(Silabs_spi_state)
 		__WFI();
-	//clear all interrupts
-	memcpy(tx_buffer, (uint8_t [4]){0x20, 0x00, 0x00, 0x00}, 4*sizeof(uint8_t));
-	si446x_spi_state_machine( &Silabs_spi_state, 4, tx_buffer, 0, rx_buffer, NULL );
-	while(Silabs_spi_state)
-		__WFI();
 	//read the device part number info
 	memcpy(tx_buffer, (uint8_t [1]){0x01}, 1*sizeof(uint8_t));
 	si446x_spi_state_machine( &Silabs_spi_state, 1, tx_buffer, 12, rx_buffer, NULL );
 	while(Silabs_spi_state)
 		__WFI();
 	part=rx_buffer[3];//Should be 0x44
+	//clear all interrupts
+	memcpy(tx_buffer, (uint8_t [4]){0x20, 0x00, 0x00, 0x00}, 4*sizeof(uint8_t));
+	si446x_spi_state_machine( &Silabs_spi_state, 4, tx_buffer, 0, rx_buffer, NULL );
+	while(Silabs_spi_state)
+		__WFI();
 	//Setup the GPIO pin, note that GPIO1 defaults to CTS, but we need to reset and set GPIO0 to TX direct mode mod input
 	memcpy(tx_buffer, (uint8_t [8]){0x13, 0x04, 0x00, 0x01, 0x01, 0x00, 0x11, 0x00}, 8*sizeof(uint8_t));//GPIO0 in, 1 CTS, rest dis, NIRQ unchanged
 	si446x_spi_state_machine( &Silabs_spi_state, 8, tx_buffer, 0, rx_buffer, NULL );
@@ -540,14 +548,18 @@ __attribute__((externally_visible)) void USART3_IRQHandler(void) {
   */
 void si446x_spi_state_machine( uint8_t *state_, uint8_t tx_bytes, uint8_t *tx_data, uint8_t rx_bytes, uint8_t *rx_data, void(*callback)(void*)) {
 	static uint8_t tx_bytes_local,rx_bytes_local;	/* These allow the buffers to be set only once */
-	static uint8_t *tx_data_local,*rx_data_local;
+	static uint8_t* tx_data_local;
+	static uint8_t* rx_data_local;
 	static void(*callback_local)( uint8_t* arg1, uint8_t arg2);
 	static uint8_t dummywrite[16]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};/* For feeding the spi */
+	static uint8_t dummyread;
 	DMA_InitTypeDef DMA_InitStructure;
 	uint8_t state=*state_;
 	if(tx_data) {	/* These only need to be set once with a non NULL pointer*/
 		tx_data_local=tx_data;
 		tx_bytes_local=tx_bytes;
+		if(tx_bytes_local<=1)
+			tx_bytes_local=2;/*Need to write two bytes at least - silabs hardware bug*/
 	}
 	if(rx_data) {	/* These only need to be set once */
 		rx_data_local=rx_data;
@@ -571,19 +583,28 @@ void si446x_spi_state_machine( uint8_t *state_, uint8_t tx_bytes, uint8_t *tx_da
 	switch (state) {
 		case 0:	/* First state is Tx via DMA */
 			*state_=1;	/*Global variable set to let everything know that the state machine is in operation*/
+			NSEL_LOW;	/* Select device */
 			if(tx_bytes_local) {/* Normal command/response comms */
 				/* DMA1 channel3 configuration SPI1 TX ---------------------------------------------*/
 				DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)tx_data_local;
 				DMA_InitStructure.DMA_BufferSize = tx_bytes_local;
 				DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralDST;
 				DMA_Init(DMA1_Channel3, &DMA_InitStructure);
+				/* DMA1 channel2 configuration SPI1 RX ---------------------------------------------*/
+				DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)&dummyread;
+				DMA_InitStructure.DMA_BufferSize = tx_bytes_local;
+				DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Disable;
+				DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
+				DMA_Init(DMA1_Channel2, &DMA_InitStructure);
 				/* Enable the DMA complete callback interrupt here */
 				DMA_ClearFlag(DMA1_FLAG_TC3|DMA1_FLAG_HT3);  /* Make sure flags are clear */
 				DMA_ITConfig(DMA1_Channel3, DMA_IT_TC, ENABLE);/* Interrupt on complete */
 				/* Enable DMA TX Channel */
 				DMA_Cmd(DMA1_Channel3, ENABLE);
+				/* Enable DMA RX Channel */
+				DMA_Cmd(DMA1_Channel2, ENABLE);
 				/* Enable SPI TX/RX request */
-				SPI_I2S_DMACmd(SPI1, SPI_I2S_DMAReq_Tx, ENABLE);
+				SPI_I2S_DMACmd(SPI1, SPI_I2S_DMAReq_Rx|SPI_I2S_DMAReq_Tx, ENABLE);
 			}
 			else {
 				dummywrite[0]=*tx_data_local;/* Directly write the command byte */
@@ -611,11 +632,12 @@ void si446x_spi_state_machine( uint8_t *state_, uint8_t tx_bytes, uint8_t *tx_da
 		case 2: /* portb, pin 11 must be high*/
 			if(tx_bytes_local) {/* Normal command/response comms */
 				DMA_Cmd(DMA1_Channel3, DISABLE);
+				DMA_Cmd(DMA1_Channel2, DISABLE);
 				/* Disable SPI TX/RX request */
-				SPI_I2S_DMACmd(SPI1, SPI_I2S_DMAReq_Tx, DISABLE);
+				SPI_I2S_DMACmd(SPI1, SPI_I2S_DMAReq_Rx|SPI_I2S_DMAReq_Tx, DISABLE);
 				DMA_ITConfig(DMA1_Channel3, DMA_IT_TC, DISABLE);
-				SPI_Cmd(SPI1, DISABLE);/* This clears NSS */
-				SPI_Cmd(SPI1, ENABLE);
+				//SPI_Cmd(SPI1, DISABLE);/* This clears NSS */
+				//SPI_Cmd(SPI1, ENABLE);
 				CTS_Low=Millis;
 				if( GPIO_ReadInputDataBit( GPIOB, GPIO_Pin_11 ) )
 					*state_=3;
@@ -629,21 +651,25 @@ void si446x_spi_state_machine( uint8_t *state_, uint8_t tx_bytes, uint8_t *tx_da
 				DMA_Cmd(DMA1_Channel2, DISABLE);
 				DMA_Cmd(DMA1_Channel3, DISABLE);
 				DMA_ITConfig(DMA1_Channel2, DMA_IT_TC, DISABLE);
-				SPI_Cmd(SPI1, DISABLE);/* This clears NSS */
-				SPI_Cmd(SPI1, ENABLE);
+				//SPI_Cmd(SPI1, DISABLE);/* This clears NSS */
+				//SPI_Cmd(SPI1, ENABLE);
 				*state_=0;	/* Back to the default state */
 			}
 		case 3: /* CTS cleared, time to read the data if there is any to read */
 			CTS_Low=0;
 			if( rx_bytes_local ) {
 				*state_=4;
+				NSEL_LOW;	/* Select device */
 				dummywrite[0] = 0x44;/* Cases 0x44 to be transmitted to get command response back */
+				dummywrite[1] = 0x44;
+				dummywrite[2] = 0x44;
+				dummywrite[3] = 0x44;
 				/* DMA1 channel4 configuration SPI2 RX ---------------------------------------------*/
 				DMA_InitStructure.DMA_MemoryBaseAddr = rx_data_local;
 				DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
 				DMA_InitStructure.DMA_BufferSize = rx_bytes_local;
 				DMA_Init(DMA1_Channel2, &DMA_InitStructure);
-				DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)&dummywrite;/*Tx is a dummy write*/
+				DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)dummywrite;/*Tx is a dummy write*/
 				DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralDST;
 				DMA_Init(DMA1_Channel3, &DMA_InitStructure);
 				/* Enable the DMA complete callback interrupt here */
@@ -663,16 +689,16 @@ void si446x_spi_state_machine( uint8_t *state_, uint8_t tx_bytes, uint8_t *tx_da
 			DMA_Cmd(DMA1_Channel2, DISABLE);
 			DMA_Cmd(DMA1_Channel3, DISABLE);
 			DMA_ITConfig(DMA1_Channel2, DMA_IT_TC, DISABLE);
-			SPI_Cmd(SPI1, DISABLE);/* This clears NSS */
-			SPI_Cmd(SPI1, ENABLE);
+			//SPI_Cmd(SPI1, DISABLE);/* This clears NSS */
+			//SPI_Cmd(SPI1, ENABLE);
 			*state_=0;
 			if( callback_local )
 				(*callback_local)( &Silabs_driver_state, 0);/* The callback function with argument zero to show SPI callback */
 			break;
 		default:
 			SPI_I2S_DMACmd(SPI1, SPI_I2S_DMAReq_Rx|SPI_I2S_DMAReq_Tx, DISABLE);
-			DMA_Cmd(DMA1_Channel2, DISABLE);
-			DMA_Cmd(DMA1_Channel3, DISABLE);
+			//DMA_Cmd(DMA1_Channel2, DISABLE);
+			//DMA_Cmd(DMA1_Channel3, DISABLE);
 			*state_=0;	/* Should not happen */
 	}
 }
@@ -684,6 +710,7 @@ void si446x_spi_state_machine( uint8_t *state_, uint8_t tx_bytes, uint8_t *tx_da
   */
 __attribute__((externally_visible)) void DMA1_Channel3_IRQHandler(void) {
 	if (DMA_GetITStatus(DMA1_IT_TC3)) {
+		NSEL_HIGH; 	/*Deselect device*/
 		DMA_ClearFlag(DMA1_FLAG_TC3|DMA1_FLAG_HT3);  	/* make sure all flags are clear */
 		si446x_spi_state_machine( &Silabs_spi_state, 0, NULL, 0, NULL, NULL );
 	}
@@ -697,6 +724,7 @@ __attribute__((externally_visible)) void DMA1_Channel3_IRQHandler(void) {
   */
 __attribute__((externally_visible)) void DMA1_Channel2_IRQHandler(void) {
 	if (DMA_GetITStatus(DMA1_IT_TC2)) {
+		NSEL_HIGH; 	/*Deselect device*/
 		DMA_ClearFlag(DMA1_FLAG_TC2|DMA1_FLAG_HT2);  	/* make sure all flags are clear */
 		DMA_ClearFlag(DMA1_FLAG_TC3|DMA1_FLAG_HT3);  	/* make sure tx flags cleared here too */
 		si446x_spi_state_machine( &Silabs_spi_state, 0, NULL, 0, NULL, NULL );
