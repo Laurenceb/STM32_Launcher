@@ -110,7 +110,7 @@ void Set_USBClock(void)
   RCC_AHBPeriphClockCmd(RCC_AHBPeriph_OTG_FS, ENABLE) ;
 #else
   /* Select USBCLK source */
-  RCC_USBCLKConfig(RCC_USBCLKSource_PLLCLK_1Div);
+  RCC_USBCLKConfig(RCC_USBCLKSource_PLLCLK_Div1);
   
   /* Enable the USB clock */
   RCC_APB1PeriphClockCmd(RCC_APB1Periph_USB, ENABLE);
