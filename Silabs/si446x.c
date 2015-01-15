@@ -385,9 +385,9 @@ void si446x_state_machine(uint8_t *state_, uint8_t reason ) {
 				}
 				tx_buffer[0]=0x20;/* Wipe interrupt status */
 				tx_buffer[1]=0x00;/* All bits */
-				tx_buffer[1]=0x00;
-				tx_buffer[1]=0x00;
-				si446x_spi_state_machine( &Silabs_spi_state, 1, tx_buffer, 10, rx_buffer, &si446x_state_machine );
+				tx_buffer[2]=0x00;
+				tx_buffer[3]=0x00;
+				si446x_spi_state_machine( &Silabs_spi_state, 4, tx_buffer, 10, rx_buffer, &si446x_state_machine );
 			}
 			else {/* This shouldnt happen, might be caused by glitchy NIRQ line or TX data being added */
 				/* Keep the state unchanged */
@@ -463,9 +463,9 @@ void si446x_state_machine(uint8_t *state_, uint8_t reason ) {
 				if(reason==1) {/* NIRQ */
 					tx_buffer[0]=0x20;/* Wipe interrupt status */
 					tx_buffer[1]=0x00;/* All bits */
-					tx_buffer[1]=0x00;
-					tx_buffer[1]=0x00;
-					si446x_spi_state_machine( &Silabs_spi_state, 1, tx_buffer, 10, rx_buffer, &si446x_state_machine );
+					tx_buffer[2]=0x00;
+					tx_buffer[3]=0x00;
+					si446x_spi_state_machine( &Silabs_spi_state, 4, tx_buffer, 10, rx_buffer, &si446x_state_machine );
 				}
 			}
 			break;
@@ -483,9 +483,9 @@ void si446x_state_machine(uint8_t *state_, uint8_t reason ) {
 				if(reason==1) {/* NIRQ */
 					tx_buffer[0]=0x20;/* Wipe interrupt status */
 					tx_buffer[1]=0x00;/* All bits */
-					tx_buffer[1]=0x00;
-					tx_buffer[1]=0x00;
-					si446x_spi_state_machine( &Silabs_spi_state, 1, tx_buffer, 10, rx_buffer, &si446x_state_machine );
+					tx_buffer[2]=0x00;
+					tx_buffer[3]=0x00;
+					si446x_spi_state_machine( &Silabs_spi_state, 4, tx_buffer, 10, rx_buffer, &si446x_state_machine );
 				}//Reason 2 == more data being added just does nothing, but data will have been added to the buffer and sent with string
 			}
 		default:
