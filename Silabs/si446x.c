@@ -114,12 +114,13 @@ uint8_t si446x_setup(void) {
 	SPI_InitStructure.SPI_FirstBit = SPI_FirstBit_MSB;
 	SPI_InitStructure.SPI_CRCPolynomial = 7;
 
+	SPI1->CR2 |= 0x04 ;	//NSS output enable
 	SPI_Init(SPI1, &SPI_InitStructure);
 	SPI_CalculateCRC(SPI1, DISABLE);
 	SPI_Cmd(SPI1, ENABLE);
 
 	/* drain SPI */
-	while (SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_TXE) == RESET) { ; }
+	while (SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_RXNE) == SET) { ; }
 	dummyread = SPI_I2S_ReceiveData(SPI1);
 
 	/* enable DMA clock */
@@ -176,7 +177,7 @@ uint8_t si446x_setup(void) {
 	/* Reset the radio */
 	SDN_HIGH;
 	uint32_t t=Millis;
-	while(Millis<t+5)
+	while(Millis<t+15)
 		__WFI();
 	SDN_LOW;/* Radio is now reset */
 
@@ -541,6 +542,7 @@ void si446x_spi_state_machine( uint8_t *state_, uint8_t tx_bytes, uint8_t *tx_da
 	static uint8_t tx_bytes_local,rx_bytes_local;	/* These allow the buffers to be set only once */
 	static uint8_t *tx_data_local,*rx_data_local;
 	static void(*callback_local)( uint8_t* arg1, uint8_t arg2);
+	static uint8_t dummywrite[16]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};/* For feeding the spi */
 	DMA_InitTypeDef DMA_InitStructure;
 	uint8_t state=*state_;
 	if(tx_data) {	/* These only need to be set once with a non NULL pointer*/
@@ -553,16 +555,16 @@ void si446x_spi_state_machine( uint8_t *state_, uint8_t tx_bytes, uint8_t *tx_da
 	}
 	if(callback)	/* The callback function is stored locally */
 		callback_local=callback;
-	if ( !state || state==2 ) {
-		/* Shared DMA configuration values */
-		DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)(&(SPI1->DR));
-		DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
-		DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
-		DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
-		DMA_InitStructure.DMA_BufferSize = (state|(!tx_bytes_local))?rx_bytes_local:tx_bytes_local;/*We Rx if in state2, or no tx bytes (fast response) */
-		DMA_InitStructure.DMA_Mode = DMA_Mode_Normal;
-		DMA_InitStructure.DMA_Priority = DMA_Priority_Low;
-		DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
+	/* Shared DMA configuration values */
+	DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)(&(SPI1->DR));
+	DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
+	DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
+	DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
+	DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
+	DMA_InitStructure.DMA_Mode = DMA_Mode_Normal;
+	DMA_InitStructure.DMA_Priority = DMA_Priority_Low;
+	DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
+	if(!state) {
 		DMA_DeInit(DMA1_Channel2);
 		DMA_DeInit(DMA1_Channel3);
 	}
@@ -570,10 +572,10 @@ void si446x_spi_state_machine( uint8_t *state_, uint8_t tx_bytes, uint8_t *tx_da
 		case 0:	/* First state is Tx via DMA */
 			*state_=1;	/*Global variable set to let everything know that the state machine is in operation*/
 			if(tx_bytes_local) {/* Normal command/response comms */
-				/* DMA1 channel5 configuration SPI2 TX ---------------------------------------------*/
+				/* DMA1 channel3 configuration SPI1 TX ---------------------------------------------*/
 				DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)tx_data_local;
+				DMA_InitStructure.DMA_BufferSize = tx_bytes_local;
 				DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralDST;
-				DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
 				DMA_Init(DMA1_Channel3, &DMA_InitStructure);
 				/* Enable the DMA complete callback interrupt here */
 				DMA_ClearFlag(DMA1_FLAG_TC3|DMA1_FLAG_HT3);  /* Make sure flags are clear */
@@ -584,19 +586,24 @@ void si446x_spi_state_machine( uint8_t *state_, uint8_t tx_bytes, uint8_t *tx_da
 				SPI_I2S_DMACmd(SPI1, SPI_I2S_DMAReq_Tx, ENABLE);
 			}
 			else {
-				SPI1->DR=*tx_data_local;/* Directly write the command byte */
-				/* DMA1 channel4 configuration SPI2 RX ---------------------------------------------*/
+				dummywrite[0]=*tx_data_local;/* Directly write the command byte */
+				/* DMA1 channel2 configuration SPI1 RX ---------------------------------------------*/
 				DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)rx_data_local;
+				DMA_InitStructure.DMA_BufferSize = rx_bytes_local;
 				DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
-				DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
 				DMA_Init(DMA1_Channel2, &DMA_InitStructure);
+				DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)dummywrite;
+				DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralDST;
+				DMA_Init(DMA1_Channel3, &DMA_InitStructure);
 				/* Enable the DMA complete callback interrupt here */
 				DMA_ClearFlag(DMA1_FLAG_TC2|DMA1_FLAG_HT2);  /* Make sure flags are clear */
 				DMA_ITConfig(DMA1_Channel2, DMA_IT_TC, ENABLE);/* Interrupt on complete */
 				/* Enable DMA RX Channel */
 				DMA_Cmd(DMA1_Channel2, ENABLE);
+				/* Enable DMA TX Channel */
+				DMA_Cmd(DMA1_Channel3, ENABLE);
 				/* Enable SPI TX/RX request */
-				SPI_I2S_DMACmd(SPI1, SPI_I2S_DMAReq_Rx, ENABLE);
+				SPI_I2S_DMACmd(SPI1, SPI_I2S_DMAReq_Rx|SPI_I2S_DMAReq_Tx, ENABLE);
 			}
 			break;
 		case 1: /* We get here because the DMA transfer completed*/
@@ -618,8 +625,9 @@ void si446x_spi_state_machine( uint8_t *state_, uint8_t tx_bytes, uint8_t *tx_da
 			}
 			else { 			/* Fast response mode, this is the final state */
 				/* Disable SPI TX/RX request */
-				SPI_I2S_DMACmd(SPI1, SPI_I2S_DMAReq_Rx, DISABLE);
+				SPI_I2S_DMACmd(SPI1, SPI_I2S_DMAReq_Rx|SPI_I2S_DMAReq_Tx, DISABLE);
 				DMA_Cmd(DMA1_Channel2, DISABLE);
+				DMA_Cmd(DMA1_Channel3, DISABLE);
 				DMA_ITConfig(DMA1_Channel2, DMA_IT_TC, DISABLE);
 				SPI_Cmd(SPI1, DISABLE);/* This clears NSS */
 				SPI_Cmd(SPI1, ENABLE);
@@ -629,26 +637,31 @@ void si446x_spi_state_machine( uint8_t *state_, uint8_t tx_bytes, uint8_t *tx_da
 			CTS_Low=0;
 			if( rx_bytes_local ) {
 				*state_=4;
-				SPI1->DR = 0x44;/* Cases 0x44 to be transmitted to get command response back */
+				dummywrite[0] = 0x44;/* Cases 0x44 to be transmitted to get command response back */
 				/* DMA1 channel4 configuration SPI2 RX ---------------------------------------------*/
 				DMA_InitStructure.DMA_MemoryBaseAddr = rx_data_local;
 				DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
-				DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
 				DMA_InitStructure.DMA_BufferSize = rx_bytes_local;
 				DMA_Init(DMA1_Channel2, &DMA_InitStructure);
+				DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)&dummywrite;/*Tx is a dummy write*/
+				DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralDST;
+				DMA_Init(DMA1_Channel3, &DMA_InitStructure);
 				/* Enable the DMA complete callback interrupt here */
 				DMA_ClearFlag(DMA1_FLAG_TC2|DMA1_FLAG_HT2);  /* Make sure flags are clear */
 				DMA_ITConfig(DMA1_Channel2, DMA_IT_TC, ENABLE);/* Interrupt on complete */
 				/* Enable DMA RX Channel */
 				DMA_Cmd(DMA1_Channel2, ENABLE);
+				/* Enable DMA TX Channel */
+				DMA_Cmd(DMA1_Channel3, ENABLE);
 				/* Enable SPI TX/RX request */
-				SPI_I2S_DMACmd(SPI1, SPI_I2S_DMAReq_Rx, ENABLE);
+				SPI_I2S_DMACmd(SPI1, SPI_I2S_DMAReq_Rx|SPI_I2S_DMAReq_Tx, ENABLE);
 				break;
 			}
 		case 4:
 			/* Disable SPI TX/RX request */
-			SPI_I2S_DMACmd(SPI1, SPI_I2S_DMAReq_Rx, DISABLE);
+			SPI_I2S_DMACmd(SPI1, SPI_I2S_DMAReq_Rx|SPI_I2S_DMAReq_Tx, DISABLE);
 			DMA_Cmd(DMA1_Channel2, DISABLE);
+			DMA_Cmd(DMA1_Channel3, DISABLE);
 			DMA_ITConfig(DMA1_Channel2, DMA_IT_TC, DISABLE);
 			SPI_Cmd(SPI1, DISABLE);/* This clears NSS */
 			SPI_Cmd(SPI1, ENABLE);
@@ -685,6 +698,7 @@ __attribute__((externally_visible)) void DMA1_Channel3_IRQHandler(void) {
 __attribute__((externally_visible)) void DMA1_Channel2_IRQHandler(void) {
 	if (DMA_GetITStatus(DMA1_IT_TC2)) {
 		DMA_ClearFlag(DMA1_FLAG_TC2|DMA1_FLAG_HT2);  	/* make sure all flags are clear */
+		DMA_ClearFlag(DMA1_FLAG_TC3|DMA1_FLAG_HT3);  	/* make sure tx flags cleared here too */
 		si446x_spi_state_machine( &Silabs_spi_state, 0, NULL, 0, NULL, NULL );
 	}
 	DMA_ClearITPendingBit(DMA1_IT_GL2);			/* clear all the interrupts */
