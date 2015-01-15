@@ -63,7 +63,7 @@ void ISR_Config(void) {
   */
 void SysTick_Configuration(void) {
 	RCC_HCLKConfig(RCC_SYSCLK_Div1);			//CLK the periferal - configure the AHB clk
-	SysTick_Config(30000);					//SYSTICK at 100Hz - this function also enables the interrupt (24mhz system clock)
+	SysTick_Config(60000);					//SYSTICK at 100Hz - this function also enables the interrupt (48mhz system clock)
 	SysTick_CLKSourceConfig(SysTick_CLKSource_HCLK_Div8);   //SYSTICK AHB1/8
 }
 
