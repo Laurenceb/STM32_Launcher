@@ -97,9 +97,9 @@ int main(void)
 				Delay(100);
 				if(!GET_VBUS_STATE)
 					shutdown();
-				Watchdog_Reset();
-				__WFI();		//Sleep mode
 			}
+			Watchdog_Reset();
+			__WFI();			//Sleep mode
 		}
 	}
         if(!GET_PWR_STATE && !(CoreDebug->DHCSR&0x00000001) && shutdown_lock!=SHUTDOWNLOCK_MAGIC) {//Check here to make sure the power button is still pressed, if not, sleep if no debug and not in always on flight mode

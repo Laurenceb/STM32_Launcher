@@ -28,10 +28,9 @@ void Init_Timer(void) {
   TIM_TimeBaseStructure.TIM_ClockDivision = 0;
   TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
 
-  TIM_TimeBaseInit(TIM1, &TIM_TimeBaseStructure);
-
   /* Enable the timer clocks */
   Timer_RCC_Configuration();
+  TIM_TimeBaseInit(TIM1, &TIM_TimeBaseStructure);
 
   /* PWM1 Mode configuration: Channel1 on TIM1 */
   TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;
