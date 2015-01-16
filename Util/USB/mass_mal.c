@@ -62,7 +62,10 @@ uint16_t MAL_Init(uint8_t lun)
       Status = disk_initialize(0);/* Physical drive number (0) */
       if(Status) Status = disk_initialize(0);/*Try again on error*/
       if(!Status && !Data_Buffer) Data_Buffer=(volatile uint32_t*)malloc(MAX_DMA_BUFF_SIZE);/*Allocate the data buffer*/
-      break;
+      if(!Status)
+       break;
+      else
+       return MAL_FAIL;
 #ifdef USE_STM3210E_EVAL
     case 1:
       NAND_Init();

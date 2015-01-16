@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "stm32f10x.h"
+#include "core_cm3.h"
 #include "buffer.h"
 #include "interrupts.h"
 
