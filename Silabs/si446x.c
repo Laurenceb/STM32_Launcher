@@ -129,7 +129,6 @@ uint8_t si446x_setup(void) {
 	/* drain SPI */
 	while (SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_RXNE) == SET) { dummyread = SPI_I2S_ReceiveData(SPI1); }
 
-
 	/* enable DMA clock */
 	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
 
@@ -142,33 +141,6 @@ uint8_t si446x_setup(void) {
 	GPIO_EXTILineConfig(GPIO_PortSourceGPIOB, GPIO_PinSource0);
 	/* Connect EXTI11 Line to PB.11 pin - CTS*/
 	GPIO_EXTILineConfig(GPIO_PortSourceGPIOB, GPIO_PinSource11);
-
-	/* Configure EXTI11 line */
-	EXTI_InitStructure.EXTI_Line = EXTI_Line11;
-	EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
-	EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;  
-	EXTI_InitStructure.EXTI_LineCmd = ENABLE;
-
-	/* Enable and set EXTI11 Interrupt to the second lowest priority */
-	NVIC_InitStructure.NVIC_IRQChannel = EXTI15_10_IRQn;	//The NIRQ triggered interrupt	
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x01;//Lower pre-emption priority
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x06;	//Second Lowest group priority
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&NVIC_InitStructure);
-	EXTI_Init(&EXTI_InitStructure);	/* Only enable the CTS once NVIC is configured */
-
-	/* Configure EXTI0 line */
-	EXTI_InitStructure.EXTI_Line = EXTI_Line0;
-	EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
-	EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;  
-	EXTI_InitStructure.EXTI_LineCmd = ENABLE;
-
-	/* Enable and set EXTI0 Interrupt to the lowest priority */
-	NVIC_InitStructure.NVIC_IRQChannel = EXTI0_IRQn;	//The NIRQ triggered interrupt	
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x01;//Lower pre-emption priority
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x07;	//Lowest group priority
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&NVIC_InitStructure);
 
 	/* Now enable the other interrupts via the NVIC - USART3 and the two DMA interrupts */
 	NVIC_InitStructure.NVIC_IRQChannel = USART3_IRQn;//Tx  triggered interrupt
@@ -186,8 +158,22 @@ uint8_t si446x_setup(void) {
 	uint32_t t=Millis;
 	while(Millis<t+15)
 		__WFI();
-	SDN_LOW;/* Radio is now reset */
-	while(GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_11)==0);/*Wait for CTS high after POR*/
+	SDN_LOW;						/*Radio is now reset*/
+	while(GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_11)==0);	/*Wait for CTS high after POR*/
+
+	/* Configure EXTI11 line */
+	EXTI_InitStructure.EXTI_Line = EXTI_Line11;		/*Only enable the CTS once the init stuff has completed*/
+	EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
+	EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;  
+	EXTI_InitStructure.EXTI_LineCmd = ENABLE;
+
+	/* Enable and set EXTI11 Interrupt to the second lowest priority */
+	NVIC_InitStructure.NVIC_IRQChannel = EXTI15_10_IRQn;	//The CTS triggered interrupt	
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x01;//Lower pre-emption priority
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x06;	//Second Lowest group priority
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&NVIC_InitStructure);
+	EXTI_Init(&EXTI_InitStructure);	/* Only enable the CTS once NVIC is configured */
 
 	/* Configure the radio ready for use, use simple busy wait logic here, as only has to happen once */
 	uint8_t part=0;
@@ -205,7 +191,18 @@ uint8_t si446x_setup(void) {
 	__enable_irq();
 	while(Silabs_spi_state)
 		__WFI();
-	while(GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_0)==1);/*Wait for NIRQ*/
+	while(GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_0)==1);	/*Wait for NIRQ*/
+	/* Configure EXTI0 line */
+	EXTI_InitStructure.EXTI_Line = EXTI_Line0;		/*Only enable NIRQ here*/
+	EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
+	EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;  
+	EXTI_InitStructure.EXTI_LineCmd = ENABLE;
+	/* Enable and set EXTI0 Interrupt to the lowest priority */
+	NVIC_InitStructure.NVIC_IRQChannel = EXTI0_IRQn;	//The NIRQ triggered interrupt	
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x01;//Lower pre-emption priority
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x07;	//Lowest group priority
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&NVIC_InitStructure);
 	//read the device part number info
 	memcpy(tx_buffer, (uint8_t [2]){0x01, 0x01}, 2*sizeof(uint8_t));
 	__disable_irq();
@@ -520,7 +517,7 @@ __attribute__((externally_visible)) void EXTI0_IRQHandler(void) {
 			si446x_state_machine( &Silabs_driver_state, 1 );
 		}
 		else {	/* SW triggered interrupt, used when adding data to the TX buffer */
-			//si446x_state_machine( &Silabs_driver_state, 2 );
+			si446x_state_machine( &Silabs_driver_state, 2 );
 		}
 	}
 }
@@ -598,20 +595,20 @@ void si446x_spi_state_machine( uint8_t *state_, uint8_t tx_bytes, uint8_t *tx_da
 				DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralDST;
 				DMA_Init(DMA1_Channel3, &DMA_InitStructure);
 				/* DMA1 channel2 configuration SPI1 RX ---------------------------------------------*/
-				//DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)&dummyread;
-				//DMA_InitStructure.DMA_BufferSize = tx_bytes_local;
-				//DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Disable;
-				//DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
-				//DMA_Init(DMA1_Channel2, &DMA_InitStructure);
+				DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)&dummyread;
+				DMA_InitStructure.DMA_BufferSize = tx_bytes_local;
+				DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Disable;
+				DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
+				DMA_Init(DMA1_Channel2, &DMA_InitStructure);
 				/* Enable the DMA complete callback interrupt here */
 				DMA_ClearFlag(DMA1_FLAG_TC3|DMA1_FLAG_HT3);  /* Make sure flags are clear */
 				DMA_ITConfig(DMA1_Channel3, DMA_IT_TC, ENABLE);/* Interrupt on complete */
 				/* Enable DMA TX Channel */
 				DMA_Cmd(DMA1_Channel3, ENABLE);
 				/* Enable DMA RX Channel */
-				//DMA_Cmd(DMA1_Channel2, ENABLE);
+				DMA_Cmd(DMA1_Channel2, ENABLE);
 				/* Enable SPI TX/RX request */
-				SPI_I2S_DMACmd(SPI1, /*SPI_I2S_DMAReq_Rx|*/SPI_I2S_DMAReq_Tx, ENABLE);
+				SPI_I2S_DMACmd(SPI1, SPI_I2S_DMAReq_Rx|SPI_I2S_DMAReq_Tx, ENABLE);
 			}
 			else {
 				dummywrite[0]=*tx_data_local;/* Directly write the command byte */
@@ -704,8 +701,8 @@ void si446x_spi_state_machine( uint8_t *state_, uint8_t tx_bytes, uint8_t *tx_da
 			break;
 		default:
 			SPI_I2S_DMACmd(SPI1, SPI_I2S_DMAReq_Rx|SPI_I2S_DMAReq_Tx, DISABLE);
-			//DMA_Cmd(DMA1_Channel2, DISABLE);
-			//DMA_Cmd(DMA1_Channel3, DISABLE);
+			DMA_Cmd(DMA1_Channel2, DISABLE);
+			DMA_Cmd(DMA1_Channel3, DISABLE);
 			*state_=0;	/* Should not happen */
 	}
 }
@@ -750,7 +747,7 @@ __attribute__((externally_visible)) void EXTI15_10_IRQHandler(void) {
 		EXTI_ClearITPendingBit(EXTI_Line11);
 		if( Silabs_spi_state==2 ) { /* If we are waiting for the ISR */
 			Silabs_spi_state++;
-			Delay(1000);
+			//Delay(1000);/*A Delay here might help if the silabs timing is glitchy*/
 			si446x_spi_state_machine( &Silabs_spi_state, 0, NULL, 0, NULL, NULL );
 		}
 	}

@@ -61,12 +61,17 @@ int main(void)
 	SystemInit();					//Sets up the clk
 	setup_gpio();					//Initialised pins, and detects boot source
 	DBGMCU_Config(DBGMCU_IWDG_STOP, ENABLE);	//Watchdog stopped during JTAG halt
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR | RCC_APB1Periph_BKP, ENABLE);/* Enable PWR and BKP clocks */
 	PWR_BackupAccessCmd(ENABLE);/* Allow access to BKP Domain */
 	uint16_t shutdown_lock=BKP_ReadBackupRegister(BKP_DR1);	//Holds the shutdown lock setting
 	PWR_BackupAccessCmd(DISABLE);
 	if(RCC->CSR&RCC_CSR_IWDGRSTF && shutdown_lock!=SHUTDOWNLOCK_MAGIC) {//Watchdog reset, turn off
 		RCC->CSR|=RCC_CSR_RMVF;			//Reset the reset flags
 		shutdown();
+	}
+	if(USB_SOURCE==bootsource) {
+		RCC->CFGR &= ~(uint32_t)RCC_CFGR_PPRE1_DIV16;
+		RCC->CFGR |= ~(uint32_t)RCC_CFGR_PPRE1_DIV4;//Swap the ABP1 bus to run at 12mhz rather than 4 if we booted from USB, this means USB is fast enough
 	}
 	SysTick_Configuration();			//Start up system timer at 100Hz for uSD card functionality
 	Watchdog_Config(WATCHDOG_TIMEOUT);		//Set the watchdog

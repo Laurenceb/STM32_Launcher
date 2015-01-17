@@ -639,10 +639,10 @@ static void SetSysClockTo48(void)
     /* HCLK = SYSCLK */
     RCC->CFGR |= (uint32_t)RCC_CFGR_HPRE_DIV1;
       
-    /* PCLK2 = HCLK */
+    /* PCLK2 = HCLK/4 */
     RCC->CFGR |= (uint32_t)RCC_CFGR_PPRE2_DIV4;
     
-    /* PCLK1 = HCLK */
+    /* PCLK1 = HCLK/16 (Note that USB needs > 8Mhz, so this is fixed later if the USB is used) */
     RCC->CFGR |= (uint32_t)RCC_CFGR_PPRE1_DIV16;
     
 #ifdef STM32F10X_CL
