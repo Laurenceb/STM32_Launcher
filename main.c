@@ -71,7 +71,7 @@ int main(void)
 	}
 	if(USB_SOURCE==bootsource) {
 		RCC->CFGR &= ~(uint32_t)RCC_CFGR_PPRE1_DIV16;
-		RCC->CFGR |= ~(uint32_t)RCC_CFGR_PPRE1_DIV4;//Swap the ABP1 bus to run at 12mhz rather than 4 if we booted from USB, this means USB is fast enough
+		RCC->CFGR |= (uint32_t)RCC_CFGR_PPRE1_DIV4;//Swap the ABP1 bus to run at 12mhz rather than 4 if we booted from USB, makes USB fast enough
 	}
 	SysTick_Configuration();			//Start up system timer at 100Hz for uSD card functionality
 	Watchdog_Config(WATCHDOG_TIMEOUT);		//Set the watchdog
