@@ -58,10 +58,10 @@ uint8_t si446x_setup(void) {
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB | RCC_APB2Periph_GPIOA | RCC_APB2Periph_SPI1, ENABLE);
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART3 , ENABLE );
 
-	// Configure Tx pin
+	// Configure Tx pin as input to start with, so that it can be used to monitor POR
 	GPIO_InitStructure.GPIO_Pin     = GPIO_Pin_10;
 	GPIO_InitStructure.GPIO_Speed   = GPIO_Speed_50MHz;
-	GPIO_InitStructure.GPIO_Mode    = GPIO_Mode_AF_PP;
+	GPIO_InitStructure.GPIO_Mode    = GPIO_Mode_IN_FLOATING;//_AF_PP;
 	GPIO_Init(GPIOB, &GPIO_InitStructure);
     
 	// Configure CTS pin
@@ -117,7 +117,7 @@ uint8_t si446x_setup(void) {
 	SPI_InitStructure.SPI_CPOL = SPI_CPOL_Low;
 	SPI_InitStructure.SPI_CPHA = SPI_CPHA_1Edge;
 	SPI_InitStructure.SPI_NSS = SPI_NSS_Soft;//SPI_NSS_Hard;
-	SPI_InitStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_4; // (48MHz/4)/4=3MHz, assumes 12Mhz PCLK2, i.e. 24mhz/2
+	SPI_InitStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_2; // (48MHz/4)/4=3MHz, assumes 12Mhz PCLK2, i.e. 24mhz/2
 	SPI_InitStructure.SPI_FirstBit = SPI_FirstBit_MSB;
 	SPI_InitStructure.SPI_CRCPolynomial = 7;
 
@@ -142,6 +142,18 @@ uint8_t si446x_setup(void) {
 	/* Connect EXTI11 Line to PB.11 pin - CTS*/
 	GPIO_EXTILineConfig(GPIO_PortSourceGPIOB, GPIO_PinSource11);
 
+	/* Deconfigure EXTI11 line */
+	EXTI_InitStructure.EXTI_Line = EXTI_Line11;		/*Only enable the CTS once the init stuff has completed*/
+	EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
+	EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;  
+	EXTI_InitStructure.EXTI_LineCmd = DISABLE;
+
+	/* Deconfigure EXTI0 line */
+	EXTI_InitStructure.EXTI_Line = EXTI_Line0;		/*Only enable NIRQ later*/
+	EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
+	EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;  
+	EXTI_InitStructure.EXTI_LineCmd = DISABLE;
+
 	/* Now enable the other interrupts via the NVIC - USART3 and the two DMA interrupts */
 	NVIC_InitStructure.NVIC_IRQChannel = USART3_IRQn;//Tx  triggered interrupt
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x03;	//Third highest group - above the DMA
@@ -159,6 +171,9 @@ uint8_t si446x_setup(void) {
 	while(Millis<t+15)
 		__WFI();
 	SDN_LOW;						/*Radio is now reset*/
+	t=Millis;
+	while(Millis<t+100)
+		__WFI();					/*Wait another 15ms to boot*/
 	while(GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_11)==0);	/*Wait for CTS high after POR*/
 
 	/* Configure EXTI11 line */
@@ -189,9 +204,9 @@ uint8_t si446x_setup(void) {
 	__disable_irq();
 	si446x_spi_state_machine( &Silabs_spi_state, 7, tx_buffer, 0, NULL, NULL );
 	__enable_irq();
-	while(Silabs_spi_state)
-		__WFI();
-	while(GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_0)==1);	/*Wait for NIRQ*/
+	while(Silabs_spi_state);
+		//__WFI();
+	while(GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_0)||GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_10));/*Wait for NIRQ and POR low*/
 	/* Configure EXTI0 line */
 	EXTI_InitStructure.EXTI_Line = EXTI_Line0;		/*Only enable NIRQ here*/
 	EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
@@ -203,6 +218,13 @@ uint8_t si446x_setup(void) {
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x07;	//Lowest group priority
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitStructure);
+	//clear all interrupts
+	memcpy(tx_buffer, (uint8_t [4]){0x20, 0x00, 0x00, 0x00}, 4*sizeof(uint8_t));
+	__disable_irq();
+	si446x_spi_state_machine( &Silabs_spi_state, 4, tx_buffer, 0, NULL, NULL );
+	__enable_irq();
+	while(Silabs_spi_state)
+		__WFI();
 	//read the device part number info
 	memcpy(tx_buffer, (uint8_t [2]){0x01, 0x01}, 2*sizeof(uint8_t));
 	__disable_irq();
@@ -211,16 +233,17 @@ uint8_t si446x_setup(void) {
 	while(Silabs_spi_state)
 		__WFI();
 	part=rx_buffer[3];//Should be 0x44
-	//clear all interrupts
-	memcpy(tx_buffer, (uint8_t [4]){0x20, 0x00, 0x00, 0x00}, 4*sizeof(uint8_t));
-	si446x_spi_state_machine( &Silabs_spi_state, 4, tx_buffer, 0, NULL, NULL );
-	while(Silabs_spi_state)
-		__WFI();
 	//Setup the GPIO pin, note that GPIO1 defaults to CTS, but we need to reset and set GPIO0 to TX direct mode mod input
 	memcpy(tx_buffer, (uint8_t [8]){0x13, 0x04, 0x00, 0x01, 0x01, 0x00, 0x11, 0x00}, 8*sizeof(uint8_t));//GPIO0 in, 1 CTS, rest dis, NIRQ unchanged
 	si446x_spi_state_machine( &Silabs_spi_state, 8, tx_buffer, 0, NULL, NULL );
 	while(Silabs_spi_state)
 		__WFI();
+	// Configure Tx pin as input to start with, so that it can be used to monitor POR, now configure it to TX AF
+	GPIO_InitStructure.GPIO_Pin     = GPIO_Pin_10;
+	GPIO_InitStructure.GPIO_Speed   = GPIO_Speed_50MHz;
+	GPIO_InitStructure.GPIO_Mode    = GPIO_Mode_AF_PP;
+	GPIO_Init(GPIOB, &GPIO_InitStructure);
+	//Rest of the config
 	si446x_set_frequency(Active_freq);
 	si446x_set_deviation_channel(Active_freq, Active_channel);
 	si446x_set_modem();
@@ -583,6 +606,8 @@ void si446x_spi_state_machine( uint8_t *state_, uint8_t tx_bytes, uint8_t *tx_da
 		DMA_Cmd(DMA1_Channel2, DISABLE);
 		DMA_DeInit(DMA1_Channel2);
 		DMA_DeInit(DMA1_Channel3);
+		/* Disable SPI TX/RX request */
+		SPI_I2S_DMACmd(SPI1, SPI_I2S_DMAReq_Rx|SPI_I2S_DMAReq_Tx, DISABLE);
 	}
 	switch (state) {
 		case 0:	/* First state is Tx via DMA */
@@ -595,13 +620,13 @@ void si446x_spi_state_machine( uint8_t *state_, uint8_t tx_bytes, uint8_t *tx_da
 				DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralDST;
 				DMA_Init(DMA1_Channel3, &DMA_InitStructure);
 				/* DMA1 channel2 configuration SPI1 RX ---------------------------------------------*/
-				DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)&dummyread;
+				DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)(&dummyread);
 				DMA_InitStructure.DMA_BufferSize = tx_bytes_local;
 				DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Disable;
 				DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
 				DMA_Init(DMA1_Channel2, &DMA_InitStructure);
 				/* Enable the DMA complete callback interrupt here */
-				DMA_ClearFlag(DMA1_FLAG_TC3|DMA1_FLAG_HT3);  /* Make sure flags are clear */
+				DMA_ClearFlag(DMA1_FLAG_TC3|DMA1_FLAG_HT3|DMA1_FLAG_TE3);  /* Make sure flags are clear */
 				DMA_ITConfig(DMA1_Channel3, DMA_IT_TC, ENABLE);/* Interrupt on complete */
 				/* Enable DMA TX Channel */
 				DMA_Cmd(DMA1_Channel3, ENABLE);
@@ -622,7 +647,7 @@ void si446x_spi_state_machine( uint8_t *state_, uint8_t tx_bytes, uint8_t *tx_da
 				DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralDST;
 				DMA_Init(DMA1_Channel3, &DMA_InitStructure);
 				/* Enable the DMA complete callback interrupt here */
-				DMA_ClearFlag(DMA1_FLAG_TC2|DMA1_FLAG_HT2);  /* Make sure flags are clear */
+				DMA_ClearFlag(DMA1_FLAG_TC2|DMA1_FLAG_HT2|DMA1_FLAG_TE2);  /* Make sure flags are clear */
 				DMA_ITConfig(DMA1_Channel2, DMA_IT_TC, ENABLE);/* Interrupt on complete */
 				/* Enable DMA RX Channel */
 				DMA_Cmd(DMA1_Channel2, ENABLE);
@@ -644,6 +669,7 @@ void si446x_spi_state_machine( uint8_t *state_, uint8_t tx_bytes, uint8_t *tx_da
 				//SPI_Cmd(SPI1, DISABLE);/* This clears NSS */
 				//SPI_Cmd(SPI1, ENABLE);
 				CTS_Low=Millis;
+				//Delay(10000);
 				if( GPIO_ReadInputDataBit( GPIOB, GPIO_Pin_11 ) )
 					*state_=3;
 				/* Otherwise we await an interrupt to move us on to the next stage */
@@ -673,11 +699,11 @@ void si446x_spi_state_machine( uint8_t *state_, uint8_t tx_bytes, uint8_t *tx_da
 				DMA_InitStructure.DMA_BufferSize = rx_bytes_local;
 				DMA_Init(DMA1_Channel2, &DMA_InitStructure);
 				DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)dummywrite;/*Tx is a dummy write*/
-				DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
+				DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Disable;
 				DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralDST;
 				DMA_Init(DMA1_Channel3, &DMA_InitStructure);
 				/* Enable the DMA complete callback interrupt here */
-				DMA_ClearFlag(DMA1_FLAG_TC2|DMA1_FLAG_HT2);  /* Make sure flags are clear */
+				DMA_ClearFlag(DMA1_FLAG_TC2|DMA1_FLAG_HT2|DMA1_FLAG_TE2);  /* Make sure flags are clear */
 				DMA_ITConfig(DMA1_Channel2, DMA_IT_TC, ENABLE);/* Interrupt on complete */
 				/* Enable DMA RX Channel */
 				DMA_Cmd(DMA1_Channel2, ENABLE);
