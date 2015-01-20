@@ -77,20 +77,20 @@ uint8_t si446x_setup(void) {
 	GPIO_Init(GPIOB, &GPIO_InitStructure);
 
 	// Configure SDN pin
-	GPIO_WriteBit(GPIOB,GPIO_Pin_9,Bit_RESET);//Set it low
 	GPIO_InitStructure.GPIO_Pin     = GPIO_Pin_9;
 	GPIO_InitStructure.GPIO_Speed   = GPIO_Speed_50MHz;
 	GPIO_InitStructure.GPIO_Mode    = GPIO_Mode_Out_PP;
 	GPIO_Init(GPIOB, &GPIO_InitStructure);
+	GPIO_WriteBit(GPIOB,GPIO_Pin_9,Bit_RESET);//Set it low
 
 	// Configure NSEL pin
-	GPIO_WriteBit(GPIOB,GPIO_Pin_9,Bit_SET);//Set it high
 	GPIO_InitStructure.GPIO_Pin     = GPIO_Pin_4;
 	GPIO_InitStructure.GPIO_Speed   = GPIO_Speed_50MHz;
 	GPIO_InitStructure.GPIO_Mode    = GPIO_Mode_Out_PP;
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
+	GPIO_WriteBit(GPIOA,GPIO_Pin_4,Bit_SET);//Set it high
 
-	// Configure MOSI,SCLK,NSS pins (SPI2)
+	// Configure MOSI,SCLK pins (SPI2)
 	GPIO_InitStructure.GPIO_Pin     = GPIO_Pin_5|GPIO_Pin_7;
 	GPIO_InitStructure.GPIO_Speed   = GPIO_Speed_50MHz;
 	GPIO_InitStructure.GPIO_Mode    = GPIO_Mode_AF_PP;
@@ -206,13 +206,6 @@ uint8_t si446x_setup(void) {
 	while(Silabs_spi_state);
 		__WFI();
 	while(GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_0)|(!GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_10)));/*Wait for NIRQ low and POR high*/
-	//Setup the GPIO pin, note that GPIO1 defaults to CTS, but we need to reset and set GPIO0 to TX direct mode mod input
-	memcpy(tx_buffer, (uint8_t [8]){0x13, 0x04, 0x08, 0x01, 0x01, 0x00, 0x11, 0x00}, 8*sizeof(uint8_t));//GPIO0 in, 1 CTS, rest dis, NIRQ unchanged
-	__disable_irq();
-	si446x_spi_state_machine( &Silabs_spi_state, 8, tx_buffer, 0, NULL, NULL );
-	__enable_irq();
-	while(Silabs_spi_state)
-		__WFI();
 	/* Configure EXTI0 line */
 	EXTI_InitStructure.EXTI_Line = EXTI_Line0;		/*Only enable NIRQ here*/
 	EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
@@ -242,6 +235,13 @@ uint8_t si446x_setup(void) {
 	GPIO_InitStructure.GPIO_Speed   = GPIO_Speed_50MHz;
 	GPIO_InitStructure.GPIO_Mode    = GPIO_Mode_AF_PP;
 	GPIO_Init(GPIOB, &GPIO_InitStructure);
+	//Setup the GPIO pin, note that GPIO1 defaults to CTS, but we need to reset and set GPIO0 to TX direct mode mod input
+	memcpy(tx_buffer, (uint8_t [8]){0x13, 0x04, 0x08, 0x01, 0x01, 0x00, 0x11, 0x00}, 8*sizeof(uint8_t));//GPIO0 in, 1 CTS, rest dis, NIRQ unchanged
+	__disable_irq();
+	si446x_spi_state_machine( &Silabs_spi_state, 8, tx_buffer, 0, NULL, NULL );
+	__enable_irq();
+	while(Silabs_spi_state)
+		__WFI();
 	//Rest of the config
 	si446x_set_frequency(Active_freq);
 	si446x_set_deviation_channel(Active_freq, Active_channel);
@@ -599,9 +599,10 @@ __attribute__((externally_visible)) void USART3_IRQHandler(void) {
 void si446x_busy_wait_send_receive(uint8_t tx_bytes, uint8_t rx_bytes, uint8_t *tx_data, uint8_t *rx_data) {
 	NSEL_LOW;
 	for(uint8_t n=0; n<tx_bytes; n++) {
-		SPI_I2S_SendData(SPI1,tx_bytes[n]);
+		SPI_I2S_SendData(SPI1,tx_data[n]);
 		while(SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_TXE) == RESET);
 	}
+	while( SPI1->SR & SPI_I2S_FLAG_BSY );	//Wait until SPI is not busy anymore
 	NSEL_HIGH;
 	uint16_t reply = SPI1->DR;		//Read this to wipe the RXNE - clear the RX buffer
 	reply=0;
@@ -609,7 +610,7 @@ void si446x_busy_wait_send_receive(uint8_t tx_bytes, uint8_t rx_bytes, uint8_t *
 		SPI1->DR=0x44;			//The read command
 		while(SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_RXNE) == RESET);
 		reply = SPI1->DR;
-		SPI1->DR=0x44;			//The read command - dummy byte
+		SPI1->DR=0x00;			//The read command - dummy byte
 		while(SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_RXNE) == RESET);
 		reply = SPI1->DR;
 		if (reply != 0xFF){		//Try again
