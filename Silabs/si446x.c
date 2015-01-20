@@ -206,6 +206,13 @@ uint8_t si446x_setup(void) {
 	while(Silabs_spi_state);
 		__WFI();
 	while(GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_0)|(!GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_10)));/*Wait for NIRQ low and POR high*/
+	//Setup the GPIO pin, note that GPIO1 defaults to CTS, but we need to reset and set GPIO0 to TX direct mode mod input
+	memcpy(tx_buffer, (uint8_t [8]){0x13, 0x04, 0x08, 0x01, 0x01, 0x00, 0x11, 0x00}, 8*sizeof(uint8_t));//GPIO0 in, 1 CTS, rest dis, NIRQ unchanged
+	__disable_irq();
+	si446x_spi_state_machine( &Silabs_spi_state, 8, tx_buffer, 0, NULL, NULL );
+	__enable_irq();
+	while(Silabs_spi_state)
+		__WFI();
 	/* Configure EXTI0 line */
 	EXTI_InitStructure.EXTI_Line = EXTI_Line0;		/*Only enable NIRQ here*/
 	EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
@@ -230,13 +237,6 @@ uint8_t si446x_setup(void) {
 	while(Silabs_spi_state)
 		__WFI();
 	part=rx_buffer[3];//Should be 0x44
-	//Setup the GPIO pin, note that GPIO1 defaults to CTS, but we need to reset and set GPIO0 to TX direct mode mod input
-	memcpy(tx_buffer, (uint8_t [8]){0x13, 0x04, 0x00, 0x01, 0x01, 0x00, 0x11, 0x00}, 8*sizeof(uint8_t));//GPIO0 in, 1 CTS, rest dis, NIRQ unchanged
-	__disable_irq();
-	si446x_spi_state_machine( &Silabs_spi_state, 8, tx_buffer, 0, NULL, NULL );
-	__enable_irq();
-	while(Silabs_spi_state)
-		__WFI();
 	// Configure Tx pin as input to start with, so that it can be used to monitor POR, now configure it to TX AF
 	GPIO_InitStructure.GPIO_Pin     = GPIO_Pin_10;
 	GPIO_InitStructure.GPIO_Speed   = GPIO_Speed_50MHz;
