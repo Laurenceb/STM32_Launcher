@@ -592,6 +592,41 @@ __attribute__((externally_visible)) void USART3_IRQHandler(void) {
 }
 
 /**
+  * @brief  This function handles simple busy wait two way silabs comms
+  * @param  Tx and Rx number of bytes, pointers to buffers. Note that number or Rx bytes is payload only
+  * @retval None
+  */
+void si446x_busy_wait_send_receive(uint8_t tx_bytes, uint8_t rx_bytes, uint8_t *tx_data, uint8_t *rx_data) {
+	NSEL_LOW;
+	for(uint8_t n=0; n<tx_bytes; n++) {
+		SPI_I2S_SendData(SPI1,tx_bytes[n]);
+		while(SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_TXE) == RESET);
+	}
+	NSEL_HIGH;
+	uint16_t reply = SPI1->DR;		//Read this to wipe the RXNE - clear the RX buffer
+	reply=0;
+	while (reply != 0xFF) {
+		SPI1->DR=0x44;			//The read command
+		while(SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_RXNE) == RESET);
+		reply = SPI1->DR;
+		SPI1->DR=0x44;			//The read command - dummy byte
+		while(SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_RXNE) == RESET);
+		reply = SPI1->DR;
+		if (reply != 0xFF){		//Try again
+			NSEL_HIGH;
+			Delay(40);
+			NSEL_LOW;
+		}
+	}
+	for(uint8_t n=0; n<tx_bytes; n++) {	//Can now read out the rest of the data
+		SPI_I2S_SendData(SPI1,0x00);
+		while(SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_RXNE) == RESET);
+		rx_data[n]=SPI1->DR;
+	}
+	NSEL_HIGH;
+}
+
+/**
   * @brief  This function handles DMA/ISR driven two way silabs comms
   * @param  State machine state, tx and rx config, callback function pointer, note that rx buffer offset by one byte is fast (CMD) and two bytes in normal (CMD,CTS)
   * @retval None
