@@ -12,6 +12,8 @@ void setup_gpio(void)
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB|RCC_APB2Periph_GPIOA|RCC_APB2Periph_AFIO, ENABLE);//GPIO/AFIO clks
 	setuppwr();				//configure power control
 	disable_pin();				//disable WKUP pin functionality
+	//Disable the JTAG so we can use pins as GPIO - SWD still usable
+	GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable,ENABLE);
 	//Configure and read the PortB2 pin - this has a pullup to V_USB, so if it reads 1 we booted off usb so setup USB detatch isr
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD;
