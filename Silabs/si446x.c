@@ -117,7 +117,7 @@ uint8_t si446x_setup(void) {
 	SPI_InitStructure.SPI_CPOL = SPI_CPOL_Low;
 	SPI_InitStructure.SPI_CPHA = SPI_CPHA_1Edge;
 	SPI_InitStructure.SPI_NSS = SPI_NSS_Soft;//SPI_NSS_Hard;
-	SPI_InitStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_2; // (48MHz/4)/4=3MHz, assumes 12Mhz PCLK2, i.e. 24mhz/2
+	SPI_InitStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_2; // (48MHz/4)/2=6MHz, assumes 12Mhz PCLK2, i.e. 48mhz/4
 	SPI_InitStructure.SPI_FirstBit = SPI_FirstBit_MSB;
 	SPI_InitStructure.SPI_CRCPolynomial = 7;
 
@@ -157,14 +157,13 @@ uint8_t si446x_setup(void) {
 	EXTI_Init(&EXTI_InitStructure);
 
 	/* Now enable the other interrupts via the NVIC - USART3 and the two DMA interrupts */
-	NVIC_InitStructure.NVIC_IRQChannel = USART3_IRQn;//Tx  triggered interrupt
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x03;	//Third highest group - above the DMA
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x01;//Lower pre-emption priority
+	NVIC_InitStructure.NVIC_IRQChannel = USART3_IRQn;	//Tx  triggered interrupt
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x04;	//Third highest group - above the DMA
 	NVIC_Init(&NVIC_InitStructure);
 	NVIC_InitStructure.NVIC_IRQChannel = DMA1_Channel2_IRQn;//The DMA complete/half complete triggered interrupt	
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x04;	//4th subpriority
-	NVIC_Init(&NVIC_InitStructure);
-	NVIC_InitStructure.NVIC_IRQChannel = DMA1_Channel3_IRQn;//The DMA complete/half complete triggered interrupt	
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x05;	//5th subpriority
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x05;	//4th subpriority
 	NVIC_Init(&NVIC_InitStructure);
 
 	/* Reset the radio */
@@ -174,7 +173,7 @@ uint8_t si446x_setup(void) {
 		__WFI();
 	SDN_LOW;						/*Radio is now reset*/
 	t=Millis;
-	while(Millis<t+100)
+	while(Millis<t+15)
 		__WFI();					/*Wait another 15ms to boot*/
 	while(GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_11)==0);	/*Wait for CTS high after POR*/
 
@@ -186,9 +185,7 @@ uint8_t si446x_setup(void) {
 
 	/* Enable and set EXTI11 Interrupt to the second lowest priority */
 	NVIC_InitStructure.NVIC_IRQChannel = EXTI15_10_IRQn;	//The CTS triggered interrupt	
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x01;//Lower pre-emption priority
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x06;	//Second Lowest group priority
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitStructure);
 	EXTI_Init(&EXTI_InitStructure);	/* Only enable the CTS once NVIC is configured */
 
@@ -199,26 +196,24 @@ uint8_t si446x_setup(void) {
 	uint8_t rx_buffer[12];
 	//divide VCXO_FREQ into its bytes; MSB first
 	uint8_t x3 = VCXO_FREQ / 0x1000000;
-	uint8_t x2 = (VCXO_FREQ - x3 * 0x1000000) / 0x10000;
-	uint8_t x1 = (VCXO_FREQ - x3 * 0x1000000 - x2 * 0x10000) / 0x100;
-	uint8_t x0 = (VCXO_FREQ - x3 * 0x1000000 - x2 * 0x10000 - x1 * 0x100); 
+	uint8_t x2 = (VCXO_FREQ - (uint32_t)x3 * 0x1000000) / 0x10000;
+	uint8_t x1 = (VCXO_FREQ - (uint32_t)x3 * 0x1000000 - (uint32_t)x2 * 0x10000) / 0x100;
+	uint8_t x0 = (VCXO_FREQ - (uint32_t)x3 * 0x1000000 - (uint32_t)x2 * 0x10000 - (uint32_t)x1 * 0x100); 
 	memcpy(tx_buffer, (uint8_t [7]){0x02, 0x01, 0x01, x3, x2, x1, x0}, 7*sizeof(uint8_t));
 	__disable_irq();
-	si446x_spi_state_machine( &Silabs_spi_state, 7, tx_buffer, 0, NULL, NULL );
+	si446x_spi_state_machine( &Silabs_spi_state, 7, tx_buffer, 2, rx_buffer, NULL );
 	__enable_irq();
 	while(Silabs_spi_state);
-		//__WFI();
-	while(GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_0)||GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_10));/*Wait for NIRQ and POR low*/
+		__WFI();
+	while(GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_0)|(!GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_10)));/*Wait for NIRQ low and POR high*/
 	/* Configure EXTI0 line */
 	EXTI_InitStructure.EXTI_Line = EXTI_Line0;		/*Only enable NIRQ here*/
 	EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
-	EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;  
+	EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling; //NIRQ is active low  
 	EXTI_InitStructure.EXTI_LineCmd = ENABLE;
 	/* Enable and set EXTI0 Interrupt to the lowest priority */
 	NVIC_InitStructure.NVIC_IRQChannel = EXTI0_IRQn;	//The NIRQ triggered interrupt	
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x01;//Lower pre-emption priority
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x07;	//Lowest group priority
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitStructure);
 	//clear all interrupts
 	memcpy(tx_buffer, (uint8_t [4]){0x20, 0x00, 0x00, 0x00}, 4*sizeof(uint8_t));
@@ -237,7 +232,9 @@ uint8_t si446x_setup(void) {
 	part=rx_buffer[3];//Should be 0x44
 	//Setup the GPIO pin, note that GPIO1 defaults to CTS, but we need to reset and set GPIO0 to TX direct mode mod input
 	memcpy(tx_buffer, (uint8_t [8]){0x13, 0x04, 0x00, 0x01, 0x01, 0x00, 0x11, 0x00}, 8*sizeof(uint8_t));//GPIO0 in, 1 CTS, rest dis, NIRQ unchanged
+	__disable_irq();
 	si446x_spi_state_machine( &Silabs_spi_state, 8, tx_buffer, 0, NULL, NULL );
+	__enable_irq();
 	while(Silabs_spi_state)
 		__WFI();
 	// Configure Tx pin as input to start with, so that it can be used to monitor POR, now configure it to TX AF
@@ -250,7 +247,9 @@ uint8_t si446x_setup(void) {
 	si446x_set_deviation_channel(Active_freq, Active_channel);
 	si446x_set_modem();
 	memcpy(tx_buffer, (uint8_t [6]){0x32, Channel_rx, 0x00, 0x00, 0x03, 0x08}, 6*sizeof(uint8_t));/* ready on CRC match pkt, RX on CRC packet error, FIELD config in packet handler for packet engine */
+	__disable_irq();
 	si446x_spi_state_machine( &Silabs_spi_state, 6, tx_buffer, 0, rx_buffer, &si446x_state_machine );/* Start off in Rx mode */
+	__enable_irq();
 	while(Silabs_spi_state)
 		__WFI();
 	}
@@ -280,7 +279,9 @@ void si446x_set_frequency(uint32_t freq) {/*Set the output divider according to 
 	// set the band parameter
 	uint32_t sy_sel = 8;
 	memcpy(tx_buffer, (uint8_t [5]){0x11, 0x20, 0x01, 0x51, (band + sy_sel)}, 5*sizeof(uint8_t));
+	__disable_irq();
 	si446x_spi_state_machine( &Silabs_spi_state, 5, tx_buffer, 0, rx_buffer, NULL );
+	__enable_irq();
 	while(Silabs_spi_state)
 		__WFI();
 	// Set the pll parameters
@@ -291,12 +292,16 @@ void si446x_set_frequency(uint32_t freq) {/*Set the output divider according to 
 	uint8_t c1 = channel_increment / 0x100;
 	uint8_t c0 = channel_increment - (0x100 * c1);
 	memcpy(tx_buffer, (uint8_t [10]){0x11, 0x40, 0x06, 0x00, n, m2, m1, m0, c1, c0}, 10*sizeof(uint8_t));
+	__disable_irq();
 	si446x_spi_state_machine( &Silabs_spi_state, 10, tx_buffer, 0, rx_buffer, NULL );
+	__enable_irq();
 	while(Silabs_spi_state)
 		__WFI();
 	// Set the Power
 	memcpy(tx_buffer, (uint8_t [5]){0x11, 0x22, 0x01, 0x01, Active_level}, 5*sizeof(uint8_t));
+	__disable_irq();
 	si446x_spi_state_machine( &Silabs_spi_state, 5, tx_buffer, 0, rx_buffer, NULL );
+	__enable_irq();
 	while(Silabs_spi_state)
 		__WFI();
 }
@@ -319,14 +324,18 @@ void si446x_set_deviation_channel(uint32_t deviation, uint32_t channel_space) {
 	uint8_t modem_freq_dev_1 = mask & (modem_freq_dev >> 8);
 	uint8_t modem_freq_dev_2 = mask & (modem_freq_dev >> 16);
 	memcpy(tx_buffer, (uint8_t [7]){0x11, 0x20, 0x03, 0x0A, modem_freq_dev_2, modem_freq_dev_1, modem_freq_dev_0}, 7*sizeof(uint8_t));
+	__disable_irq();
 	si446x_spi_state_machine( &Silabs_spi_state, 7, tx_buffer, 0, rx_buffer, NULL );
+	__enable_irq();
 	while(Silabs_spi_state)
 		__WFI();
 	uint32_t channel_spacing = (uint32_t)(units_per_hz * channel_space / 2.0 );
 	modem_freq_dev_0 = mask & channel_spacing ;
 	modem_freq_dev_1 = mask & (channel_spacing >> 8);
 	memcpy(tx_buffer, (uint8_t [6]){0x11, 0x40, 0x02, 0x04, modem_freq_dev_1, modem_freq_dev_0}, 6*sizeof(uint8_t));
+	__disable_irq();
 	si446x_spi_state_machine( &Silabs_spi_state, 6, tx_buffer, 0, rx_buffer, NULL );
+	__enable_irq();
 	while(Silabs_spi_state)
 		__WFI();
 }
@@ -342,39 +351,53 @@ void si446x_set_modem(void) {
 	//Set to CW mode
 	//Sets modem into direct asynchronous 2FSK mode using GPIO0 (UART3 TX on the board)
 	memcpy(tx_buffer, (uint8_t [5]){0x11, 0x20, 0x01, 0x00, 0x8A}, 5*sizeof(uint8_t));
+	__disable_irq();
 	si446x_spi_state_machine( &Silabs_spi_state, 5, tx_buffer, 0, rx_buffer, NULL );
+	__enable_irq();
 	while(Silabs_spi_state)
 		__WFI();
 	//Also configure the RX packet CRC stuff here, 6 byte payload for FIELD1, using CRC and CRC check for rx with no seed, and 2FSK
 	memcpy(tx_buffer, (uint8_t [7]){0x11, 0x12, 0x03, 0x22, 0x06, 0x00, 0x0A}, 7*sizeof(uint8_t));
+	__disable_irq();
 	si446x_spi_state_machine( &Silabs_spi_state, 7, tx_buffer, 0, rx_buffer, NULL );
+	__enable_irq();
 	while(Silabs_spi_state)
 		__WFI();
 	//Configure the RSSI thresholding for RX mode, with 12dB jump threshold (reset if RSSI changes this much during Rx), RSSI mean with packet toggle
 	//RSSI_THRESH is in dBm, it needs to be converted to 0.5dBm steps offset by ~130
 	uint8_t rssi = (2*(RSSI_THRESH+130))&0xFF;
 	memcpy(tx_buffer, (uint8_t [8]){0x11, 0x20, 0x04, 0x4A, rssi, 0x0C, 0x12, 0x3E}, 8*sizeof(uint8_t));
+	__disable_irq();
 	si446x_spi_state_machine( &Silabs_spi_state, 8, tx_buffer, 0, rx_buffer, NULL );
+	__enable_irq();
 	while(Silabs_spi_state)
 		__WFI();
 	//Configure the match value, this constrains the first 4 bytes of data to match e.g. $$RO
 	memcpy(tx_buffer, (uint8_t [16]){0x11, 0x30, 0x0C, 0x00,Silabs_Header[0], 0xFF, 0x41,Silabs_Header[1], 0xFF, 0x42,Silabs_Header[2], 0xFF, 0x43,Silabs_Header[3], 0xFF, 0x44}, 16*sizeof(uint8_t));
+	__disable_irq();
 	si446x_spi_state_machine( &Silabs_spi_state, 16, tx_buffer, 0, rx_buffer, NULL );
+	__enable_irq();
 	while(Silabs_spi_state)
 		__WFI();
 	//Configure the Packet handler to use seperate FIELD config for RX, and turn off after packet rx
 	memcpy(tx_buffer, (uint8_t [5]){0x11, 0x12, 0x01, 0x06, 0x80}, 5*sizeof(uint8_t));
+	__disable_irq();
 	si446x_spi_state_machine( &Silabs_spi_state, 5, tx_buffer, 0, rx_buffer, NULL );
+	__enable_irq();
 	while(Silabs_spi_state)
 		__WFI();
 	//Use CCIT-16 CRC with 0xFFFF seed on the packet handler, same as UKHAS protocol
 	memcpy(tx_buffer, (uint8_t [5]){0x11, 0x12, 0x01, 0x00, 0x85}, 5*sizeof(uint8_t));
+	__disable_irq();
 	si446x_spi_state_machine( &Silabs_spi_state, 5, tx_buffer, 0, rx_buffer, NULL );
+	__enable_irq();
 	while(Silabs_spi_state)
 		__WFI();
 	//Set the sync word as two bytes 0xD391, this has good autocorrelation 8/1 peak to secondary ratio, default config used, no bit errors, 16 bit
 	memcpy(tx_buffer, (uint8_t [6]){0x11, 0x11, 0x02, 0x01, 0xD3, 0x91}, 6*sizeof(uint8_t));
+	__disable_irq();
 	si446x_spi_state_machine( &Silabs_spi_state, 6, tx_buffer, 0, rx_buffer, NULL );
+	__enable_irq();
 	while(Silabs_spi_state)
 		__WFI();
 }
@@ -628,8 +651,8 @@ void si446x_spi_state_machine( uint8_t *state_, uint8_t tx_bytes, uint8_t *tx_da
 				DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
 				DMA_Init(DMA1_Channel2, &DMA_InitStructure);
 				/* Enable the DMA complete callback interrupt here */
-				DMA_ClearFlag(DMA1_FLAG_TC3|DMA1_FLAG_HT3|DMA1_FLAG_TE3);  /* Make sure flags are clear */
-				DMA_ITConfig(DMA1_Channel3, DMA_IT_TC, ENABLE);/* Interrupt on complete */
+				DMA_ClearFlag(DMA1_FLAG_TC2|DMA1_FLAG_HT2|DMA1_FLAG_TE2);  /* Make sure flags are clear */
+				DMA_ITConfig(DMA1_Channel2, DMA_IT_TC, ENABLE);/* Interrupt on complete */
 				/* Enable DMA TX Channel */
 				DMA_Cmd(DMA1_Channel3, ENABLE);
 				/* Enable DMA RX Channel */
@@ -667,7 +690,7 @@ void si446x_spi_state_machine( uint8_t *state_, uint8_t tx_bytes, uint8_t *tx_da
 				DMA_Cmd(DMA1_Channel2, DISABLE);
 				/* Disable SPI TX/RX request */
 				SPI_I2S_DMACmd(SPI1, SPI_I2S_DMAReq_Rx|SPI_I2S_DMAReq_Tx, DISABLE);
-				DMA_ITConfig(DMA1_Channel3, DMA_IT_TC, DISABLE);
+				DMA_ITConfig(DMA1_Channel2, DMA_IT_TC, DISABLE);
 				//SPI_Cmd(SPI1, DISABLE);/* This clears NSS */
 				//SPI_Cmd(SPI1, ENABLE);
 				CTS_Low=Millis;
@@ -736,21 +759,7 @@ void si446x_spi_state_machine( uint8_t *state_, uint8_t tx_bytes, uint8_t *tx_da
 }
 
 /**
-  * @brief  This function handles DMA channel interrupt request.- DMA SPI1 TX complete ISR
-  * @param  None
-  * @retval None
-  */
-__attribute__((externally_visible)) void DMA1_Channel3_IRQHandler(void) {
-	if (DMA_GetITStatus(DMA1_IT_TC3)) {
-		NSEL_HIGH; 	/*Deselect device*/
-		DMA_ClearFlag(DMA1_FLAG_TC3|DMA1_FLAG_HT3);  	/* make sure all flags are clear */
-		si446x_spi_state_machine( &Silabs_spi_state, 0, NULL, 0, NULL, NULL );
-	}
-	DMA_ClearITPendingBit(DMA1_IT_GL3);			/* clear all the interrupts */
-}
-
-/**
-  * @brief  This function handles DMA channel interrupt request.- DMA SPI1 RX complete ISR
+  * @brief  This function handles DMA channel interrupt request.- DMA SPI1 RX complete ISR - TX is not used due to buffering alignment issues
   * @param  None
   * @retval None
   */
@@ -775,7 +784,7 @@ __attribute__((externally_visible)) void EXTI15_10_IRQHandler(void) {
 		EXTI_ClearITPendingBit(EXTI_Line11);
 		if( Silabs_spi_state==2 ) { /* If we are waiting for the ISR */
 			Silabs_spi_state++;
-			//Delay(1000);/*A Delay here might help if the silabs timing is glitchy*/
+			//Delay(1000);/*A Delay here might help if the silabs timing is glitchy?*/
 			si446x_spi_state_machine( &Silabs_spi_state, 0, NULL, 0, NULL, NULL );
 		}
 	}

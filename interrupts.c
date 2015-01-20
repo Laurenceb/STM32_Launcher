@@ -24,16 +24,16 @@ void ISR_Config(void) {
 	//First we configure the systick ISR
 	/* Configure one bit for preemption priority */   
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_1);
-	/* Enable and set SYSTICK Interrupt to the fifth priority */
+	/* Enable and set SYSTICK Interrupt to the fourth priority */
 	NVIC_InitStructure.NVIC_IRQChannel = SysTick_IRQn;	//The 100hz timer triggered interrupt	
 	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x01;//Pre-emption priority
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x02;	//3rd subpriority
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x03;	//4th subpriority
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitStructure);
 	//Configure ADC interrupt
 	NVIC_InitStructure.NVIC_IRQChannel = ADC1_2_IRQn;	//The ADC watchdog triggered interrupt	
 	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x01;//Low Pre-emption priority
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x01;	//2nd subpriority
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x02;	//3rd subpriority
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitStructure);
 	//Now we configure the I2C Event ISR
