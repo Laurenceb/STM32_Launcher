@@ -246,9 +246,9 @@ uint8_t si446x_setup(void) {
 	si446x_set_frequency(Active_freq);
 	si446x_set_deviation_channel(Active_freq, Active_channel);
 	si446x_set_modem();
-	memcpy(tx_buffer, (uint8_t [6]){0x32, Channel_rx, 0x00, 0x00, 0x03, 0x08}, 6*sizeof(uint8_t));/* ready on CRC match pkt, RX on CRC packet error, FIELD config in packet handler for packet engine */
+	memcpy(tx_buffer, (uint8_t [8]){0x32, Channel_rx, 0x00, 0x00, 0x00, 0x00, 0x03, 0x08}, 8*sizeof(uint8_t));/* ready on CRC match pkt, RX on CRC packet error, FIELD config in packet handler for packet engine */
 	__disable_irq();
-	si446x_spi_state_machine( &Silabs_spi_state, 6, tx_buffer, 0, rx_buffer, &si446x_state_machine );/* Start off in Rx mode */
+	si446x_spi_state_machine( &Silabs_spi_state, 8, tx_buffer, 0, rx_buffer, &si446x_state_machine );/* Start off in Rx mode */
 	__enable_irq();
 	while(Silabs_spi_state)
 		__WFI();
@@ -426,11 +426,10 @@ void si446x_state_machine(uint8_t *state_, uint8_t reason ) {
 				*state_=5;
 				tx_buffer[0]=0x31;/* Go to TX mode */
 				tx_buffer[1]=Channel_tx;/* The global channel number */
-				tx_buffer[2]=0x30;
+				tx_buffer[2]=0x00;/* Direct mode - ignore the packet settings */
 				tx_buffer[3]=0x00;
 				tx_buffer[4]=0x00;
-				tx_buffer[5]=0x00;
-				si446x_spi_state_machine( &Silabs_spi_state, 6, tx_buffer, 0, rx_buffer, &si446x_state_machine );
+				si446x_spi_state_machine( &Silabs_spi_state, 5, tx_buffer, 0, rx_buffer, &si446x_state_machine );
 			}
 			break;
 		case 1: /* NIRQ during Rx mode caused PH to be read */
@@ -471,8 +470,8 @@ void si446x_state_machine(uint8_t *state_, uint8_t reason ) {
 				if(rx_buffer[2]) {/* There is data for us */
 					*state_=4;
 					tx_buffer[0]=0x77;
-					bytes_read=rx_buffer[2]+1;/* Offset for CMD dummy byte */
-					si446x_spi_state_machine( &Silabs_spi_state, 1, tx_buffer, bytes_read, rx_buffer, &si446x_state_machine );
+					bytes_read=rx_buffer[2]+1;/* Offset for CMD dummy byte, note use of zero tx bytes to set direct read mode */
+					si446x_spi_state_machine( &Silabs_spi_state, 0, tx_buffer, bytes_read, rx_buffer, &si446x_state_machine );
 				}
 				else
 					*state_=0;/* Return to Rx state */
@@ -484,18 +483,17 @@ void si446x_state_machine(uint8_t *state_, uint8_t reason ) {
 			break;
 		case 4:
 			if(!reason) {
-				for( uint8_t n=0; n<bytes_read; n++ )
+				for( uint8_t n=1; n<bytes_read && n<sizeof(rx_buffer); n++ )/* Avoid the CTS byte */
 					Add_To_Buffer( rx_buffer[n], &Silabs_Rx_Buffer );
 				if(unhandled_tx_data) {
 					*state_=5;/* Jump directly to Tx mode*/
 					unhandled_tx_data=0;/* Reset this here */
 					tx_buffer[0]=0x31;/* Go to TX mode */
 					tx_buffer[1]=Channel_tx;/* The global channel number */
-					tx_buffer[2]=0x30;
+					tx_buffer[2]=0x00;
 					tx_buffer[3]=0x00;
 					tx_buffer[4]=0x00;
-					tx_buffer[5]=0x00;
-					si446x_spi_state_machine( &Silabs_spi_state, 6, tx_buffer, 0, rx_buffer, &si446x_state_machine );
+					si446x_spi_state_machine( &Silabs_spi_state, 5, tx_buffer, 0, rx_buffer, &si446x_state_machine );
 				}
 				else {
 					*state_=0;/* Completed the reception */
@@ -503,9 +501,11 @@ void si446x_state_machine(uint8_t *state_, uint8_t reason ) {
 					tx_buffer[1]=Channel_rx;/* The global channel number */
 					tx_buffer[2]=0x00;
 					tx_buffer[3]=0x00;
-					tx_buffer[4]=0x03;
-					tx_buffer[5]=0x08;
-					si446x_spi_state_machine( &Silabs_spi_state, 6, tx_buffer, 0, rx_buffer, &si446x_state_machine );
+					tx_buffer[4]=0x00;
+					tx_buffer[5]=0x00;
+					tx_buffer[6]=0x03;
+					tx_buffer[7]=0x08;/*Only exit RX mode on CRC match, use zero length packet here as its configured as field*/
+					si446x_spi_state_machine( &Silabs_spi_state, 8, tx_buffer, 0, rx_buffer, &si446x_state_machine );
 				}
 			}
 			else {
@@ -534,9 +534,11 @@ void si446x_state_machine(uint8_t *state_, uint8_t reason ) {
 				tx_buffer[1]=Channel_rx;/* The global channel number */
 				tx_buffer[2]=0x00;
 				tx_buffer[3]=0x00;
-				tx_buffer[4]=0x03;
-				tx_buffer[5]=0x08;
-				si446x_spi_state_machine( &Silabs_spi_state, 6, tx_buffer, 0, rx_buffer, &si446x_state_machine );	
+				tx_buffer[4]=0x00;
+				tx_buffer[5]=0x00;
+				tx_buffer[6]=0x03;
+				tx_buffer[7]=0x08;/*Only exit RX mode on CRC match, use zero length packet here as its configured as field*/
+				si446x_spi_state_machine( &Silabs_spi_state, 8, tx_buffer, 0, rx_buffer, &si446x_state_machine );	
 			}/*Return the state to 0 now*/
 			else {/* This may be due to NIRQ glitch, or even more data being added */
 				if(reason==1) {/* NIRQ */
@@ -644,8 +646,10 @@ void si446x_spi_state_machine( uint8_t *state_, uint8_t tx_bytes, uint8_t *tx_da
 	if(tx_data) {	/* These only need to be set once with a non NULL pointer*/
 		tx_data_local=tx_data;
 		tx_bytes_local=tx_bytes;
-		if(tx_bytes_local==1)
+		if(tx_bytes_local==1) {
+			tx_data[1]=0x00;/*Wipe the dummy byte*/
 			tx_bytes_local=2;/*Need to write two bytes at least - silabs hardware bug, zero bytes is used to trigger direct mode*/
+		}
 	}
 	if(rx_data) {	/* These only need to be set once */
 		rx_data_local=rx_data;
