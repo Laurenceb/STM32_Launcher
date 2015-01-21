@@ -10,6 +10,7 @@ uint32_t Active_freq = DEFAULT_FREQ;
 uint32_t Active_shift = DEFAULT_SHIFT;
 uint32_t Active_level = DEFAULT_POWER_LEVEL;
 uint32_t Active_channel = DEFAULT_CHANNEL;
+uint32_t Active_bps = DEFAULT_BPS;
 int8_t Outdiv = 4;
 
 //Interface functions go here
@@ -244,7 +245,7 @@ uint8_t si446x_setup(void) {
 		__WFI();
 	//Rest of the config
 	si446x_set_frequency(Active_freq);
-	si446x_set_deviation_channel(Active_freq, Active_channel);
+	si446x_set_deviation_channel_bps(Active_freq, Active_channel, Active_bps);
 	si446x_set_modem();
 	memcpy(tx_buffer, (uint8_t [8]){0x32, Channel_rx, 0x00, 0x00, 0x00, 0x00, 0x03, 0x08}, 8*sizeof(uint8_t));/* ready on CRC match pkt, RX on CRC packet error, FIELD config in packet handler for packet engine */
 	__disable_irq();
@@ -308,10 +309,10 @@ void si446x_set_frequency(uint32_t freq) {/*Set the output divider according to 
 
 /**
   * @brief  This function sets silabs deviation and channel spacing
-  * @param  Deviation and spacing in Hz
+  * @param  Deviation and spacing in Hz, BPS in bit units
   * @retval None
   */
-void si446x_set_deviation_channel(uint32_t deviation, uint32_t channel_space) {
+void si446x_set_deviation_channel_bps(uint32_t deviation, uint32_t channel_space, uint32_t bps) {
 	uint8_t tx_buffer[16];
 	uint8_t rx_buffer[2];
 	//Make sure that Si446x::sendFrequencyToSi446x() was called before this function, so that we have set the global variable 'Outdiv' properly
@@ -335,6 +336,15 @@ void si446x_set_deviation_channel(uint32_t deviation, uint32_t channel_space) {
 	memcpy(tx_buffer, (uint8_t [6]){0x11, 0x40, 0x02, 0x04, modem_freq_dev_1, modem_freq_dev_0}, 6*sizeof(uint8_t));
 	__disable_irq();
 	si446x_spi_state_machine( &Silabs_spi_state, 6, tx_buffer, 0, rx_buffer, NULL );
+	__enable_irq();
+	while(Silabs_spi_state)
+		__WFI();
+	modem_freq_dev_0 = mask & bps;
+	modem_freq_dev_1 = mask & (bps >> 8);
+	modem_freq_dev_2 = mask & (bps >> 16);
+	memcpy(tx_buffer, (uint8_t [7]){0x11, 0x20, 0x03, 0x03, modem_freq_dev_2, modem_freq_dev_1, modem_freq_dev_0}, 7*sizeof(uint8_t));
+	__disable_irq();
+	si446x_spi_state_machine( &Silabs_spi_state, 7, tx_buffer, 0, rx_buffer, NULL );
 	__enable_irq();
 	while(Silabs_spi_state)
 		__WFI();
