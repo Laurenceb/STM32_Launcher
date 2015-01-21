@@ -373,6 +373,13 @@ void si446x_set_modem(void) {
 	__enable_irq();
 	while(Silabs_spi_state)
 		__WFI();
+	//Configure the rx signal path, these setting are from WDS - lower the IF slightly and setup the CIC Rx filter
+	memcpy(tx_buffer, (uint8_t [11]){0x11, 0x20, 0x07, 0x1C, 0x80, 0x00, 0x10, 0x0C, 0xE8, 0x00, 0x44}, 11*sizeof(uint8_t));
+	__disable_irq();
+	si446x_spi_state_machine( &Silabs_spi_state, 11, tx_buffer, 0, rx_buffer, NULL );
+	__enable_irq();
+	while(Silabs_spi_state)
+		__WFI();
 	//Configure the RSSI thresholding for RX mode, with 12dB jump threshold (reset if RSSI changes this much during Rx), RSSI mean with packet toggle
 	//RSSI_THRESH is in dBm, it needs to be converted to 0.5dBm steps offset by ~130
 	uint8_t rssi = (2*(RSSI_THRESH+130))&0xFF;
