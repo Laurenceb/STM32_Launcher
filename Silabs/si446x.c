@@ -423,12 +423,8 @@ void si446x_state_machine(uint8_t *state_, uint8_t reason ) {
 			}
 			if(reason==2 || unhandled_tx_data==1 ) {/* We have data ready to send via TX */
 				unhandled_tx_data=0;/* Reset this here */
-				*state_=5;
-				tx_buffer[0]=0x31;/* Go to TX mode */
-				tx_buffer[1]=Channel_tx;/* The global channel number */
-				tx_buffer[2]=0x00;/* Direct mode - ignore the packet settings */
-				tx_buffer[3]=0x00;
-				tx_buffer[4]=0x00;
+				*state_=5;/* Go to TX mode, use the global channel number. Direct mode - ignore the packet settings  */
+				memcpy(tx_buffer, (uint8_t [5]){0x31, Channel_tx, 0x00, 0x00, 0x00}, 5*sizeof(uint8_t));
 				si446x_spi_state_machine( &Silabs_spi_state, 5, tx_buffer, 0, rx_buffer, &si446x_state_machine );
 			}
 			break;
@@ -441,10 +437,7 @@ void si446x_state_machine(uint8_t *state_, uint8_t reason ) {
 				else {/*Something bad happened, return to state 0 after spi comms */
 					*state_=0;
 				}
-				tx_buffer[0]=0x20;/* Wipe interrupt status */
-				tx_buffer[1]=0x00;/* All bits */
-				tx_buffer[2]=0x00;
-				tx_buffer[3]=0x00;
+				memcpy(tx_buffer, (uint8_t [4]){0x20, 0x00, 0x00, 0x00}, 4*sizeof(uint8_t));/* Wipe interrupt status, all bits */
 				si446x_spi_state_machine( &Silabs_spi_state, 4, tx_buffer, 10, rx_buffer, &si446x_state_machine );
 			}
 			else {/* This shouldnt happen, might be caused by glitchy NIRQ line or TX data being added */
@@ -488,23 +481,15 @@ void si446x_state_machine(uint8_t *state_, uint8_t reason ) {
 				if(unhandled_tx_data) {
 					*state_=5;/* Jump directly to Tx mode*/
 					unhandled_tx_data=0;/* Reset this here */
-					tx_buffer[0]=0x31;/* Go to TX mode */
-					tx_buffer[1]=Channel_tx;/* The global channel number */
-					tx_buffer[2]=0x00;
-					tx_buffer[3]=0x00;
-					tx_buffer[4]=0x00;
+					/* Go to TX mode, use the global channel number. Direct mode - ignore the packet settings  */
+					memcpy(tx_buffer, (uint8_t [5]){0x31, Channel_tx, 0x00, 0x00, 0x00}, 5*sizeof(uint8_t));
 					si446x_spi_state_machine( &Silabs_spi_state, 5, tx_buffer, 0, rx_buffer, &si446x_state_machine );
 				}
 				else {
 					*state_=0;/* Completed the reception */
-					tx_buffer[0]=0x32;/* Go to RX mode */
-					tx_buffer[1]=Channel_rx;/* The global channel number */
-					tx_buffer[2]=0x00;
-					tx_buffer[3]=0x00;
-					tx_buffer[4]=0x00;
-					tx_buffer[5]=0x00;
-					tx_buffer[6]=0x03;
-					tx_buffer[7]=0x08;/*Only exit RX mode on CRC match, use zero length packet here as its configured as field*/
+					memcpy(tx_buffer, (uint8_t [8]){0x32, Channel_rx, 0x00, 0x00, 0x00, 0x00, 0x03, 0x08}, 8*sizeof(uint8_t));
+					/* Go to RX mode, use the global channel number. Exit on CRC match, use zero length packet*/
+					/* here as its configured as field*/
 					si446x_spi_state_machine( &Silabs_spi_state, 8, tx_buffer, 0, rx_buffer, &si446x_state_machine );
 				}
 			}
@@ -520,32 +505,21 @@ void si446x_state_machine(uint8_t *state_, uint8_t reason ) {
 			}
 			else {/* This may be due to NIRQ glitch, or even more data being added */
 				if(reason==1) {/* NIRQ */
-					tx_buffer[0]=0x20;/* Wipe interrupt status */
-					tx_buffer[1]=0x00;/* All bits */
-					tx_buffer[2]=0x00;
-					tx_buffer[3]=0x00;
+					memcpy(tx_buffer, (uint8_t [4]){0x20, 0x00, 0x00, 0x00}, 4*sizeof(uint8_t));/* Wipe interrupt status, all bits */
 					si446x_spi_state_machine( &Silabs_spi_state, 4, tx_buffer, 10, rx_buffer, &si446x_state_machine );
 				}
 			}
 			break;
 		case 6:
 			if(reason==4) {/* TX completed, go back to RX mode */
-				tx_buffer[0]=0x32;/* Go to RX mode */
-				tx_buffer[1]=Channel_rx;/* The global channel number */
-				tx_buffer[2]=0x00;
-				tx_buffer[3]=0x00;
-				tx_buffer[4]=0x00;
-				tx_buffer[5]=0x00;
-				tx_buffer[6]=0x03;
-				tx_buffer[7]=0x08;/*Only exit RX mode on CRC match, use zero length packet here as its configured as field*/
+				memcpy(tx_buffer, (uint8_t [8]){0x32, Channel_rx, 0x00, 0x00, 0x00, 0x00, 0x03, 0x08}, 8*sizeof(uint8_t));
+				/* Go to RX mode, use the global channel number. Exit on CRC match, use zero length packet*/
+				/* here as its configured as field*/
 				si446x_spi_state_machine( &Silabs_spi_state, 8, tx_buffer, 0, rx_buffer, &si446x_state_machine );	
 			}/*Return the state to 0 now*/
 			else {/* This may be due to NIRQ glitch, or even more data being added */
 				if(reason==1) {/* NIRQ */
-					tx_buffer[0]=0x20;/* Wipe interrupt status */
-					tx_buffer[1]=0x00;/* All bits */
-					tx_buffer[2]=0x00;
-					tx_buffer[3]=0x00;
+					memcpy(tx_buffer, (uint8_t [4]){0x20, 0x00, 0x00, 0x00}, 4*sizeof(uint8_t));/* Wipe interrupt status, all bits */
 					si446x_spi_state_machine( &Silabs_spi_state, 4, tx_buffer, 10, rx_buffer, &si446x_state_machine );
 				}//Reason 2 == more data being added just does nothing, but data will have been added to the buffer and sent with string
 			}
