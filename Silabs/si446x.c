@@ -380,6 +380,20 @@ void si446x_set_modem(void) {
 	__enable_irq();
 	while(Silabs_spi_state)
 		__WFI();
+	//Configure BCR - NCO settings for the RX signal path - WDS settings
+	memcpy(tx_buffer, (uint8_t [16]){0x11, 0x20, 0x0C, 0x24, 0x07, 0x8F, 0xD5, 0x00, 0x00, 0x02, 0xC0, 0x08, 0x00, 0x12, 0x80, 0x28}, 16*sizeof(uint8_t));
+	__disable_irq();
+	si446x_spi_state_machine( &Silabs_spi_state, 16, tx_buffer, 0, rx_buffer, NULL );
+	__enable_irq();
+	while(Silabs_spi_state)
+		__WFI();
+	//Configure AFC/AGC settings for Rx path, WDS settings - only change the AFC here, as the other settings are only slightly tweaked by WDS
+	memcpy(tx_buffer, (uint8_t [6]){0x11, 0x20, 0x03, 0x30, 0x01, 0x7C}, 6*sizeof(uint8_t));//This just sets AFC limiter values
+	__disable_irq();
+	si446x_spi_state_machine( &Silabs_spi_state, 6, tx_buffer, 0, rx_buffer, NULL );
+	__enable_irq();
+	while(Silabs_spi_state)
+		__WFI();
 	//Configure the RSSI thresholding for RX mode, with 12dB jump threshold (reset if RSSI changes this much during Rx), RSSI mean with packet toggle
 	//RSSI_THRESH is in dBm, it needs to be converted to 0.5dBm steps offset by ~130
 	uint8_t rssi = (2*(RSSI_THRESH+130))&0xFF;
