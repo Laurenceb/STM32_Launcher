@@ -394,6 +394,26 @@ void si446x_set_modem(void) {
 	__enable_irq();
 	while(Silabs_spi_state)
 		__WFI();
+	//Configure signal arrival detect - WDS settings
+	memcpy(tx_buffer, (uint8_t [9]){0x11, 0x20, 0x05, 0x5B, 0x40, 0x04, 0x04, 0x78, 0x20}, 9*sizeof(uint8_t));
+	__disable_irq();
+	si446x_spi_state_machine( &Silabs_spi_state, 9, tx_buffer, 0, rx_buffer, NULL );
+	__enable_irq();
+	while(Silabs_spi_state)
+		__WFI();
+	//Configure first and second set of Rx filter coefficients - WDS settings
+	memcpy(tx_buffer, (uint8_t [16]){0x11, 0x21, 0x0C, 0x0C, 0x0A, 0x04, 0x15, 0xFC, 0x03, 0x00, 0xCC, 0xA1, 0x30, 0xA0, 0x21, 0xD1}, 16*sizeof(uint8_t));
+	__disable_irq();
+	si446x_spi_state_machine( &Silabs_spi_state, 9, tx_buffer, 0, rx_buffer, NULL );
+	__enable_irq();
+	while(Silabs_spi_state)
+		__WFI();
+	memcpy(tx_buffer, (uint8_t [16]){0x11, 0x21, 0x0C, 0x18, 0xB9, 0xC9, 0xEA, 0x05, 0x12, 0x11, 0x0A, 0x04, 0x15, 0xFC, 0x03, 0x00}, 16*sizeof(uint8_t));
+	__disable_irq();
+	si446x_spi_state_machine( &Silabs_spi_state, 9, tx_buffer, 0, rx_buffer, NULL );
+	__enable_irq();
+	while(Silabs_spi_state)
+		__WFI();
 	//Configure the RSSI thresholding for RX mode, with 12dB jump threshold (reset if RSSI changes this much during Rx), RSSI mean with packet toggle
 	//RSSI_THRESH is in dBm, it needs to be converted to 0.5dBm steps offset by ~130
 	uint8_t rssi = (2*(RSSI_THRESH+130))&0xFF;
