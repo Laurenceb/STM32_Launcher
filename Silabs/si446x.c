@@ -354,6 +354,7 @@ void si446x_set_deviation_channel_bps(uint32_t deviation, uint32_t channel_space
 	__enable_irq();
 	while(Silabs_spi_state)
 		__WFI();
+	bps*=10;		/*From WDS settings, modem speed is in 0.1bps units*/
 	modem_freq_dev_0 = mask & bps;
 	modem_freq_dev_1 = mask & (bps >> 8);
 	modem_freq_dev_2 = mask & (bps >> 16);
@@ -389,61 +390,61 @@ void si446x_set_modem(void) {
 	while(Silabs_spi_state)
 		__WFI();
 	//Configure the rx signal path, these setting are from WDS - lower the IF slightly and setup the CIC Rx filter
-	memcpy(tx_buffer, (uint8_t [11]){0x11, 0x20, 0x07, 0x1C, 0x80, 0x00, 0x10, 0x0C, 0xE8, 0x00, 0x44}, 11*sizeof(uint8_t));
+	memcpy(tx_buffer, (uint8_t [15]){0x11, 0x20, 0x0B, 0x19, 0x80, 0x08, 0x03, 0x80, 0x00, 0xF0, 0x10, 0x74, 0xE8, 0x00, 0x55}, 15*sizeof(uint8_t));
 	__disable_irq();
-	si446x_spi_state_machine( &Silabs_spi_state, 11, tx_buffer, 0, rx_buffer, NULL );
+	si446x_spi_state_machine( &Silabs_spi_state, 15, tx_buffer, 0, rx_buffer, NULL );
 	__enable_irq();
 	while(Silabs_spi_state)
 		__WFI();
 	//Configure BCR - NCO settings for the RX signal path - WDS settings
-	memcpy(tx_buffer, (uint8_t [16]){0x11, 0x20, 0x0C, 0x24, 0x07, 0x8F, 0xD5, 0x00, 0x00, 0x02, 0xC0, 0x08, 0x00, 0x12, 0x80, 0x28}, 16*sizeof(uint8_t));
+	memcpy(tx_buffer, (uint8_t [16]){0x11, 0x20, 0x0C, 0x24, 0x06, 0x0C, 0xAB, 0x03, 0x03, 0x02, 0xC2, 0x00, 0x04, 0x32, 0xC0, 0x01}, 16*sizeof(uint8_t));
 	__disable_irq();
 	si446x_spi_state_machine( &Silabs_spi_state, 16, tx_buffer, 0, rx_buffer, NULL );
 	__enable_irq();
 	while(Silabs_spi_state)
 		__WFI();
 	//Configure AFC/AGC settings for Rx path, WDS settings - only change the AFC here, as the other settings are only slightly tweaked by WDS
-	memcpy(tx_buffer, (uint8_t [6]){0x11, 0x20, 0x03, 0x30, 0x01, 0x7C}, 6*sizeof(uint8_t));//This just sets AFC limiter values
+	memcpy(tx_buffer, (uint8_t [7]){0x11, 0x20, 0x03, 0x30, 0x03, 0x64, 0xC0}, 7*sizeof(uint8_t));//This just sets AFC limiter values
 	__disable_irq();
-	si446x_spi_state_machine( &Silabs_spi_state, 6, tx_buffer, 0, rx_buffer, NULL );
+	si446x_spi_state_machine( &Silabs_spi_state, 7, tx_buffer, 0, rx_buffer, NULL );
 	__enable_irq();
 	while(Silabs_spi_state)
 		__WFI();
 	//Configure Rx search period control - WDS settings
-	memcpy(tx_buffer, (uint8_t [6]){0x11, 0x20, 0x02, 0x50, 0x94, 0x0A}, 6*sizeof(uint8_t));
+	memcpy(tx_buffer, (uint8_t [6]){0x11, 0x20, 0x02, 0x50, 0x84, 0x0A}, 6*sizeof(uint8_t));
 	__disable_irq();
 	si446x_spi_state_machine( &Silabs_spi_state, 6, tx_buffer, 0, rx_buffer, NULL );
 	__enable_irq();
 	while(Silabs_spi_state)
 		__WFI();
 	//Configure Rx BCR and AFC config - WDS settings
-	memcpy(tx_buffer, (uint8_t [6]){0x11, 0x20, 0x02, 0x54, 0x03, 0x07}, 6*sizeof(uint8_t));
+	memcpy(tx_buffer, (uint8_t [6]){0x11, 0x20, 0x02, 0x54, 0x0F, 0x07}, 6*sizeof(uint8_t));
 	__disable_irq();
 	si446x_spi_state_machine( &Silabs_spi_state, 6, tx_buffer, 0, rx_buffer, NULL );
 	__enable_irq();
 	while(Silabs_spi_state)
 		__WFI();
 	//Configure signal arrival detect - WDS settings
-	memcpy(tx_buffer, (uint8_t [9]){0x11, 0x20, 0x05, 0x5B, 0x40, 0x04, 0x04, 0x78, 0x20}, 9*sizeof(uint8_t));
+	memcpy(tx_buffer, (uint8_t [9]){0x11, 0x20, 0x05, 0x5B, 0x40, 0x04, 0x21, 0x78, 0x20}, 9*sizeof(uint8_t));
 	__disable_irq();
 	si446x_spi_state_machine( &Silabs_spi_state, 9, tx_buffer, 0, rx_buffer, NULL );
 	__enable_irq();
 	while(Silabs_spi_state)
 		__WFI();
 	//Configure first and second set of Rx filter coefficients - WDS settings
-	memcpy(tx_buffer, (uint8_t [16]){0x11, 0x21, 0x0C, 0x00, 0xCC, 0xA1, 0x30, 0xA0, 0x21, 0xD1, 0xB9, 0xC9, 0xEA, 0x05, 0x12, 0x11}, 16*sizeof(uint8_t));
+	memcpy(tx_buffer, (uint8_t [16]){0x11, 0x21, 0x0C, 0x00, 0xFF, 0xBA, 0x0F, 0x51, 0xCF, 0xA9, 0xC9, 0xFC, 0x1B, 0x1E, 0x0F, 0x01}, 16*sizeof(uint8_t));
 	__disable_irq();
 	si446x_spi_state_machine( &Silabs_spi_state, 9, tx_buffer, 0, rx_buffer, NULL );
 	__enable_irq();
 	while(Silabs_spi_state)
 		__WFI();
-	memcpy(tx_buffer, (uint8_t [16]){0x11, 0x21, 0x0C, 0x0C, 0x0A, 0x04, 0x15, 0xFC, 0x03, 0x00, 0xCC, 0xA1, 0x30, 0xA0, 0x21, 0xD1}, 16*sizeof(uint8_t));
+	memcpy(tx_buffer, (uint8_t [16]){0x11, 0x21, 0x0C, 0x0C, 0xFC, 0xFD, 0x15, 0xFF, 0x00, 0x0F, 0xFF, 0xBA, 0x0F, 0x51, 0xCF, 0xA9}, 16*sizeof(uint8_t));
 	__disable_irq();
 	si446x_spi_state_machine( &Silabs_spi_state, 9, tx_buffer, 0, rx_buffer, NULL );
 	__enable_irq();
 	while(Silabs_spi_state)
 		__WFI();
-	memcpy(tx_buffer, (uint8_t [16]){0x11, 0x21, 0x0C, 0x18, 0xB9, 0xC9, 0xEA, 0x05, 0x12, 0x11, 0x0A, 0x04, 0x15, 0xFC, 0x03, 0x00}, 16*sizeof(uint8_t));
+	memcpy(tx_buffer, (uint8_t [16]){0x11, 0x21, 0x0C, 0x18, 0xC9, 0xFC, 0x1B, 0x1E, 0x0F, 0x01, 0xFC, 0xFD, 0x15, 0xFF, 0x00, 0x0F}, 16*sizeof(uint8_t));
 	__disable_irq();
 	si446x_spi_state_machine( &Silabs_spi_state, 9, tx_buffer, 0, rx_buffer, NULL );
 	__enable_irq();
