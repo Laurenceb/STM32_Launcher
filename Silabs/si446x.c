@@ -3,6 +3,7 @@
 /* Globals live here */
 volatile uint8_t Channel_rx,Channel_tx,Silabs_spi_state,Silabs_driver_state;
 volatile buff_type Silabs_Tx_Buffer,Silabs_Rx_Buffer;
+volatile int8_t Last_RSSI=0;	/*Holds RSSI of the last packet*/
 const uint8_t Silabs_Header[5]=UPLINK_CALLSIGN;
 
 static volatile uint32_t CTS_Low;
@@ -231,6 +232,20 @@ uint8_t si446x_setup(void) {
 	while(Silabs_spi_state)
 		__WFI();
 	part=rx_buffer[3];//Should be 0x44
+	//Only enable the packet received interrupt - global interrupt config and PH interrupt config bytes
+	memcpy(tx_buffer, (uint8_t [6]){0x11, 0x01, 0x02, 0x00, 0x01, 0x10}, 6*sizeof(uint8_t));
+	__disable_irq();
+	si446x_spi_state_machine( &Silabs_spi_state, 6, tx_buffer, 0, NULL, NULL );
+	__enable_irq();
+	while(Silabs_spi_state)
+		__WFI();
+	//Setup the fist response A register to hold the RSSI of the last packet
+	memcpy(tx_buffer, (uint8_t [5]){0x11, 0x02, 0x01, 0x00, 0x0A}, 5*sizeof(uint8_t));
+	__disable_irq();
+	si446x_spi_state_machine( &Silabs_spi_state, 5, tx_buffer, 0, NULL, NULL );
+	__enable_irq();
+	while(Silabs_spi_state)
+		__WFI();
 	// Configure Tx pin as input to start with, so that it can be used to monitor POR, now configure it to TX AF
 	GPIO_InitStructure.GPIO_Pin     = GPIO_Pin_10;
 	GPIO_InitStructure.GPIO_Speed   = GPIO_Speed_50MHz;
@@ -394,6 +409,20 @@ void si446x_set_modem(void) {
 	__enable_irq();
 	while(Silabs_spi_state)
 		__WFI();
+	//Configure Rx search period control - WDS settings
+	memcpy(tx_buffer, (uint8_t [6]){0x11, 0x20, 0x02, 0x50, 0x94, 0x0A}, 6*sizeof(uint8_t));
+	__disable_irq();
+	si446x_spi_state_machine( &Silabs_spi_state, 6, tx_buffer, 0, rx_buffer, NULL );
+	__enable_irq();
+	while(Silabs_spi_state)
+		__WFI();
+	//Configure Rx BCR and AFC config - WDS settings
+	memcpy(tx_buffer, (uint8_t [6]){0x11, 0x20, 0x02, 0x54, 0x03, 0x07}, 6*sizeof(uint8_t));
+	__disable_irq();
+	si446x_spi_state_machine( &Silabs_spi_state, 6, tx_buffer, 0, rx_buffer, NULL );
+	__enable_irq();
+	while(Silabs_spi_state)
+		__WFI();
 	//Configure signal arrival detect - WDS settings
 	memcpy(tx_buffer, (uint8_t [9]){0x11, 0x20, 0x05, 0x5B, 0x40, 0x04, 0x04, 0x78, 0x20}, 9*sizeof(uint8_t));
 	__disable_irq();
@@ -402,6 +431,12 @@ void si446x_set_modem(void) {
 	while(Silabs_spi_state)
 		__WFI();
 	//Configure first and second set of Rx filter coefficients - WDS settings
+	memcpy(tx_buffer, (uint8_t [16]){0x11, 0x21, 0x0C, 0x00, 0xCC, 0xA1, 0x30, 0xA0, 0x21, 0xD1, 0xB9, 0xC9, 0xEA, 0x05, 0x12, 0x11}, 16*sizeof(uint8_t));
+	__disable_irq();
+	si446x_spi_state_machine( &Silabs_spi_state, 9, tx_buffer, 0, rx_buffer, NULL );
+	__enable_irq();
+	while(Silabs_spi_state)
+		__WFI();
 	memcpy(tx_buffer, (uint8_t [16]){0x11, 0x21, 0x0C, 0x0C, 0x0A, 0x04, 0x15, 0xFC, 0x03, 0x00, 0xCC, 0xA1, 0x30, 0xA0, 0x21, 0xD1}, 16*sizeof(uint8_t));
 	__disable_irq();
 	si446x_spi_state_machine( &Silabs_spi_state, 9, tx_buffer, 0, rx_buffer, NULL );
@@ -464,29 +499,29 @@ void si446x_state_machine(uint8_t *state_, uint8_t reason ) {
 	static uint8_t tx_buffer[6];
 	static uint8_t bytes_read,unhandled_tx_data;
 	switch(state) {
-		case 0:	/* State 0 is the entry point, this is Rx mode, and is exited upon NIRQ/TX data */
+		case DEFAULT_MODE:/* State 0 is the entry point, this is Rx mode, and is exited upon NIRQ/TX data */
 			if(!reason)
-				*state_=0;/* Should happen in case of unhandled NIRQ request (after it is cleared), Tx completion, or Rx re setup */
+				*state_=DEFAULT_MODE;/*Should happen in case of unhandled NIRQ request (after its cleared), Tx completion, or Rx re-setup*/
 			else if(reason==1) {/* Silabs interrupt, setup a read to get the status */
-				*state_=1;/* Go to state 1 */
+				*state_=IRQ_MODE;/* Go to state 1 */
 				tx_buffer[0]=0x21;/* Get packethandler status */
 				si446x_spi_state_machine( &Silabs_spi_state, 1, tx_buffer, 4, rx_buffer, &si446x_state_machine );
 			}
 			if(reason==2 || unhandled_tx_data==1 ) {/* We have data ready to send via TX */
 				unhandled_tx_data=0;/* Reset this here */
-				*state_=5;/* Go to TX mode, use the global channel number. Direct mode - ignore the packet settings  */
+				*state_=TX_MODE;/* Go to TX mode, use the global channel number. Direct mode - ignore the packet settings  */
 				memcpy(tx_buffer, (uint8_t [5]){0x31, Channel_tx, 0x00, 0x00, 0x00}, 5*sizeof(uint8_t));
 				si446x_spi_state_machine( &Silabs_spi_state, 5, tx_buffer, 0, rx_buffer, &si446x_state_machine );
 			}
 			break;
-		case 1: /* NIRQ during Rx mode caused PH to be read */
+		case IRQ_MODE: /* NIRQ during Rx mode caused PH to be read */
 			if(!reason) {/* Callback, read completed */
 				uint8_t a=rx_buffer[3]&0x18;
 				if(a==0x10) {/*Packet received */
-					*state_=2;
+					*state_=READ_STAT_MODE;
 				}
 				else {/*Something bad happened, return to state 0 after spi comms */
-					*state_=0;
+					*state_=DEFAULT_MODE;
 				}
 				memcpy(tx_buffer, (uint8_t [4]){0x20, 0x00, 0x00, 0x00}, 4*sizeof(uint8_t));/* Wipe interrupt status, all bits */
 				si446x_spi_state_machine( &Silabs_spi_state, 4, tx_buffer, 10, rx_buffer, &si446x_state_machine );
@@ -497,9 +532,9 @@ void si446x_state_machine(uint8_t *state_, uint8_t reason ) {
 					unhandled_tx_data=1;
 			}
 			break;
-		case 2:	/* There is data ready to be read */
+		case READ_STAT_MODE:/* There is data ready to be read */
 			if(!reason) {
-				*state_=3;
+				*state_=READ_MODE;
 				tx_buffer[0]=0x15;
 				tx_buffer[1]=0x00;/* Read number of bytes in FIFO */
 				si446x_spi_state_machine( &Silabs_spi_state, 2, tx_buffer, 4, rx_buffer, &si446x_state_machine );
@@ -509,35 +544,57 @@ void si446x_state_machine(uint8_t *state_, uint8_t reason ) {
 					unhandled_tx_data=1;
 			}
 			break;
-		case 3:
+		case READ_MODE:
 			if(!reason) {
 				if(rx_buffer[2]) {/* There is data for us */
-					*state_=4;
+					*state_=READ_COMPLETE_MODE;
 					tx_buffer[0]=0x77;
 					bytes_read=rx_buffer[2]+1;/* Offset for CMD dummy byte, note use of zero tx bytes to set direct read mode */
 					si446x_spi_state_machine( &Silabs_spi_state, 0, tx_buffer, bytes_read, rx_buffer, &si446x_state_machine );
 				}
 				else
-					*state_=0;/* Return to Rx state */
+					*state_=DEFAULT_MODE;/* Return to Rx state */
 			}
 			else {
 				if(reason==2)
 					unhandled_tx_data=1;
 			}
 			break;
-		case 4:
+		case READ_COMPLETE_MODE:
 			if(!reason) {
 				for( uint8_t n=1; n<bytes_read && n<sizeof(rx_buffer); n++ )/* Avoid the CTS byte */
 					Add_To_Buffer( rx_buffer[n], &Silabs_Rx_Buffer );
 				if(unhandled_tx_data) {
-					*state_=5;/* Jump directly to Tx mode*/
+					*state_=TX_MODE;/* Jump directly to Tx mode*/
 					unhandled_tx_data=0;/* Reset this here */
 					/* Go to TX mode, use the global channel number. Direct mode - ignore the packet settings  */
 					memcpy(tx_buffer, (uint8_t [5]){0x31, Channel_tx, 0x00, 0x00, 0x00}, 5*sizeof(uint8_t));
 					si446x_spi_state_machine( &Silabs_spi_state, 5, tx_buffer, 0, rx_buffer, &si446x_state_machine );
 				}
 				else {
-					*state_=0;/* Completed the reception */
+					*state_=READ_RSSI_COMPLETED;/* Completed the reception */
+					tx_buffer[0]=0x50;
+					/* Read the RSSI for this packet from the FRR */
+					si446x_spi_state_machine( &Silabs_spi_state, 0, tx_buffer, 2, rx_buffer, &si446x_state_machine );
+				}
+			}
+			else {
+				if(reason==2)
+					unhandled_tx_data=1;
+			}
+			break;
+		case READ_RSSI_COMPLETED:
+			if(!reason) {
+				Last_RSSI=(int8_t)(rx_buffer[1]*2)-30;/*This is in dBm offset from -100dBm*/
+				if(unhandled_tx_data) {
+					*state_=TX_MODE;/* Jump directly to Tx mode*/
+					unhandled_tx_data=0;/* Reset this here */
+					/* Go to TX mode, use the global channel number. Direct mode - ignore the packet settings  */
+					memcpy(tx_buffer, (uint8_t [5]){0x31, Channel_tx, 0x00, 0x00, 0x00}, 5*sizeof(uint8_t));
+					si446x_spi_state_machine( &Silabs_spi_state, 5, tx_buffer, 0, rx_buffer, &si446x_state_machine );
+				}
+				else {
+					*state_=DEFAULT_MODE;/* Completed the reception */
 					memcpy(tx_buffer, (uint8_t [8]){0x32, Channel_rx, 0x00, 0x00, 0x00, 0x00, 0x03, 0x08}, 8*sizeof(uint8_t));
 					/* Go to RX mode, use the global channel number. Exit on CRC match, use zero length packet*/
 					/* here as its configured as field*/
@@ -549,9 +606,9 @@ void si446x_state_machine(uint8_t *state_, uint8_t reason ) {
 					unhandled_tx_data=1;
 			}
 			break;
-		case 5:
+		case TX_MODE:
 			if(!reason) {
-				*state_=6;
+				*state_=TX_COMPLETE_MODE;
 				USART3->CR1 |=(1<<7);/*Enable the TXE interrupt on USART3*/	
 			}
 			else {/* This may be due to NIRQ glitch, or even more data being added */
@@ -561,7 +618,7 @@ void si446x_state_machine(uint8_t *state_, uint8_t reason ) {
 				}
 			}
 			break;
-		case 6:
+		case TX_COMPLETE_MODE:
 			if(reason==4) {/* TX completed, go back to RX mode */
 				memcpy(tx_buffer, (uint8_t [8]){0x32, Channel_rx, 0x00, 0x00, 0x00, 0x00, 0x03, 0x08}, 8*sizeof(uint8_t));
 				/* Go to RX mode, use the global channel number. Exit on CRC match, use zero length packet*/
@@ -575,7 +632,7 @@ void si446x_state_machine(uint8_t *state_, uint8_t reason ) {
 				}//Reason 2 == more data being added just does nothing, but data will have been added to the buffer and sent with string
 			}
 		default:
-			*state_=0;/* This should not happen - called with an unknown state */
+			*state_=DEFAULT_MODE;/* This should not happen - called with an unknown state */
 	}
 }
 
