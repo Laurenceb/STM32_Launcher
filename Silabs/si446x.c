@@ -566,7 +566,7 @@ void si446x_state_machine(uint8_t *state_, uint8_t reason ) {
 		case READ_COMPLETE_MODE:
 			if(!reason) {
 				for( uint8_t n=1; n<bytes_read && n<sizeof(rx_buffer); n++ )/* Avoid the CTS byte */
-					Add_To_Buffer( rx_buffer[n], &Silabs_Rx_Buffer );
+					Add_To_Byte_Buffer( rx_buffer[n], &Silabs_Rx_Buffer );
 				if(unhandled_tx_data) {
 					*state_=TX_MODE;/* Jump directly to Tx mode*/
 					unhandled_tx_data=0;/* Reset this here */
