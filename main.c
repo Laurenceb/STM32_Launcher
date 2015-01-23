@@ -233,7 +233,7 @@ int main(void)
 		printf("Silabs: %02x\n",silab);
 		f_puts("Silabs detect error, got:",&FATFS_logfile);
 		f_puts(print_string,&FATFS_logfile);
-		f_close(&FATFS_logfile);		//So we log that something went wrong in the logfile
+		shutdown_filesystem(ERR, file_opened);//So we log that something went wrong in the logfile
 		shutdown();
 	}						//Otherwise silabs is now initialised, and can be used via its buffers
 	printf("Hello from rockoon project\n");		//Test the silabs RTTY
@@ -241,6 +241,7 @@ int main(void)
 	//Wait for packet to send (could be caught by watchdog if failure)
 	while(Silabs_driver_state);
 	if(f_err_code) {				//There was an init error
+		shutdown_filesystem(ERR, file_opened);//So we log that something went wrong in the logfile - hopefully
 		shutdown();				//Abort, but only after sending over the radio, so we are still trackable
 	}
 	//Setup and test the I2C
@@ -248,7 +249,7 @@ int main(void)
 	sensors=detect_sensors(0);
 	if((sensors&((1<<L3GD20_CONFIG)|(1<<AFROESC_READ)))!=((1<<L3GD20_CONFIG)|(1<<AFROESC_READ))) {
 		f_puts("I2C sensor detect error\r\n",&FATFS_logfile);
-		f_close(&FATFS_logfile);		//So we log that something went wrong in the logfile
+		shutdown_filesystem(ERR, file_opened);//So we log that something went wrong in the logfile
 		shutdown();
 	}
 	//Setup the Timer for PWM
