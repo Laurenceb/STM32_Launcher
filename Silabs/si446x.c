@@ -207,7 +207,7 @@ uint8_t si446x_setup(void) {
 	__enable_irq();
 	while(Silabs_spi_state);
 		__WFI();
-	while(GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_0)|(!GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_10)));/*Wait for NIRQ low and POR high*/
+	while(GET_NIRQ|(!GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_10)));/*Wait for NIRQ low and POR high*/
 	/* Configure EXTI0 line */
 	EXTI_InitStructure.EXTI_Line = EXTI_Line0;		/*Only enable NIRQ here*/
 	EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
@@ -502,6 +502,7 @@ void si446x_state_machine(uint8_t *state_, uint8_t reason ) {
 	static uint8_t bytes_read,unhandled_tx_data;
 	switch(state) {
 		case DEFAULT_MODE:/* State 0 is the entry point, this is Rx mode, and is exited upon NIRQ/TX data */
+			DEFAULT_RETURN:
 			if(!reason)
 				*state_=DEFAULT_MODE;/*Should happen in case of unhandled NIRQ request (after its cleared), Tx completion, or Rx re-setup*/
 			else if(reason==1) {/* Silabs interrupt, setup a read to get the status */
@@ -613,26 +614,22 @@ void si446x_state_machine(uint8_t *state_, uint8_t reason ) {
 				*state_=TX_COMPLETE_MODE;
 				USART3->CR1 |=(1<<7);/*Enable the TXE interrupt on USART3*/	
 			}
-			else {/* This may be due to NIRQ glitch, or even more data being added */
-				if(reason==1) {/* NIRQ */
-					memcpy(tx_buffer, (uint8_t [4]){0x20, 0x00, 0x00, 0x00}, 4*sizeof(uint8_t));/* Wipe interrupt status, all bits */
-					si446x_spi_state_machine( &Silabs_spi_state, 4, tx_buffer, 10, rx_buffer, &si446x_state_machine );
-				}
-			}
+			/* Other reasons may be due to NIRQ glitch, or even more data being added, or an RX packet */
 			break;
 		case TX_COMPLETE_MODE:
 			if(reason==4) {/* TX completed, go back to RX mode */
-				memcpy(tx_buffer, (uint8_t [8]){0x32, Channel_rx, 0x00, 0x00, 0x00, 0x00, 0x03, 0x08}, 8*sizeof(uint8_t));
-				/* Go to RX mode, use the global channel number. Exit on CRC match, use zero length packet*/
-				/* here as its configured as field*/
-				si446x_spi_state_machine( &Silabs_spi_state, 8, tx_buffer, 0, rx_buffer, &si446x_state_machine );	
+				if(GET_NIRQ) {
+					memcpy(tx_buffer, (uint8_t [8]){0x32, Channel_rx, 0x00, 0x00, 0x00, 0x00, 0x03, 0x08}, 8*sizeof(uint8_t));
+					/* Go to RX mode, use the global channel number. Exit on CRC match, use zero length packet*/
+					/* here as its configured as field*/
+					si446x_spi_state_machine( &Silabs_spi_state, 8, tx_buffer, 0, rx_buffer, &si446x_state_machine );
+				}
+				else {	/* Here we check to see if NIRQ went low, and if so we need to rerun the state machine as its unhandled */
+					reason=1;
+					goto DEFAULT_RETURN;
+				}	
 			}/*Return the state to 0 now*/
-			else {/* This may be due to NIRQ glitch, or even more data being added */
-				if(reason==1) {/* NIRQ */
-					memcpy(tx_buffer, (uint8_t [4]){0x20, 0x00, 0x00, 0x00}, 4*sizeof(uint8_t));/* Wipe interrupt status, all bits */
-					si446x_spi_state_machine( &Silabs_spi_state, 4, tx_buffer, 10, rx_buffer, &si446x_state_machine );
-				}//Reason 2 == more data being added just does nothing, but data will have been added to the buffer and sent with string
-			}
+			/* Other reasons may be due to NIRQ glitch, or even more data being added */
 		default:
 			*state_=DEFAULT_MODE;/* This should not happen - called with an unknown state */
 	}
