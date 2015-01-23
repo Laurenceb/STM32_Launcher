@@ -27,6 +27,7 @@
 enum{DEFAULT_MODE=0,IRQ_MODE,READ_STAT_MODE,READ_MODE,READ_COMPLETE_MODE,READ_RSSI_COMPLETED,TX_MODE,TX_COMPLETE_MODE};
 
 extern volatile uint8_t Channel_rx,Channel_tx,Silabs_spi_state,Silabs_driver_state;
+extern volatile int8_t Last_RSSI;
 
 uint8_t send_string_to_silabs(uint8_t* str);
 void add_to_silabs_buffer(uint8_t data);

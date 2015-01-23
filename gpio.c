@@ -10,6 +10,7 @@ void setup_gpio(void)
 	GPIO_InitTypeDef	GPIO_InitStructure;
 	//enable the clocks 
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB|RCC_APB2Periph_GPIOA|RCC_APB2Periph_AFIO, ENABLE);//GPIO/AFIO clks
+	GPIO_WriteBit(GPIOB,GPIO_Pin_5,Bit_RESET);//to power cycle the secondary supply in case of a reset
 	setuppwr();				//configure power control
 	disable_pin();				//disable WKUP pin functionality
 	//Disable the JTAG so we can use pins as GPIO - SWD still usable

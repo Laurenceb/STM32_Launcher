@@ -269,6 +269,7 @@ uint8_t si446x_setup(void) {
 	while(Silabs_spi_state)
 		__WFI();
 	}
+	Silabs_driver_state=DEFAULT_MODE;/* Make sure this is initialised */
 	EXTI_Init(&EXTI_InitStructure);	/* Only enable the NIRQ once everything is configured */
 	return part;			/* Return the part number */
 }
