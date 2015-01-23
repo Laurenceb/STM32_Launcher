@@ -274,13 +274,13 @@ int main(void)
 		__WFI();				//Wait for something to happen - saves power
 		uint8_t mode=0;
 		while(Bytes_In_DMA_Buffer(&Gps_Buffer))//Dump all the data
-			Gps_Process_Byte((uint8_t)(Pop_From_Buffer(&Gps_Buffer)),&Gps);
+			Gps_Process_Byte((uint8_t)(Pop_From_Byte_Buffer(&Gps_Buffer)),&Gps);
 		if(Gps.packetflag==REQUIRED_DATA){		
 			putchar(0x30+Gps.nosats);putchar(0x2C);//Number of sats seperated by commas
 			Gps.packetflag=0x00;
 		}
 		while(bytes_in_buff(&Usart1_rx_buff)) {//Bytes received on serial terminal
-			uint8_t err=(uint8_t)(Pop_From_Buffer(&Usart1_rx_buff));
+			uint8_t err=(uint8_t)(Pop_From_Byte_Buffer(&Usart1_rx_buff));
 			if('1'==err) {		//Enter '1' to abort to indoor mode
 				printf("Indoor mode\r\n");
 				mode=1;
@@ -318,7 +318,7 @@ int main(void)
 	Gps.packetflag=0x00;				//Reset
 	while(Gps.packetflag!=REQUIRED_DATA) {		//Wait for all fix data
 		while(Bytes_In_DMA_Buffer(&Gps_Buffer))	//Dump all the data
-			Gps_Process_Byte((uint8_t)(Pop_From_Buffer(&Gps_Buffer)),&Gps);
+			Gps_Process_Byte((uint8_t)(Pop_From_Byte_Buffer(&Gps_Buffer)),&Gps);
 	}
 	Usart_Send_Str((char*)"\r\nGot GPS fix:");	//Print out the fix for debug purposes
 	printf("%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld,%1x\r\n",\
@@ -354,7 +354,7 @@ int main(void)
 		//Await a full set of GPS data (Lat,Long,Alt,Sat info)
 		while(Gps.packetflag!=REQUIRED_DATA) {	//Wait for all fix data
 			while(Bytes_In_DMA_Buffer(&Gps_Buffer))//Dump all the data
-				Gps_Process_Byte((uint8_t)(Pop_From_Buffer(&Gps_Buffer)),&Gps);
+				Gps_Process_Byte((uint8_t)(Pop_From_Byte_Buffer(&Gps_Buffer)),&Gps);
 		}
 		Gps.packetflag=0x00;
 		//Test the Cutdown and update the appropriate bit in the Cut flags byte, check for cutdown conditions and process accordingly
@@ -441,11 +441,11 @@ int main(void)
 				sensors_=detect_sensors(1);//Search for connected sensors -argument means the i2c data output buffers are not reinitialised
 				Delay(100000);
 				//If it didn't work the first time - call the preallocator to force a file sync, saving all data
-				if(sensors_&((1<<L3GD20_CONFIG)|(1<<AFROESC_READ))!=((1<<L3GD20_CONFIG)|(1<<AFROESC_READ))) {	
+				if((sensors_&((1<<L3GD20_CONFIG)|(1<<AFROESC_READ)))!=((1<<L3GD20_CONFIG)|(1<<AFROESC_READ))) {	
 					f_sync(&FATFS_logfile);
 					f_sync(&FATFS_wavfile_gyro);
 				}			//Loop forever if we dont find correct sensors - watchdog will kill us in the end
-			} while(sensors_&((1<<L3GD20_CONFIG)|(1<<AFROESC_READ))!=((1<<L3GD20_CONFIG)|(1<<AFROESC_READ)));
+			} while((sensors_&((1<<L3GD20_CONFIG)|(1<<AFROESC_READ)))!=((1<<L3GD20_CONFIG)|(1<<AFROESC_READ)));
 			sensors=sensors_;	
 			Watchdog_Reset();		//Recovered ok, so reset
 		}
@@ -530,10 +530,10 @@ uint8_t detect_sensors(uint8_t init) {
 	}
 	sensors=Completed_Jobs;				//Which I2C jobs completed ok?
 	//Initialise the buffers if all is ok and we are allowed to
-	if(!init && sensors&((1<<L3GD20_CONFIG)|(1<<AFROESC_READ))!=((1<<L3GD20_CONFIG)|(1<<AFROESC_READ))) {
-		init_buffer(&Gyro_x_buffer, 32);
-		init_buffer(&Gyro_y_buffer, 32);
-		init_buffer(&Gyro_z_buffer, 32);
+	if(!init && ((sensors&((1<<L3GD20_CONFIG)|(1<<AFROESC_READ)))!=((1<<L3GD20_CONFIG)|(1<<AFROESC_READ)))) {
+		Init_Buffer(&Gyro_x_buffer, 32);
+		Init_Buffer(&Gyro_y_buffer, 32);
+		Init_Buffer(&Gyro_z_buffer, 32);
 	}
 	return sensors;
 }

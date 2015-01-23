@@ -5,7 +5,7 @@
 
 // globals
 
-volatile buff_type Usart1_rx_buff;
+volatile byte_buff_type Usart1_rx_buff;
 
 //Public functions
 
@@ -18,7 +18,7 @@ void Usarts_Init() {
     GPIO_InitTypeDef    GPIO_InitStructure;
     USART_InitTypeDef   USART_InitStructure;
     // Initialise the buffers
-    init_buffer(&Usart1_rx_buff, 256);//Initialise the Usart1 Rx
+    Init_Byte_Buffer(&Usart1_rx_buff, 256);//Initialise the Usart1 Rx
     
     // Enable clock to GPIO and USART1 and USART2 peripherals - on different APBs
     RCC_APB2PeriphClockCmd(USART1_RCC_GPIO | USART1_RCC_USART, ENABLE);
@@ -44,7 +44,7 @@ void Usarts_Init() {
     USART_InitStructure.USART_BaudRate = USART2_BAUD;
     USART_Init(USART2_USART, &USART_InitStructure );
 
-    init_buffer(&Gps_Buffer, 256);//Initialise the Usart2 Rx for the GPS 
+    Init_Dma_Buffer(&Gps_Buffer, 256);//Initialise the Usart2 Rx for the GPS 
     //Configure the USART2 DMA etc
     DMA_USART2_Configuration(&Gps_Buffer);
 
@@ -171,7 +171,7 @@ __attribute__((externally_visible)) void USART1_IRQHandler(void) {
     //Clear pending bit and read the data.
     USART_ClearITPendingBit(USART1, USART_IT_RXNE);
   }
-  Add_To_Buffer( (uint8_t)(USART_ReceiveData(USART1)&0x00FF), &Usart1_rx_buff );
+  Add_To_Byte_Buffer( (uint8_t)(USART_ReceiveData(USART1)&0x00FF), &Usart1_rx_buff );
 }
 
 //Private functions

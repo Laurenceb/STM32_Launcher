@@ -8,7 +8,7 @@
 #include "ubx.h"
 
 volatile Ubx_Gps_Type Gps;			//These are global
-volatile buff_type Gps_Buffer;
+volatile dma_buff_type Gps_Buffer;
 
 /* - example trivial use
 	for(;;)
@@ -198,7 +198,7 @@ uint8_t Config_Gps(void) {
 	Gps_Send_Str(rmc_off);
 	Gps_Send_Str(gga_off);
 	Delay(GPS_DELAY);			//Wait for the gps to process this
-	Empty_Buffer(&Gps_Buffer);		//Wipe the DMA buffer - it will have been overwritten with NMEA
+	Empty_Dma_Buffer(&Gps_Buffer);		//Wipe the DMA buffer - it will have been overwritten with NMEA
 	Gps_Send_Utf8(usart_conf);
 	if(Get_UBX_Ack(usart_conf[3],usart_conf[4])) {
 		printf("Ack Error -Usart config\r\n");

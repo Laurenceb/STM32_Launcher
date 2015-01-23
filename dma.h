@@ -4,4 +4,4 @@
 #include "buffer.h"
 
 //Function prototypes
-void DMA_USART2_Configuration(buff_type* buffer);
+void DMA_USART2_Configuration(dma_buff_type* buffer);

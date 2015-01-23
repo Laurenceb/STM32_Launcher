@@ -7,7 +7,7 @@
 #include "dma.h"
 #include "ubx.h"
 
-extern volatile buff_type Usart1_rx_buff;
+extern volatile byte_buff_type Usart1_rx_buff;
 
 //Defines - USART 1 and 2 used
 

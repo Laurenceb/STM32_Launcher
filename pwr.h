@@ -4,6 +4,7 @@
 #include "main.h"
 #include "Util/fat_fs/inc/diskio.h"
 #include "Util/fat_fs/inc/ff.h"
+#include "wave.h"
 
 void setuppwr(void);
 void shutdown(void);

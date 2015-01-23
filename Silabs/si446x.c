@@ -2,7 +2,7 @@
 
 /* Globals live here */
 volatile uint8_t Channel_rx,Channel_tx,Silabs_spi_state,Silabs_driver_state;
-volatile buff_type Silabs_Tx_Buffer,Silabs_Rx_Buffer;
+volatile byte_buff_type Silabs_Tx_Buffer,Silabs_Rx_Buffer;
 volatile int8_t Last_RSSI=0;	/*Holds RSSI of the last packet*/
 const uint8_t Silabs_Header[5]=UPLINK_CALLSIGN;
 
@@ -17,18 +17,18 @@ int8_t Outdiv = 4;
 //Interface functions go here
 uint8_t send_string_to_silabs(uint8_t* str) {
 	for(;*str;str++)
-		Add_To_Buffer( *str, &Silabs_Tx_Buffer );
+		Add_To_Byte_Buffer( *str, &Silabs_Tx_Buffer );
 	EXTI_GenerateSWInterrupt(EXTI_Line0);
 }
 
 void add_to_silabs_buffer(uint8_t data) {
-	Add_To_Buffer( data, &Silabs_Tx_Buffer );
+	Add_To_Byte_Buffer( data, &Silabs_Tx_Buffer );
 	EXTI_GenerateSWInterrupt(EXTI_Line0);
 }
 
 uint8_t get_from_silabs_buffer(uint8_t* status) {
 	uint32_t g;
-	*status=Get_From_Buffer((uint32_t*) &g, &Silabs_Rx_Buffer);
+	*status=Get_From_Byte_Buffer((uint32_t*) &g, &Silabs_Rx_Buffer);
 	return g;
 }
 
@@ -53,8 +53,8 @@ uint8_t si446x_setup(void) {
 
 	uint16_t dummyread;
 	// Initialise the Silabs buffers
-	init_buffer(&Silabs_Tx_Buffer, 256);//256 samples
-	init_buffer(&Silabs_Rx_Buffer, 256);//256 samples
+	Init_Byte_Buffer(&Silabs_Tx_Buffer, 256);//256 samples
+	Init_Byte_Buffer(&Silabs_Rx_Buffer, 256);//256 samples
     
 	// Enable clock to GPIO and USART3 peripherals - on different APBs
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB | RCC_APB2Periph_GPIOA | RCC_APB2Periph_SPI1, ENABLE);
