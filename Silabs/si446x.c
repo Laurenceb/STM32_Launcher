@@ -13,6 +13,7 @@ uint32_t Active_level = DEFAULT_POWER_LEVEL;
 uint32_t Active_channel = DEFAULT_CHANNEL;
 uint32_t Active_bps = DEFAULT_BPS;
 int8_t Outdiv = 4;
+uint8_t Active_banddiv = 10;
 
 //Interface functions go here
 uint8_t send_string_to_silabs(uint8_t* str) {
@@ -295,7 +296,8 @@ void si446x_set_frequency(uint32_t freq) {/*Set the output divider according to 
 	uint32_t m = (unsigned long)(rest * 524288UL);
 	// set the band parameter
 	uint32_t sy_sel = 8;
-	memcpy(tx_buffer, (uint8_t [5]){0x11, 0x20, 0x01, 0x51, (band + sy_sel)}, 5*sizeof(uint8_t));
+	Active_banddiv = (band + sy_sel);/*From experience this seems to be involved in bps scaling*/
+	memcpy(tx_buffer, (uint8_t [5]){0x11, 0x20, 0x01, 0x51, Active_banddiv}, 5*sizeof(uint8_t));
 	__disable_irq();
 	si446x_spi_state_machine( &Silabs_spi_state, 5, tx_buffer, 0, rx_buffer, NULL );
 	__enable_irq();
@@ -355,7 +357,7 @@ void si446x_set_deviation_channel_bps(uint32_t deviation, uint32_t channel_space
 	__enable_irq();
 	while(Silabs_spi_state)
 		__WFI();
-	bps*=10;		/*From WDS settings, modem speed is in 0.1bps units*/
+	bps*=Active_banddiv;		/*From WDS settings, modem speed is in 0.1bps units, but it seems to scale with the frequency, for Manchester is data bps*/
 	modem_freq_dev_0 = mask & bps;
 	modem_freq_dev_1 = mask & (bps >> 8);
 	modem_freq_dev_2 = mask & (bps >> 16);
