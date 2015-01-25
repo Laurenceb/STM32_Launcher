@@ -161,7 +161,7 @@ uint8_t Get_UBX_Ack(uint8_t Class, uint8_t Id) {
 		if(ackByteID > 9)return UBX_OK;	//All packets in order!
 		if(counter++>GPS_RESPONSE_TIMEOUT)return UBX_FAIL; //Timeout if no valid response in 3 seconds
 		if(bytes_in_buff(&Gps_Buffer)) {//Make sure data is available to read
-			b=Pop_From_Buffer(&Gps_Buffer);
+			b=Pop_From_Dma_Buffer(&Gps_Buffer);
 			//putchar(b);
  			if(b==ackPacket[ackByteID])//Check that bytes arrive correct sequence
 				ackByteID++;

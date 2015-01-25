@@ -274,7 +274,7 @@ int main(void)
 		__WFI();				//Wait for something to happen - saves power
 		uint8_t mode=0;
 		while(Bytes_In_DMA_Buffer(&Gps_Buffer))//Dump all the data
-			Gps_Process_Byte((uint8_t)(Pop_From_Byte_Buffer(&Gps_Buffer)),&Gps);
+			Gps_Process_Byte((uint8_t)(Pop_From_Dma_Buffer(&Gps_Buffer)),&Gps);
 		if(Gps.packetflag==REQUIRED_DATA){		
 			putchar(0x30+Gps.nosats);putchar(0x2C);//Number of sats seperated by commas
 			Gps.packetflag=0x00;
@@ -318,7 +318,7 @@ int main(void)
 	Gps.packetflag=0x00;				//Reset
 	while(Gps.packetflag!=REQUIRED_DATA) {		//Wait for all fix data
 		while(Bytes_In_DMA_Buffer(&Gps_Buffer))	//Dump all the data
-			Gps_Process_Byte((uint8_t)(Pop_From_Byte_Buffer(&Gps_Buffer)),&Gps);
+			Gps_Process_Byte((uint8_t)(Pop_From_Dma_Buffer(&Gps_Buffer)),&Gps);
 	}
 	Usart_Send_Str((char*)"\r\nGot GPS fix:");	//Print out the fix for debug purposes
 	printf("%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld,%1x\r\n",\
@@ -354,7 +354,7 @@ int main(void)
 		//Await a full set of GPS data (Lat,Long,Alt,Sat info)
 		while(Gps.packetflag!=REQUIRED_DATA) {	//Wait for all fix data
 			while(Bytes_In_DMA_Buffer(&Gps_Buffer))//Dump all the data
-				Gps_Process_Byte((uint8_t)(Pop_From_Byte_Buffer(&Gps_Buffer)),&Gps);
+				Gps_Process_Byte((uint8_t)(Pop_From_Dma_Buffer(&Gps_Buffer)),&Gps);
 		}
 		Gps.packetflag=0x00;
 		//Test the Cutdown and update the appropriate bit in the Cut flags byte, check for cutdown conditions and process accordingly

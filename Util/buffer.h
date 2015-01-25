@@ -29,6 +29,8 @@ void Add_To_Buffer(uint32_t data,volatile buff_type* buffer);
 void Add_To_Byte_Buffer(uint8_t data,volatile byte_buff_type* buffer);
 uint8_t Get_From_Buffer(uint32_t* data,volatile buff_type* buffer);
 uint8_t Get_From_Byte_Buffer(uint8_t* data,volatile byte_buff_type* buffer);
+uint8_t Pop_From_Dma_Buffer(dma_buff_type* buffer);
+uint8_t Pop_From_Byte_Buffer(byte_buff_type* buffer);
 void Empty_Buffer(volatile buff_type* buffer);
 void Empty_Dma_Buffer(volatile dma_buff_type* buffer);
 int16_t Bytes_In_DMA_Buffer(dma_buff_type* buffer);

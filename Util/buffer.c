@@ -59,6 +59,12 @@ uint8_t Pop_From_Byte_Buffer(byte_buff_type* buffer) {
 	return d; //returns the byte
 }
 
+uint8_t Pop_From_Dma_Buffer(dma_buff_type* buffer) {
+	uint8_t d=(buffer->data)[buffer->tail];//read data at tail
+	buffer->tail=(buffer->tail+1)%buffer->size;
+	return d; //returns the byte
+}
+
 void Empty_Buffer(volatile buff_type* buffer) {
 	buffer->tail=buffer->head;	//Set the tail to the head, to show there is no usable data present.
 }
