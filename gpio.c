@@ -33,7 +33,7 @@ void setup_gpio(void)
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;//pullup
 	GPIO_Init( GPIOB, &GPIO_InitStructure );/* configure SDSEL pin as input pull up until the SD driver is intialised*/
 	//Pull up all the SD SPI lines until the bus is intialized - SD spec says MISO and MOSI should be pulled up at poweron
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_13 | GPIO_Pin_15;
+	GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_14 | GPIO_Pin_15;
 	GPIO_Init( GPIOB, &GPIO_InitStructure );		
 
 	//Power button

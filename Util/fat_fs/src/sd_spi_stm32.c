@@ -200,13 +200,16 @@ static void interface_speed( enum speed_setting speed )
 {
 	DWORD tmp;
 
+	while(SPI_SD->SR & SPI_SR_BSY) {;}/*Should not change this whilst peripheral is operating*/
+
 	tmp = SPI_SD->CR1;
+	tmp &=~SPI_BaudRatePrescaler_256;/* Wipe all the bits */
 	if ( speed == INTERFACE_SLOW ) {
 		/* Set slow clock (100k-400k) */
-		tmp = ( tmp | SPI_BaudRatePrescaler_16 );/* Gives 187.5khz with 3Mhz APB clock */
+		tmp |= SPI_BaudRatePrescaler_32;/* Gives 187.5khz with 3Mhz APB clock */
 	} else {
 		/* Set fast clock (depends on the CSD) */
-		tmp = ( tmp & ~SPI_BaudRatePrescaler_16 ) | SPI_BaudRatePrescaler_SPI_SD;
+		tmp |= SPI_BaudRatePrescaler_SPI_SD;
 	}
 	SPI_SD->CR1 = tmp;
 }
@@ -567,8 +570,8 @@ void power_on (void)
 	SPI_Cmd(SPI_SD, ENABLE);
 
 	/* drain SPI */
-	while (SPI_I2S_GetFlagStatus(SPI_SD, SPI_I2S_FLAG_TXE) == RESET) { ; }
-	dummyread = SPI_I2S_ReceiveData(SPI_SD);
+	while (SPI_I2S_GetFlagStatus(SPI_SD, SPI_I2S_FLAG_TXE) == RESET) {;}
+	while (SPI_I2S_GetFlagStatus(SPI_SD, SPI_I2S_FLAG_RXNE) == SET) { dummyread = SPI_I2S_ReceiveData(SPI_SD); }
 
 #ifdef STM32_SD_USE_DMA
 	/* enable DMA clock */
@@ -701,7 +704,9 @@ BYTE send_cmd (
 
 	/* Select the card and wait for ready */
 	DESELECT();
+	for(volatile uint8_t t_=80;t_;t_--);
 	SELECT();
+	for(volatile uint8_t t_=80;t_;t_--);
 	if (wait_ready() != 0xFF) {
 		return 0xFF;
 	}
@@ -760,7 +765,7 @@ DSTATUS disk_initialize (
 		if (send_cmd(CMD8, 0x1AA) == 1) {	/* SDHC */
 			for (n = 0; n < 4; n++) ocr[n] = rcvr_spi();		/* Get trailing return value of R7 response */
 			if (ocr[2] == 0x01 && ocr[3] == 0xAA) {				/* The card can work at VDD range of 2.7-3.6V */
-				while (Timer1 && send_cmd(ACMD41, 1UL << 30));	/* Wait for leaving idle state (ACMD41 with HCS bit) */
+				while (Timer1 && send_cmd(ACMD41, 1UL << 30)){__WFI();}	/* Wait for leaving idle state (ACMD41 with HCS bit) */
 				if (Timer1 && send_cmd(CMD58, 0) == 0) {		/* Check CCS bit in the OCR */
 					for (n = 0; n < 4; n++) ocr[n] = rcvr_spi();
 					ty = (ocr[0] & 0x40) ? CT_SD2 | CT_BLOCK : CT_SD2;

@@ -112,14 +112,17 @@ int main(void)
         }
 	// check to see if battery has enough charge to start
 	ADC_Configuration();				//We leave this a bit later to allow stabilisation
-	Delay(100000);					//Sensor+inst amplifier takes about 100ms to stabilise after power on
+	{
+	uint32_t t=Millis;
+	while(Millis<(t+100)){__WFI();}			//Sensor+inst amplifier takes about 100ms to stabilise after power on
+	}
 	if(Battery_Voltage<BATTERY_STARTUP_LIMIT)	//We will have to turn off
 		shutdown();
 	Watchdog_Reset();			//Card Init can take a second or two
 	// system has passed battery level check and so file can be opened
 	if((f_err_code = f_mount(0, &FATFS_Obj)))Usart_Send_Str((char*)"FatFs mount error\r\n");//This should only error if internal error
 	else {						//FATFS initialised ok, try init the card, this also sets up the SPI1
-		if(!f_open(&FATFS_logfile,"time.txt",FA_OPEN_EXISTING | FA_READ | FA_WRITE)) {//Try and open a time file to get the system time
+		if(!(f_err_code=f_open(&FATFS_logfile,"time.txt",FA_OPEN_EXISTING | FA_READ | FA_WRITE))) {//Try and open a time file get the system time
 			if(!f_stat((const TCHAR *)"time.txt",&FATFS_info)) {//Get file info
 				if(FATFS_info.fsize<5) {	//Empty file
 					RTC_time.year=(FATFS_info.fdate>>9)+1980;//populate the time struct (FAT start==1980, RTC.year==0)
@@ -136,6 +139,8 @@ int main(void)
 			}
 			f_close(&FATFS_logfile);	//Close the time.txt file
 		}
+		else
+			NVIC_SystemReset();
 		// load settings if file exists
 		Watchdog_Reset();			//Card Init can take a second or two
 		if(!f_open(&FATFS_logfile,"settings.dat",FA_OPEN_EXISTING | FA_READ)) {
@@ -179,9 +184,12 @@ int main(void)
 #endif
 		Watchdog_Reset();			//Card Init can take a second or two
 		if((f_err_code=f_open(&FATFS_logfile,LOGFILE_NAME,FA_CREATE_ALWAYS | FA_WRITE))) {//Present
-			printf("FatFs drive error %d\r\n",f_err_code);
-			if(f_err_code==FR_DISK_ERR || f_err_code==FR_NOT_READY)
-				Usart_Send_Str((char*)"No uSD card inserted?\r\n");
+			Delay(10000);
+			if((f_err_code=f_open(&FATFS_logfile,LOGFILE_NAME,FA_CREATE_ALWAYS | FA_WRITE))) {//Try again
+				printf("FatFs drive error %d\r\n",f_err_code);
+				if(f_err_code==FR_DISK_ERR || f_err_code==FR_NOT_READY)
+					Usart_Send_Str((char*)"No uSD card inserted?\r\n");
+			}
 		}
 		else {
 			Watchdog_Reset();		//Card Init can take a second or two
