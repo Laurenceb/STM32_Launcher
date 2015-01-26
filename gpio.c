@@ -10,7 +10,11 @@ void setup_gpio(void)
 	GPIO_InitTypeDef	GPIO_InitStructure;
 	//enable the clocks 
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB|RCC_APB2Periph_GPIOA|RCC_APB2Periph_AFIO, ENABLE);//GPIO/AFIO clks
-	GPIO_WriteBit(GPIOB,GPIO_Pin_5,Bit_RESET);//to power cycle the secondary supply in case of a reset
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD;//pulldown
+	//Pull down all four lines to the microSD card during bootup
+	GPIO_InitStructure.GPIO_Pin =  (GPIO_Pin_8 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15);
+	GPIO_Init( GPIOB, &GPIO_InitStructure );
+	GPIO_WriteBit(GPIOB,GPIO_Pin_5,Bit_RESET);//Then ensure that this is low to power cycle the secondary supply in case of a reset
 	setuppwr();				//configure power control
 	disable_pin();				//disable WKUP pin functionality
 	//Disable the JTAG so we can use pins as GPIO - SWD still usable
@@ -33,7 +37,7 @@ void setup_gpio(void)
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;//pullup
 	GPIO_Init( GPIOB, &GPIO_InitStructure );/* configure SDSEL pin as input pull up until the SD driver is intialised*/
 	//Pull up all the SD SPI lines until the bus is intialized - SD spec says MISO and MOSI should be pulled up at poweron
-	GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_14 | GPIO_Pin_15;
+	GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_13 | GPIO_Pin_15;
 	GPIO_Init( GPIOB, &GPIO_InitStructure );		
 
 	//Power button
