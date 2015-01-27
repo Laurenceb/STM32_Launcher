@@ -20,6 +20,8 @@ void Usarts_Init() {
     // Initialise the buffers
     Init_Byte_Buffer(&Usart1_rx_buff, 256);//Initialise the Usart1 Rx
     
+    // Enable DMA clock
+    RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
     // Enable clock to GPIO and USART1 and USART2 peripherals - on different APBs
     RCC_APB2PeriphClockCmd(USART1_RCC_GPIO | USART1_RCC_USART, ENABLE);
     RCC_APB1PeriphClockCmd(USART2_RCC_USART,ENABLE );
@@ -41,7 +43,7 @@ void Usarts_Init() {
     Default_Usart_Config(&USART_InitStructure);
     USART_Init(USART1_USART, &USART_InitStructure );
     // Configure USART2 peripheral - only buadrate is changed
-    USART_InitStructure.USART_BaudRate = USART2_BAUD;
+    USART_InitStructure.USART_BaudRate = GPS_DEFAULT_BAUD;
     USART_Init(USART2_USART, &USART_InitStructure );
 
     Init_Dma_Buffer(&Gps_Buffer, 256);//Initialise the Usart2 Rx for the GPS 

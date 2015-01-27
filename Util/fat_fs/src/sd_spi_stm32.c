@@ -206,7 +206,7 @@ static void interface_speed( enum speed_setting speed )
 	tmp &=~SPI_BaudRatePrescaler_256;/* Wipe all the bits */
 	if ( speed == INTERFACE_SLOW ) {
 		/* Set slow clock (100k-400k) */
-		tmp |= SPI_BaudRatePrescaler_32;/* Gives 187.5khz with 3Mhz APB clock */
+		tmp |= SPI_BaudRatePrescaler_16;/* Gives 187.5khz with 3Mhz APB clock */
 	} else {
 		/* Set fast clock (depends on the CSD) */
 		tmp |= SPI_BaudRatePrescaler_SPI_SD;

@@ -70,7 +70,7 @@ void Empty_Buffer(volatile buff_type* buffer) {
 }
 
 void Empty_Dma_Buffer(volatile dma_buff_type* buffer) {
-	buffer->tail=*(buffer->head);
+	buffer->tail=(uint16_t)(*(volatile uint32_t*)(buffer->head));
 }
 
 /**
@@ -80,7 +80,7 @@ void Empty_Dma_Buffer(volatile dma_buff_type* buffer) {
   */
 int16_t Bytes_In_DMA_Buffer(dma_buff_type* buffer)
 {
-	return ((buffer->size-buffer->tail-(int16_t)(*(buffer->head)))%buffer->size);
+	return ((buffer->size-buffer->tail-(uint16_t)(*(volatile uint32_t*)(buffer->head)))%buffer->size);
 }
 
 void Init_Buffer(volatile buff_type* buff, uint16_t size) {

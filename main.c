@@ -139,8 +139,6 @@ int main(void)
 			}
 			f_close(&FATFS_logfile);	//Close the time.txt file
 		}
-		else
-			NVIC_SystemReset();
 		// load settings if file exists
 		Watchdog_Reset();			//Card Init can take a second or two
 		if(!f_open(&FATFS_logfile,"settings.dat",FA_OPEN_EXISTING | FA_READ)) {
