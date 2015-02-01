@@ -292,6 +292,16 @@ int main(void)
 				mode=1;
 			}
 		}
+		//Button multipress status, allows the device to be configured for indoor use at this point
+		if(System_state_Global&0x80) {		//A "control" button press
+			system_state=System_state_Global&~0x80;//Copy to local variable
+			if(system_state==1 && (shutdown_lock!=SHUTDOWNLOCK_MAGIC)) {//Single button press, when not in flight mode (forced via µSD card setting)
+				printf("Indoor mode\r\n");
+				mode=1;
+			}
+			System_state_Global&=~0x80;	//Wipe the flag bit to show this has been processed
+		}
+		//Generate the Telemetry string
 		if(mode==1)
 			break;
 		//Now some radio debug and 10 secondly output
@@ -319,6 +329,15 @@ int main(void)
 			last_message=Millis;
 		}
 		}//Context only
+                if(Shutdown_System) {			//A system shutdown has been requested - this allows the board to be turned off by pressing during GPS lock
+			if(file_opened)
+				shutdown_filesystem(Shutdown_System, file_opened);
+			if(Shutdown_System==USB_INSERTED)
+				NVIC_SystemReset();	//Software reset of the system - USB inserted whilst running
+			else {
+				shutdown();		//Puts us into sleep mode
+			}
+		}
 	}
 	}//Context only
 	Gps.packetflag=0x00;				//Reset
