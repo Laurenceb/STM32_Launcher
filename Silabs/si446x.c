@@ -12,7 +12,7 @@ uint32_t Active_shift = DEFAULT_SHIFT;
 uint32_t Active_level = DEFAULT_POWER_LEVEL;
 uint32_t Active_channel = DEFAULT_CHANNEL;
 uint32_t Active_bps = DEFAULT_BPS;
-int8_t Outdiv = 4;
+int8_t Outdiv = 8;
 uint8_t Active_banddiv = 10;
 
 //Interface functions go here
@@ -28,8 +28,8 @@ void add_to_silabs_buffer(uint8_t data) {
 }
 
 uint8_t get_from_silabs_buffer(uint8_t* status) {
-	uint32_t g;
-	*status=Get_From_Byte_Buffer((uint32_t*) &g, &Silabs_Rx_Buffer);
+	uint8_t g;
+	*status=Get_From_Byte_Buffer((uint8_t*) &g, &Silabs_Rx_Buffer);
 	return g;
 }
 
@@ -337,7 +337,7 @@ void si446x_set_deviation_channel_bps(uint32_t deviation, uint32_t channel_space
 	//Outdiv = 8;
 	float units_per_hz = (( 0x40000 * Outdiv ) / (float)VCXO_FREQ);
 	// Set deviation for RTTY
-	uint32_t modem_freq_dev = (uint32_t)(units_per_hz * deviation / 2.0 );
+	uint32_t modem_freq_dev = (uint32_t)(units_per_hz * (float)deviation / 2.0 );
 	uint32_t mask = 0b11111111;
 	uint8_t modem_freq_dev_0 = mask & modem_freq_dev;
 	uint8_t modem_freq_dev_1 = mask & (modem_freq_dev >> 8);
@@ -348,7 +348,7 @@ void si446x_set_deviation_channel_bps(uint32_t deviation, uint32_t channel_space
 	__enable_irq();
 	while(Silabs_spi_state)
 		__WFI();
-	uint32_t channel_spacing = (uint32_t)(units_per_hz * channel_space / 2.0 );
+	uint32_t channel_spacing = (uint32_t)(units_per_hz * (float)channel_space );
 	modem_freq_dev_0 = mask & channel_spacing ;
 	modem_freq_dev_1 = mask & (channel_spacing >> 8);
 	memcpy(tx_buffer, (uint8_t [6]){0x11, 0x40, 0x02, 0x04, modem_freq_dev_1, modem_freq_dev_0}, 6*sizeof(uint8_t));
@@ -361,9 +361,14 @@ void si446x_set_deviation_channel_bps(uint32_t deviation, uint32_t channel_space
 	modem_freq_dev_0 = mask & bps;
 	modem_freq_dev_1 = mask & (bps >> 8);
 	modem_freq_dev_2 = mask & (bps >> 16);
-	memcpy(tx_buffer, (uint8_t [7]){0x11, 0x20, 0x03, 0x03, modem_freq_dev_2, modem_freq_dev_1, modem_freq_dev_0}, 7*sizeof(uint8_t));
+	//divide VCXO_FREQ into its bytes; MSB first, this is needed for the NCO frequency for Tx mode - equal to the xtal for <200kbps
+	uint8_t x3 = VCXO_FREQ / 0x1000000;
+	uint8_t x2 = (VCXO_FREQ - (uint32_t)x3 * 0x1000000) / 0x10000;
+	uint8_t x1 = (VCXO_FREQ - (uint32_t)x3 * 0x1000000 - (uint32_t)x2 * 0x10000) / 0x100;
+	uint8_t x0 = (VCXO_FREQ - (uint32_t)x3 * 0x1000000 - (uint32_t)x2 * 0x10000 - (uint32_t)x1 * 0x100); 
+	memcpy(tx_buffer, (uint8_t [11]){0x11, 0x20, 0x07, 0x03, modem_freq_dev_2, modem_freq_dev_1, modem_freq_dev_0, x3, x2, x1, x0},11*sizeof(uint8_t));
 	__disable_irq();
-	si446x_spi_state_machine( &Silabs_spi_state, 7, tx_buffer, 0, rx_buffer, NULL );
+	si446x_spi_state_machine( &Silabs_spi_state, 11, tx_buffer, 0, rx_buffer, NULL );
 	__enable_irq();
 	while(Silabs_spi_state)
 		__WFI();
