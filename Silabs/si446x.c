@@ -390,8 +390,8 @@ void si446x_set_modem(void) {
 	__enable_irq();
 	while(Silabs_spi_state)
 		__WFI();
-	//Also configure the RX packet CRC stuff here, 6 byte payload for FIELD1, using CRC and CRC check for rx with no seed, and 2FSK
-	memcpy(tx_buffer, (uint8_t [7]){0x11, 0x12, 0x03, 0x22, 0x06, 0x00, 0x0A}, 7*sizeof(uint8_t));
+       //Also configure the RX packet CRC stuff here, 6 byte payload for FIELD1, using CRC and CRC check for rx with seed, and 2FSK
+       memcpy(tx_buffer, (uint8_t [7]){0x11, 0x12, 0x03, 0x22, 0x06, 0x00, 0x8A}, 7*sizeof(uint8_t));
 	__disable_irq();
 	si446x_spi_state_machine( &Silabs_spi_state, 7, tx_buffer, 0, rx_buffer, NULL );
 	__enable_irq();
