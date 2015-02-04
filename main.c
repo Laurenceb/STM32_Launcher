@@ -313,16 +313,16 @@ int main(void)
 		}
 		//Check for Silabs uplinked data, and process it
 		{
-		uint8_t stat;
-		uint8_t str[10];			//For receiving uplinked data
+		uint8_t stat=2;
+		uint8_t str[10]={};			//For receiving uplinked data
 		uint8_t n=0;
 		do {
 			str[n]=(uint8_t)get_from_silabs_buffer(&stat);
 			n++;
-		} while(stat && n<=10);
-		if(stat || n>1)
+		} while(!stat && n<=10);		//stat is 0 for "no error"
+		if(n>1)
 			UplinkBytes+=n;			//Stores the amount of uplinked data
-		if(stat && strlen(str)==6 && !strncmp(str,Silabs_Header,4)) {
+		if(n>1 && strlen(str)==6 && !strncmp(str,Silabs_Header,4)) {
 			print_string[0]=0;
 			printf("Rockoon project: received: %s\n",str);//Test the silabs RTTY - echo function
 			send_string_to_silabs(print_string);//Send the string
@@ -355,16 +355,16 @@ int main(void)
 		__WFI();				//Wait for something to happen - saves power 
 		//Check for Silabs uplinked data, and process it
 		{
-		uint8_t stat;
-		uint8_t str[10];			//For receiving uplinked data
+		uint8_t stat=2;
+		uint8_t str[10]={};			//For receiving uplinked data
 		uint8_t n=0;
 		do {
 			str[n]=(uint8_t)get_from_silabs_buffer(&stat);
 			n++;
-		} while(stat && n<=10);
-		if(stat || n>1)
+		} while(!stat && n<=10);
+		if(n>1)
 			UplinkBytes+=n;			//Stores the amount of uplinked data
-		if(stat && strlen(str)==6 && !strncmp(str,Silabs_Header,4)) {//We recived something, here we process the data that was received, as long as it is '$$RO**'
+		if(n>1 && strlen(str)==6 && !strncmp(str,Silabs_Header,4)) {//We recived something, here we process the data that was received, as long as it is '$$RO**'
 			if(str[4]==Silabs_Header[4] && str[5]>47 && str[5]<56 ) {//Need to send e.g. "$$ROKx" where x is 0 to 7
 				if(str[5]-48!=UPLINK_TEST_BIT)
 					UplinkFlags|=1<<(str[5]-48);//Set the correct flag bit
