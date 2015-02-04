@@ -213,14 +213,14 @@ uint8_t Config_Gps(void) {
 	if(Get_UBX_Ack(filter_mode[3],filter_mode[4])) {
 		printf("Ack Error -Filter config\r\n");
 		return 1;}
-	Gps_Send_Utf8(update);
+	/*Gps_Send_Utf8(update);		//These should be disabled to keep update rate at 1Hz and SBAS enabled
 	if(Get_UBX_Ack(update[3],update[4])) {
 		printf("Ack Error -Update config\r\n");
 		return 1;}
 	Gps_Send_Utf8(sbas);
 	if(Get_UBX_Ack(sbas[3],sbas[4])) {
 		printf("Ack Error -SBAS config\r\n");
-		return 1;}
+		return 1;}*/
 	return 0;				//Success
 }
 
