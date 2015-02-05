@@ -44,7 +44,7 @@
 
 #define MISSION_TIMEOUT 12600000UL /* 3.5 hours */
 
-#define COUNTDOWN_DELAY 1200	/*1.2 s between GoPro turn on and start of launch sequence */
+#define COUNTDOWN_DELAY 5500	/* 5s between GoPro turn on and start of launch sequence (measured from GoPro Hero3+, black edition at 240fps)*/
 //GoPro stuff
 #define GOPRO_TRIGGER_TIME 450	/*450 ms delay */
 
