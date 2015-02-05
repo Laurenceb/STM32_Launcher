@@ -261,7 +261,7 @@ uint8_t si446x_setup(void) {
 		__WFI();
 	//Rest of the config
 	si446x_set_frequency(Active_freq);
-	si446x_set_deviation_channel_bps(Active_freq, Active_channel, Active_bps);
+	si446x_set_deviation_channel_bps(Active_shift, Active_channel, Active_bps);
 	si446x_set_modem();
 	memcpy(tx_buffer, (uint8_t [8]){0x32, Channel_rx, 0x00, 0x00, 0x00, 0x00, 0x03, 0x08}, 8*sizeof(uint8_t));/* ready on CRC match pkt, RX on CRC packet error, FIELD config in packet handler for packet engine */
 	__disable_irq();
