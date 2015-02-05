@@ -13,7 +13,7 @@
 #define DEFAULT_SHIFT 300 /*300 hz tone sep*/
 #define DEFAULT_FREQ 434750000UL /*carrier center at channel 0*/
 #define DEFAULT_CHANNEL 3000 /* 3kHz channel spacing */
-#define DEFAULT_BPS 100 /*100bps for the uplink*/
+#define DEFAULT_BPS 200 /*200bps for the uplink*/
 
 #define RTTY_BAUD 50 /* This is pretty standard for balloons, means the PCLK1 has to be down at 3mhz and system clk at 24mhz*/
 

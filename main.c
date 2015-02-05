@@ -241,7 +241,8 @@ int main(void)
 		f_puts(print_string,&FATFS_logfile);
 		shutdown_filesystem(ERR, file_opened);//So we log that something went wrong in the logfile
 		shutdown();
-	}						//Otherwise silabs is now initialised, and can be used via its buffers
+	}
+	print_string[0]=0;				//Otherwise silabs is now initialised, and can be used via its buffers
 	printf("Hello from rockoon project\n");		//Test the silabs RTTY
 	send_string_to_silabs(print_string);		//Send the string
 	//Wait for packet to send (could be caught by watchdog if failure)
@@ -253,11 +254,11 @@ int main(void)
 	//Setup and test the I2C
 	I2C_Config();					//Setup the I2C bus
 	sensors=detect_sensors(0);
-	if((sensors&((1<<L3GD20_CONFIG)|(1<<AFROESC_READ)))!=((1<<L3GD20_CONFIG)|(1<<AFROESC_READ))) {
-		f_puts("I2C sensor detect error\r\n",&FATFS_logfile);
-		shutdown_filesystem(ERR, file_opened);//So we log that something went wrong in the logfile
-		shutdown();
-	}
+	//if((sensors&((1<<L3GD20_CONFIG)|(1<<AFROESC_READ)))!=((1<<L3GD20_CONFIG)|(1<<AFROESC_READ))) {
+	//	f_puts("I2C sensor detect error\r\n",&FATFS_logfile);
+	//	shutdown_filesystem(ERR, file_opened);//So we log that something went wrong in the logfile
+	//	shutdown();
+	//}
 	//Setup the Timer for PWM
 	Init_Timer();
 	PWM_Set(IND_DUTY);
@@ -555,7 +556,7 @@ uint8_t detect_sensors(uint8_t init) {
 	}
 	sensors=Completed_Jobs;				//Which I2C jobs completed ok?
 	//Initialise the buffers if all is ok and we are allowed to
-	if(!init && ((sensors&((1<<L3GD20_CONFIG)|(1<<AFROESC_READ)))!=((1<<L3GD20_CONFIG)|(1<<AFROESC_READ)))) {
+	if(!init && ((sensors&((1<<L3GD20_CONFIG)|(1<<AFROESC_READ)))==((1<<L3GD20_CONFIG)|(1<<AFROESC_READ)))) {
 		Init_Buffer(&Gyro_x_buffer, 32);
 		Init_Buffer(&Gyro_y_buffer, 32);
 		Init_Buffer(&Gyro_z_buffer, 32);

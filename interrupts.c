@@ -122,7 +122,7 @@ __attribute__((externally_visible)) void SysTick_Handler(void)
 	Low_Battery_Warning-=1;
 	ADC_SoftwareStartInjectedConvCmd(ADC2, ENABLE);		//Trigger the injected channel group
 	//Read any I2C bus sensors here (100Hz)
-	if(Completed_Jobs&(1<<L3GD20_READ)) {
+	if((Completed_Jobs&(1<<L3GD20_READ))&&Gyro_x_buffer.data) {//The data also has to exist
 		Completed_Jobs&=~(1<<L3GD20_READ);
 		uint16_t x=*((uint16_t*)&L3GD20_Data_Buffer[2]);
 		Flipbytes(x);
