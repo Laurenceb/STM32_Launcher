@@ -425,7 +425,7 @@ int main(void)
 			UplinkFlags|=(Ignition_Selftest&0x07)<<IGNITON_FLAG_BITS;//This should change from 0 to 1 following a launch, or 2 or 3 if autosequence fails
 			if( UplinkFlags&(1<<(LAUNCH_COMMAND)) ) {//Need to send the command whilst the permission is valid
 				UplinkFlags&=~(1<<(LAUNCH_COMMAND));//Wipe the bit
-				if( ((Gps.mslaltitude/1000) > LAUNCH_ALTITUDE) && ((Millis-badgyro)>LAUNCH_STABLE_PERIOD ) && (Auto_volt>INDUCT_SENSE_LOW && Auto_volt<INDUCT_SENSE_HIGH)) {
+				if( ((Gps.mslaltitude/1000) > (int32_t)LAUNCH_ALTITUDE) && ((Millis-badgyro)>LAUNCH_STABLE_PERIOD ) && (Auto_volt>INDUCT_SENSE_LOW && Auto_volt<INDUCT_SENSE_HIGH)) {
 					countdown_time=Millis+COUNTDOWN_DELAY;
 					GOPRO_TRIG_ON;		//Turn the GoPro on the record the launch, it runs an autoexec.ash script
 				} else				//Launch refused
