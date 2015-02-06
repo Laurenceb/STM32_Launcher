@@ -557,6 +557,7 @@ void si446x_busy_wait_send_receive(uint8_t tx_bytes, uint8_t rx_bytes, uint8_t *
 	NSEL_HIGH;
 	uint16_t reply = SPI1->DR;		//Read this to wipe the RXNE - clear the RX buffer
 	reply=0;
+	NSEL_LOW;
 	while (reply != 0xFF) {
 		SPI1->DR=0x44;			//The read command
 		while(SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_RXNE) == RESET);
