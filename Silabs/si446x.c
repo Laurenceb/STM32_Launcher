@@ -17,19 +17,23 @@ uint8_t Active_banddiv = 10;
 
 //Interface functions go here
 uint8_t send_string_to_silabs(uint8_t* str) {
-	for(;*str;str++)
-		Add_To_Byte_Buffer( *str, &Silabs_Tx_Buffer );
+	uint8_t n=0;
+	for(;*str && n<Silabs_Tx_Buffer.size;str++) {
+		Add_To_Byte_Buffer( *str, (volatile byte_buff_type*)&Silabs_Tx_Buffer );
+		n++;
+	}
 	NVIC_SetPendingIRQ(EXTI0_IRQn);
+	return n;
 }
 
 void add_to_silabs_buffer(uint8_t data) {
-	Add_To_Byte_Buffer( data, &Silabs_Tx_Buffer );
+	Add_To_Byte_Buffer( data, (volatile byte_buff_type*)&Silabs_Tx_Buffer );
 	NVIC_SetPendingIRQ(EXTI0_IRQn);
 }
 
 uint8_t get_from_silabs_buffer(uint8_t* status) {
 	uint8_t g;
-	*status=Get_From_Byte_Buffer((uint8_t*) &g, &Silabs_Rx_Buffer);
+	*status=Get_From_Byte_Buffer((uint8_t*) &g, (volatile byte_buff_type*)&Silabs_Rx_Buffer);
 	return g;
 }
 
@@ -195,19 +199,13 @@ uint8_t si446x_setup(void) {
 	/* Configure the radio ready for use, use simple busy wait logic here, as only has to happen once */
 	uint8_t part=0;
 	{
-	uint8_t tx_buffer[16];
 	uint8_t rx_buffer[12];
 	//divide VCXO_FREQ into its bytes; MSB first
 	uint8_t x3 = VCXO_FREQ / 0x1000000;
 	uint8_t x2 = (VCXO_FREQ - (uint32_t)x3 * 0x1000000) / 0x10000;
 	uint8_t x1 = (VCXO_FREQ - (uint32_t)x3 * 0x1000000 - (uint32_t)x2 * 0x10000) / 0x100;
 	uint8_t x0 = (VCXO_FREQ - (uint32_t)x3 * 0x1000000 - (uint32_t)x2 * 0x10000 - (uint32_t)x1 * 0x100); 
-	memcpy(tx_buffer, (uint8_t [7]){0x02, 0x01, 0x01, x3, x2, x1, x0}, 7*sizeof(uint8_t));
-	__disable_irq();
-	si446x_spi_state_machine( &Silabs_spi_state, 7, tx_buffer, 2, rx_buffer, NULL );
-	__enable_irq();
-	while(Silabs_spi_state);
-		__WFI();
+	si446x_busy_wait_send_receive(7, 2, (uint8_t [7]){0x02, 0x01, 0x01, x3, x2, x1, x0}, rx_buffer);
 	while(GET_NIRQ|(!GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_10)));/*Wait for NIRQ low and POR high*/
 	/* Configure EXTI0 line */
 	EXTI_InitStructure.EXTI_Line = EXTI_Line0;		/*Only enable NIRQ here*/
@@ -219,56 +217,27 @@ uint8_t si446x_setup(void) {
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x07;	//Lowest group priority
 	NVIC_Init(&NVIC_InitStructure);
 	//clear all interrupts
-	memcpy(tx_buffer, (uint8_t [4]){0x20, 0x00, 0x00, 0x00}, 4*sizeof(uint8_t));
-	__disable_irq();
-	si446x_spi_state_machine( &Silabs_spi_state, 4, tx_buffer, 0, NULL, NULL );
-	__enable_irq();
-	while(Silabs_spi_state)
-		__WFI();
+	si446x_busy_wait_send_receive(4, 0, (uint8_t [4]){0x20, 0x00, 0x00, 0x00}, rx_buffer);
 	//read the device part number info
-	memcpy(tx_buffer, (uint8_t [2]){0x01, 0x01}, 2*sizeof(uint8_t));
-	__disable_irq();
-	si446x_spi_state_machine( &Silabs_spi_state, 2, tx_buffer, 12, rx_buffer, NULL );
-	__enable_irq();
-	while(Silabs_spi_state)
-		__WFI();
+	si446x_busy_wait_send_receive(2, 12, (uint8_t [2]){0x01, 0x01}, rx_buffer);
 	part=rx_buffer[3];//Should be 0x44
 	//Only enable the packet received interrupt - global interrupt config and PH interrupt config bytes
-	memcpy(tx_buffer, (uint8_t [6]){0x11, 0x01, 0x02, 0x00, 0x01, 0x10}, 6*sizeof(uint8_t));
-	__disable_irq();
-	si446x_spi_state_machine( &Silabs_spi_state, 6, tx_buffer, 0, NULL, NULL );
-	__enable_irq();
-	while(Silabs_spi_state)
-		__WFI();
+	si446x_busy_wait_send_receive(6, 0, (uint8_t [6]){0x11, 0x01, 0x02, 0x00, 0x01, 0x10}, rx_buffer);
 	//Setup the fist response A register to hold the RSSI of the last packet
-	memcpy(tx_buffer, (uint8_t [5]){0x11, 0x02, 0x01, 0x00, 0x0A}, 5*sizeof(uint8_t));
-	__disable_irq();
-	si446x_spi_state_machine( &Silabs_spi_state, 5, tx_buffer, 0, NULL, NULL );
-	__enable_irq();
-	while(Silabs_spi_state)
-		__WFI();
+	si446x_busy_wait_send_receive(5, 0, (uint8_t [5]){0x11, 0x02, 0x01, 0x00, 0x0A}, rx_buffer);
 	// Configure Tx pin as input to start with, so that it can be used to monitor POR, now configure it to TX AF
 	GPIO_InitStructure.GPIO_Pin     = GPIO_Pin_10;
 	GPIO_InitStructure.GPIO_Speed   = GPIO_Speed_50MHz;
 	GPIO_InitStructure.GPIO_Mode    = GPIO_Mode_AF_PP;
 	GPIO_Init(GPIOB, &GPIO_InitStructure);
 	//Setup the GPIO pin, note that GPIO1 defaults to CTS, but we need to reset and set GPIO0 to TX direct mode mod input
-	memcpy(tx_buffer, (uint8_t [8]){0x13, 0x04, 0x08, 0x01, 0x01, 0x00, 0x11, 0x00}, 8*sizeof(uint8_t));//GPIO0 in, 1 CTS, rest dis, NIRQ unchanged
-	__disable_irq();
-	si446x_spi_state_machine( &Silabs_spi_state, 8, tx_buffer, 0, NULL, NULL );
-	__enable_irq();
-	while(Silabs_spi_state)
-		__WFI();
+	si446x_busy_wait_send_receive(8, 0, (uint8_t [8]){0x13, 0x04, 0x08, 0x01, 0x01, 0x00, 0x11, 0x00}, rx_buffer);
 	//Rest of the config
 	si446x_set_frequency(Active_freq);
 	si446x_set_deviation_channel_bps(Active_shift, Active_channel, Active_bps);
 	si446x_set_modem();
-	memcpy(tx_buffer, (uint8_t [8]){0x32, Channel_rx, 0x00, 0x00, 0x00, 0x00, 0x03, 0x08}, 8*sizeof(uint8_t));/* ready on CRC match pkt, RX on CRC packet error, FIELD config in packet handler for packet engine */
-	__disable_irq();
-	si446x_spi_state_machine( &Silabs_spi_state, 8, tx_buffer, 0, rx_buffer, &si446x_state_machine );/* Start off in Rx mode */
-	__enable_irq();
-	while(Silabs_spi_state)
-		__WFI();
+	/* ready on CRC match pkt, RX on CRC packet error, FIELD config in packet handler for packet engine */
+	si446x_busy_wait_send_receive(8, 0, (uint8_t [8]){0x32, Channel_rx, 0x00, 0x00, 0x00, 0x00, 0x03, 0x08}, rx_buffer);
 	}
 	Silabs_driver_state=DEFAULT_MODE;/* Make sure this is initialised */
 	EXTI_Init(&EXTI_InitStructure);	/* Only enable the NIRQ once everything is configured */
@@ -282,7 +251,6 @@ uint8_t si446x_setup(void) {
   */
 void si446x_set_frequency(uint32_t freq) {/*Set the output divider according to recommended ranges given in Si446x datasheet*/
 	uint8_t band = 0;
-	uint8_t tx_buffer[16];
 	uint8_t rx_buffer[2];
 	if (freq < 705000000UL) { Outdiv = 6; band = 1;};
 	if (freq < 525000000UL) { Outdiv = 8; band = 2;};
@@ -297,12 +265,7 @@ void si446x_set_frequency(uint32_t freq) {/*Set the output divider according to 
 	// set the band parameter
 	uint32_t sy_sel = 8;
 	Active_banddiv = (band + sy_sel);/*From experience this seems to be involved in bps scaling*/
-	memcpy(tx_buffer, (uint8_t [5]){0x11, 0x20, 0x01, 0x51, Active_banddiv}, 5*sizeof(uint8_t));
-	__disable_irq();
-	si446x_spi_state_machine( &Silabs_spi_state, 5, tx_buffer, 0, rx_buffer, NULL );
-	__enable_irq();
-	while(Silabs_spi_state)
-		__WFI();
+	si446x_busy_wait_send_receive(5, 0, (uint8_t [5]){0x11, 0x20, 0x01, 0x51, Active_banddiv}, rx_buffer);
 	// Set the pll parameters
 	uint32_t m2 = m / 0x10000;
 	uint32_t m1 = (m - m2 * 0x10000) / 0x100;
@@ -310,19 +273,9 @@ void si446x_set_frequency(uint32_t freq) {/*Set the output divider according to 
 	uint32_t channel_increment = 524288 * Outdiv * Active_shift / (2 * VCXO_FREQ);
 	uint8_t c1 = channel_increment / 0x100;
 	uint8_t c0 = channel_increment - (0x100 * c1);
-	memcpy(tx_buffer, (uint8_t [10]){0x11, 0x40, 0x06, 0x00, n, m2, m1, m0, c1, c0}, 10*sizeof(uint8_t));
-	__disable_irq();
-	si446x_spi_state_machine( &Silabs_spi_state, 10, tx_buffer, 0, rx_buffer, NULL );
-	__enable_irq();
-	while(Silabs_spi_state)
-		__WFI();
+	si446x_busy_wait_send_receive(10, 0, (uint8_t [10]){0x11, 0x40, 0x06, 0x00, n, m2, m1, m0, c1, c0}, rx_buffer);
 	// Set the Power
-	memcpy(tx_buffer, (uint8_t [5]){0x11, 0x22, 0x01, 0x01, Active_level}, 5*sizeof(uint8_t));
-	__disable_irq();
-	si446x_spi_state_machine( &Silabs_spi_state, 5, tx_buffer, 0, rx_buffer, NULL );
-	__enable_irq();
-	while(Silabs_spi_state)
-		__WFI();
+	si446x_busy_wait_send_receive(5, 0, (uint8_t [5]){0x11, 0x22, 0x01, 0x01, Active_level}, rx_buffer);
 }
 
 /**
@@ -331,7 +284,6 @@ void si446x_set_frequency(uint32_t freq) {/*Set the output divider according to 
   * @retval None
   */
 void si446x_set_deviation_channel_bps(uint32_t deviation, uint32_t channel_space, uint32_t bps) {
-	uint8_t tx_buffer[16];
 	uint8_t rx_buffer[2];
 	//Make sure that Si446x::sendFrequencyToSi446x() was called before this function, so that we have set the global variable 'Outdiv' properly
 	//Outdiv = 8;
@@ -342,21 +294,11 @@ void si446x_set_deviation_channel_bps(uint32_t deviation, uint32_t channel_space
 	uint8_t modem_freq_dev_0 = mask & modem_freq_dev;
 	uint8_t modem_freq_dev_1 = mask & (modem_freq_dev >> 8);
 	uint8_t modem_freq_dev_2 = mask & (modem_freq_dev >> 16);
-	memcpy(tx_buffer, (uint8_t [7]){0x11, 0x20, 0x03, 0x0A, modem_freq_dev_2, modem_freq_dev_1, modem_freq_dev_0}, 7*sizeof(uint8_t));
-	__disable_irq();
-	si446x_spi_state_machine( &Silabs_spi_state, 7, tx_buffer, 0, rx_buffer, NULL );
-	__enable_irq();
-	while(Silabs_spi_state)
-		__WFI();
+	si446x_busy_wait_send_receive(7, 0, (uint8_t [7]){0x11, 0x20, 0x03, 0x0A, modem_freq_dev_2, modem_freq_dev_1, modem_freq_dev_0}, rx_buffer);
 	uint32_t channel_spacing = (uint32_t)(units_per_hz * (float)channel_space );
 	modem_freq_dev_0 = mask & channel_spacing ;
 	modem_freq_dev_1 = mask & (channel_spacing >> 8);
-	memcpy(tx_buffer, (uint8_t [6]){0x11, 0x40, 0x02, 0x04, modem_freq_dev_1, modem_freq_dev_0}, 6*sizeof(uint8_t));
-	__disable_irq();
-	si446x_spi_state_machine( &Silabs_spi_state, 6, tx_buffer, 0, rx_buffer, NULL );
-	__enable_irq();
-	while(Silabs_spi_state)
-		__WFI();
+	si446x_busy_wait_send_receive(6, 0, (uint8_t [6]){0x11, 0x40, 0x02, 0x04, modem_freq_dev_1, modem_freq_dev_0}, rx_buffer);
 	bps*=Active_banddiv;		/*From WDS settings, modem speed is in 0.1bps units, but it seems to scale with the frequency, for Manchester is data bps*/
 	modem_freq_dev_0 = mask & bps;
 	modem_freq_dev_1 = mask & (bps >> 8);
@@ -366,12 +308,7 @@ void si446x_set_deviation_channel_bps(uint32_t deviation, uint32_t channel_space
 	uint8_t x2 = (VCXO_FREQ - (uint32_t)x3 * 0x1000000) / 0x10000;
 	uint8_t x1 = (VCXO_FREQ - (uint32_t)x3 * 0x1000000 - (uint32_t)x2 * 0x10000) / 0x100;
 	uint8_t x0 = (VCXO_FREQ - (uint32_t)x3 * 0x1000000 - (uint32_t)x2 * 0x10000 - (uint32_t)x1 * 0x100); 
-	memcpy(tx_buffer, (uint8_t [11]){0x11, 0x20, 0x07, 0x03, modem_freq_dev_2, modem_freq_dev_1, modem_freq_dev_0, x3, x2, x1, x0},11*sizeof(uint8_t));
-	__disable_irq();
-	si446x_spi_state_machine( &Silabs_spi_state, 11, tx_buffer, 0, rx_buffer, NULL );
-	__enable_irq();
-	while(Silabs_spi_state)
-		__WFI();
+	si446x_busy_wait_send_receive(11, 0, (uint8_t[11]){0x11,0x20,0x07,0x03,modem_freq_dev_2,modem_freq_dev_1,modem_freq_dev_0,x3,x2,x1,x0}, rx_buffer);
 }
 
 /**
@@ -380,121 +317,40 @@ void si446x_set_deviation_channel_bps(uint32_t deviation, uint32_t channel_space
   * @retval None
   */
 void si446x_set_modem(void) {
-	uint8_t tx_buffer[16];
 	uint8_t rx_buffer[2];
 	//Set to CW mode
 	//Sets modem into direct asynchronous 2FSK mode using GPIO0 (UART3 TX on the board)
-	memcpy(tx_buffer, (uint8_t [5]){0x11, 0x20, 0x01, 0x00, 0x8A}, 5*sizeof(uint8_t));
-	__disable_irq();
-	si446x_spi_state_machine( &Silabs_spi_state, 5, tx_buffer, 0, rx_buffer, NULL );
-	__enable_irq();
-	while(Silabs_spi_state)
-		__WFI();
+	si446x_busy_wait_send_receive(5, 0, (uint8_t [5]){0x11, 0x20, 0x01, 0x00, 0x8A}, rx_buffer);
        //Also configure the RX packet CRC stuff here, 6 byte payload for FIELD1, using CRC and CRC check for rx with seed, and 2FSK
-       memcpy(tx_buffer, (uint8_t [7]){0x11, 0x12, 0x03, 0x22, 0x06, 0x00, 0x8A}, 7*sizeof(uint8_t));
-	__disable_irq();
-	si446x_spi_state_machine( &Silabs_spi_state, 7, tx_buffer, 0, rx_buffer, NULL );
-	__enable_irq();
-	while(Silabs_spi_state)
-		__WFI();
+	si446x_busy_wait_send_receive(7, 0, (uint8_t [7]){0x11, 0x12, 0x03, 0x22, 0x06, 0x00, 0x8A}, rx_buffer);
 	//Configure the rx signal path, these setting are from WDS - lower the IF slightly and setup the CIC Rx filter
-	memcpy(tx_buffer, (uint8_t [15]){0x11, 0x20, 0x0B, 0x19, 0x80, 0x08, 0x03, 0x80, 0x00, 0xF0, 0x10, 0x74, 0xE8, 0x00, 0x55}, 15*sizeof(uint8_t));
-	__disable_irq();
-	si446x_spi_state_machine( &Silabs_spi_state, 15, tx_buffer, 0, rx_buffer, NULL );
-	__enable_irq();
-	while(Silabs_spi_state)
-		__WFI();
+	si446x_busy_wait_send_receive(15, 0, (uint8_t [15]){0x11, 0x20, 0x0B, 0x19, 0x80, 0x08, 0x03, 0x80, 0x00, 0xF0, 0x10, 0x74, 0xE8, 0x00, 0x55}, rx_buffer);
 	//Configure BCR - NCO settings for the RX signal path - WDS settings
-	memcpy(tx_buffer, (uint8_t [16]){0x11, 0x20, 0x0C, 0x24, 0x06, 0x0C, 0xAB, 0x03, 0x03, 0x02, 0xC2, 0x00, 0x04, 0x32, 0xC0, 0x01}, 16*sizeof(uint8_t));
-	__disable_irq();
-	si446x_spi_state_machine( &Silabs_spi_state, 16, tx_buffer, 0, rx_buffer, NULL );
-	__enable_irq();
-	while(Silabs_spi_state)
-		__WFI();
+	si446x_busy_wait_send_receive(16, 0, (uint8_t [16]){0x11, 0x20, 0x0C, 0x24, 0x06, 0x0C, 0xAB, 0x03, 0x03, 0x02, 0xC2, 0x00, 0x04, 0x32, 0xC0, 0x01}, rx_buffer);
 	//Configure AFC/AGC settings for Rx path, WDS settings - only change the AFC here, as the other settings are only slightly tweaked by WDS
-	memcpy(tx_buffer, (uint8_t [7]){0x11, 0x20, 0x03, 0x30, 0x03, 0x64, 0xC0}, 7*sizeof(uint8_t));//This just sets AFC limiter values
-	__disable_irq();
-	si446x_spi_state_machine( &Silabs_spi_state, 7, tx_buffer, 0, rx_buffer, NULL );
-	__enable_irq();
-	while(Silabs_spi_state)
-		__WFI();
+	si446x_busy_wait_send_receive(7, 0, (uint8_t [7]){0x11, 0x20, 0x03, 0x30, 0x03, 0x64, 0xC0}, rx_buffer);
 	//Configure Rx search period control - WDS settings
-	memcpy(tx_buffer, (uint8_t [6]){0x11, 0x20, 0x02, 0x50, 0x84, 0x0A}, 6*sizeof(uint8_t));
-	__disable_irq();
-	si446x_spi_state_machine( &Silabs_spi_state, 6, tx_buffer, 0, rx_buffer, NULL );
-	__enable_irq();
-	while(Silabs_spi_state)
-		__WFI();
+	si446x_busy_wait_send_receive(6, 0, (uint8_t [6]){0x11, 0x20, 0x02, 0x50, 0x84, 0x0A}, rx_buffer);
 	//Configure Rx BCR and AFC config - WDS settings
-	memcpy(tx_buffer, (uint8_t [6]){0x11, 0x20, 0x02, 0x54, 0x0F, 0x07}, 6*sizeof(uint8_t));
-	__disable_irq();
-	si446x_spi_state_machine( &Silabs_spi_state, 6, tx_buffer, 0, rx_buffer, NULL );
-	__enable_irq();
-	while(Silabs_spi_state)
-		__WFI();
+	si446x_busy_wait_send_receive(6, 0, (uint8_t [6]){0x11, 0x20, 0x02, 0x54, 0x0F, 0x07}, rx_buffer);
 	//Configure signal arrival detect - WDS settings
-	memcpy(tx_buffer, (uint8_t [9]){0x11, 0x20, 0x05, 0x5B, 0x40, 0x04, 0x21, 0x78, 0x20}, 9*sizeof(uint8_t));
-	__disable_irq();
-	si446x_spi_state_machine( &Silabs_spi_state, 9, tx_buffer, 0, rx_buffer, NULL );
-	__enable_irq();
-	while(Silabs_spi_state)
-		__WFI();
+	si446x_busy_wait_send_receive(9, 0, (uint8_t [9]){0x11, 0x20, 0x05, 0x5B, 0x40, 0x04, 0x21, 0x78, 0x20}, rx_buffer);
 	//Configure first and second set of Rx filter coefficients - WDS settings
-	memcpy(tx_buffer, (uint8_t [16]){0x11, 0x21, 0x0C, 0x00, 0xFF, 0xBA, 0x0F, 0x51, 0xCF, 0xA9, 0xC9, 0xFC, 0x1B, 0x1E, 0x0F, 0x01}, 16*sizeof(uint8_t));
-	__disable_irq();
-	si446x_spi_state_machine( &Silabs_spi_state, 9, tx_buffer, 0, rx_buffer, NULL );
-	__enable_irq();
-	while(Silabs_spi_state)
-		__WFI();
-	memcpy(tx_buffer, (uint8_t [16]){0x11, 0x21, 0x0C, 0x0C, 0xFC, 0xFD, 0x15, 0xFF, 0x00, 0x0F, 0xFF, 0xBA, 0x0F, 0x51, 0xCF, 0xA9}, 16*sizeof(uint8_t));
-	__disable_irq();
-	si446x_spi_state_machine( &Silabs_spi_state, 9, tx_buffer, 0, rx_buffer, NULL );
-	__enable_irq();
-	while(Silabs_spi_state)
-		__WFI();
-	memcpy(tx_buffer, (uint8_t [16]){0x11, 0x21, 0x0C, 0x18, 0xC9, 0xFC, 0x1B, 0x1E, 0x0F, 0x01, 0xFC, 0xFD, 0x15, 0xFF, 0x00, 0x0F}, 16*sizeof(uint8_t));
-	__disable_irq();
-	si446x_spi_state_machine( &Silabs_spi_state, 9, tx_buffer, 0, rx_buffer, NULL );
-	__enable_irq();
-	while(Silabs_spi_state)
-		__WFI();
+	si446x_busy_wait_send_receive(16, 0, (uint8_t [16]){0x11, 0x21, 0x0C, 0x00, 0xFF, 0xBA, 0x0F, 0x51, 0xCF, 0xA9, 0xC9, 0xFC, 0x1B, 0x1E, 0x0F, 0x01}, rx_buffer);
+	si446x_busy_wait_send_receive(16, 0, (uint8_t [16]){0x11, 0x21, 0x0C, 0x0C, 0xFC, 0xFD, 0x15, 0xFF, 0x00, 0x0F, 0xFF, 0xBA, 0x0F, 0x51, 0xCF, 0xA9}, rx_buffer);
+	si446x_busy_wait_send_receive(16, 0, (uint8_t [16]){0x11, 0x21, 0x0C, 0x18, 0xC9, 0xFC, 0x1B, 0x1E, 0x0F, 0x01, 0xFC, 0xFD, 0x15, 0xFF, 0x00, 0x0F}, rx_buffer);
 	//Configure the RSSI thresholding for RX mode, with 12dB jump threshold (reset if RSSI changes this much during Rx), RSSI mean with packet toggle
 	//RSSI_THRESH is in dBm, it needs to be converted to 0.5dBm steps offset by ~130
 	uint8_t rssi = (2*(RSSI_THRESH+130))&0xFF;
-	memcpy(tx_buffer, (uint8_t [8]){0x11, 0x20, 0x04, 0x4A, rssi, 0x0C, 0x12, 0x3E}, 8*sizeof(uint8_t));
-	__disable_irq();
-	si446x_spi_state_machine( &Silabs_spi_state, 8, tx_buffer, 0, rx_buffer, NULL );
-	__enable_irq();
-	while(Silabs_spi_state)
-		__WFI();
+	si446x_busy_wait_send_receive(8, 0, (uint8_t [8]){0x11, 0x20, 0x04, 0x4A, rssi, 0x0C, 0x12, 0x3E}, rx_buffer);
 	//Configure the match value, this constrains the first 4 bytes of data to match e.g. $$RO
-	memcpy(tx_buffer, (uint8_t [16]){0x11, 0x30, 0x0C, 0x00,Silabs_Header[0], 0xFF, 0x41,Silabs_Header[1], 0xFF, 0x42,Silabs_Header[2], 0xFF, 0x43,Silabs_Header[3], 0xFF, 0x44}, 16*sizeof(uint8_t));
-	__disable_irq();
-	si446x_spi_state_machine( &Silabs_spi_state, 16, tx_buffer, 0, rx_buffer, NULL );
-	__enable_irq();
-	while(Silabs_spi_state)
-		__WFI();
+	si446x_busy_wait_send_receive(16, 0, (uint8_t [16]){0x11, 0x30, 0x0C, 0x00,Silabs_Header[0], 0xFF, 0x41,Silabs_Header[1], 0xFF, 0x42,Silabs_Header[2], 0xFF, 0x43,Silabs_Header[3], 0xFF, 0x44}, rx_buffer);
 	//Configure the Packet handler to use seperate FIELD config for RX, and turn off after packet rx
-	memcpy(tx_buffer, (uint8_t [5]){0x11, 0x12, 0x01, 0x06, 0x80}, 5*sizeof(uint8_t));
-	__disable_irq();
-	si446x_spi_state_machine( &Silabs_spi_state, 5, tx_buffer, 0, rx_buffer, NULL );
-	__enable_irq();
-	while(Silabs_spi_state)
-		__WFI();
+	si446x_busy_wait_send_receive(5, 0, (uint8_t [5]){0x11, 0x12, 0x01, 0x06, 0x80}, rx_buffer);
 	//Use CCIT-16 CRC with 0xFFFF seed on the packet handler, same as UKHAS protocol
-	memcpy(tx_buffer, (uint8_t [5]){0x11, 0x12, 0x01, 0x00, 0x85}, 5*sizeof(uint8_t));
-	__disable_irq();
-	si446x_spi_state_machine( &Silabs_spi_state, 5, tx_buffer, 0, rx_buffer, NULL );
-	__enable_irq();
-	while(Silabs_spi_state)
-		__WFI();
+	si446x_busy_wait_send_receive(5, 0, (uint8_t [5]){0x11, 0x12, 0x01, 0x00, 0x85}, rx_buffer);
 	//Set the sync word as two bytes 0xD391, this has good autocorrelation 8/1 peak to secondary ratio, default config used, no bit errors, 16 bit
-	memcpy(tx_buffer, (uint8_t [6]){0x11, 0x11, 0x02, 0x01, 0xD3, 0x91}, 6*sizeof(uint8_t));
-	__disable_irq();
-	si446x_spi_state_machine( &Silabs_spi_state, 6, tx_buffer, 0, rx_buffer, NULL );
-	__enable_irq();
-	while(Silabs_spi_state)
-		__WFI();
+	si446x_busy_wait_send_receive(6, 0, (uint8_t [6]){0x11, 0x11, 0x02, 0x01, 0xD3, 0x91}, rx_buffer);
 }
 
 /**
@@ -502,7 +358,7 @@ void si446x_set_modem(void) {
   * @param  High level state and reason that state machine was called
   * @retval None
   */
-void si446x_state_machine(uint8_t *state_, uint8_t reason ) {
+void si446x_state_machine(volatile uint8_t *state_, uint8_t reason ) {
 	uint8_t state=*state_;
 	static uint8_t rx_buffer[10];
 	static uint8_t tx_buffer[6];
@@ -573,7 +429,7 @@ void si446x_state_machine(uint8_t *state_, uint8_t reason ) {
 		case READ_COMPLETE_MODE:
 			if(!reason) {
 				for( uint8_t n=1; n<bytes_read && n<sizeof(rx_buffer); n++ )/* Avoid the CTS byte */
-					Add_To_Byte_Buffer( rx_buffer[n], &Silabs_Rx_Buffer );
+					Add_To_Byte_Buffer( rx_buffer[n], (volatile byte_buff_type*)&Silabs_Rx_Buffer );
 				if(unhandled_tx_data) {
 					*state_=TX_MODE;/* Jump directly to Tx mode*/
 					unhandled_tx_data=0;/* Reset this here */
@@ -674,8 +530,8 @@ __attribute__((externally_visible)) void USART3_IRQHandler(void) {
 	}
 	else if(USART_GetITStatus(USART3, USART_IT_TXE) != RESET) {
 		USART_ClearITPendingBit(USART3, USART_IT_TXE);/* Clear pending bit. */
-		USART_SendData(USART3, Pop_From_Buffer(&Silabs_Tx_Buffer));/* Read the data from the tx buffer. */
-		if(!bytes_in_buff(&Silabs_Tx_Buffer)) {/* No more data to send? */
+		USART_SendData(USART3, Pop_From_Byte_Buffer((volatile byte_buff_type*)&Silabs_Tx_Buffer));/* Read the data from the tx buffer. */
+		if(!bytes_in_buff((volatile byte_buff_type*)&Silabs_Tx_Buffer)) {/* No more data to send? */
 			USART3->CR1 &=~(1<<7);		/* Disable the interrupt here. */
 			si446x_state_machine( &Silabs_driver_state, 4 );/* Reason 4 callback is for data sent ok */
 		}
@@ -691,6 +547,8 @@ __attribute__((externally_visible)) void USART3_IRQHandler(void) {
   */
 void si446x_busy_wait_send_receive(uint8_t tx_bytes, uint8_t rx_bytes, uint8_t *tx_data, uint8_t *rx_data) {
 	NSEL_LOW;
+	if(tx_bytes==1)
+		tx_bytes=2;			//Cannot send only a single byte due to hardware bug in the silabs
 	for(uint8_t n=0; n<tx_bytes; n++) {
 		SPI_I2S_SendData(SPI1,tx_data[n]);
 		while(SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_TXE) == RESET);
@@ -706,13 +564,13 @@ void si446x_busy_wait_send_receive(uint8_t tx_bytes, uint8_t rx_bytes, uint8_t *
 		SPI1->DR=0x00;			//The read command - dummy byte
 		while(SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_RXNE) == RESET);
 		reply = SPI1->DR;
-		if (reply != 0xFF){		//Try again
+		if (reply != 0xFF) {		//Try again
 			NSEL_HIGH;
 			Delay(40);
 			NSEL_LOW;
 		}
 	}
-	for(uint8_t n=0; n<tx_bytes; n++) {	//Can now read out the rest of the data
+	for(uint8_t n=0; n<rx_bytes; n++) {	//Can now read out the rest of the data
 		SPI_I2S_SendData(SPI1,0x00);
 		while(SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_RXNE) == RESET);
 		rx_data[n]=SPI1->DR;
@@ -725,11 +583,11 @@ void si446x_busy_wait_send_receive(uint8_t tx_bytes, uint8_t rx_bytes, uint8_t *
   * @param  State machine state, tx and rx config, callback function pointer, note that rx buffer offset by one byte is fast (CMD) and two bytes in normal (CMD,CTS)
   * @retval None
   */
-void si446x_spi_state_machine( uint8_t *state_, uint8_t tx_bytes, uint8_t *tx_data, uint8_t rx_bytes, uint8_t *rx_data, void(*callback)(void*)) {
+void si446x_spi_state_machine( volatile uint8_t *state_, uint8_t tx_bytes, uint8_t *tx_data, uint8_t rx_bytes, uint8_t *rx_data, void(*callback)( volatile uint8_t *, uint8_t)) {
 	static uint8_t tx_bytes_local,rx_bytes_local;	/* These allow the buffers to be set only once */
 	static uint8_t* tx_data_local;
 	static uint8_t* rx_data_local;
-	static void(*callback_local)( uint8_t* arg1, uint8_t arg2);
+	static void(*callback_local)( volatile uint8_t* arg1, uint8_t arg2);
 	static uint8_t dummywrite[1]={0};/* For feeding the spi */
 	static uint8_t dummyread;
 	DMA_InitTypeDef DMA_InitStructure;

@@ -38,8 +38,8 @@ uint8_t silabs_cts_jammed(void);
 extern const uint8_t Silabs_Header[5];
 
 void si446x_busy_wait_send_receive(uint8_t tx_bytes, uint8_t rx_bytes, uint8_t *tx_data, uint8_t *rx_data);
-void si446x_spi_state_machine( uint8_t *state_, uint8_t tx_bytes, uint8_t *tx_data, uint8_t rx_bytes, uint8_t *rx_data, void(*callback)(void*));
-void si446x_state_machine(uint8_t *state_, uint8_t reason );
+void si446x_spi_state_machine( volatile uint8_t *state_, uint8_t tx_bytes, uint8_t *tx_data, uint8_t rx_bytes, uint8_t *rx_data, void(*callback)(volatile uint8_t *, uint8_t));
+void si446x_state_machine( volatile uint8_t *state_, uint8_t reason );
 void si446x_set_modem(void);
 void si446x_set_deviation_channel_bps(uint32_t deviation, uint32_t channel_space, uint32_t bps);
 void si446x_set_frequency(uint32_t freq);

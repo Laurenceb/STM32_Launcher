@@ -122,7 +122,7 @@ int main(void)
 	// system has passed battery level check and so file can be opened
 	if((f_err_code = f_mount(0, &FATFS_Obj)))Usart_Send_Str((char*)"FatFs mount error\r\n");//This should only error if internal error
 	else {						//FATFS initialised ok, try init the card, this also sets up the SPI1
-		if(!(f_err_code=f_open(&FATFS_logfile,"time.txt",FA_OPEN_EXISTING | FA_READ | FA_WRITE))) {//Try and open a time file get the system time
+		if(!(f_err_code=f_open(&FATFS_logfile,(const TCHAR*)"time.txt",FA_OPEN_EXISTING|FA_READ|FA_WRITE))){//Try to open time file get system time
 			if(!f_stat((const TCHAR *)"time.txt",&FATFS_info)) {//Get file info
 				if(FATFS_info.fsize<5) {	//Empty file
 					RTC_time.year=(FATFS_info.fdate>>9)+1980;//populate the time struct (FAT start==1980, RTC.year==0)
@@ -141,7 +141,7 @@ int main(void)
 		}
 		// load settings if file exists
 		Watchdog_Reset();			//Card Init can take a second or two
-		if(!f_open(&FATFS_logfile,"settings.dat",FA_OPEN_EXISTING | FA_READ)) {
+		if(!f_open(&FATFS_logfile,(const TCHAR *)"settings.dat",FA_OPEN_EXISTING | FA_READ)) {
 			UINT br;
 			int8_t rtc_correction;
 			f_read(&FATFS_logfile, (void*)(&rtc_correction),sizeof(rtc_correction),&br);
@@ -181,9 +181,9 @@ int main(void)
 		rprintfInit(__usart_send_char);		//Printf over the bluetooth
 #endif
 		Watchdog_Reset();			//Card Init can take a second or two
-		if((f_err_code=f_open(&FATFS_logfile,LOGFILE_NAME,FA_CREATE_ALWAYS | FA_WRITE))) {//Present
+		if((f_err_code=f_open(&FATFS_logfile,(TCHAR*)LOGFILE_NAME,FA_CREATE_ALWAYS | FA_WRITE))) {//Present
 			Delay(10000);
-			if((f_err_code=f_open(&FATFS_logfile,LOGFILE_NAME,FA_CREATE_ALWAYS | FA_WRITE))) {//Try again
+			if((f_err_code=f_open(&FATFS_logfile,(TCHAR*)LOGFILE_NAME,FA_CREATE_ALWAYS | FA_WRITE))) {//Try again
 				printf("FatFs drive error %d\r\n",f_err_code);
 				if(f_err_code==FR_DISK_ERR || f_err_code==FR_NOT_READY)
 					Usart_Send_Str((char*)"No uSD card inserted?\r\n");
@@ -193,7 +193,7 @@ int main(void)
 			Watchdog_Reset();		//Card Init can take a second or two
 			print_string[strlen(print_string)-4]=0x00;//Wipe the .csv off the string
 			strcat(print_string,"_gyro.wav");
-			if((f_err_code=f_open(&FATFS_wavfile_gyro,LOGFILE_NAME,FA_CREATE_ALWAYS | FA_WRITE))) {//Present
+			if((f_err_code=f_open(&FATFS_wavfile_gyro,(TCHAR*)LOGFILE_NAME,FA_CREATE_ALWAYS | FA_WRITE))) {//Present
 				printf("FatFs drive error %d\r\n",f_err_code);
 				if(f_err_code==FR_DISK_ERR || f_err_code==FR_NOT_READY)
 					Usart_Send_Str((char*)"No uSD card inserted?\r\n");
@@ -346,7 +346,7 @@ int main(void)
 		while(Bytes_In_DMA_Buffer(&Gps_Buffer))	//Dump all the data
 			Gps_Process_Byte((uint8_t)(Pop_From_Dma_Buffer(&Gps_Buffer)),&Gps);
 	}
-	Usart_Send_Str((char*)"\r\nGot GPS fix:");	//Print out the fix for debug purposes
+	Usart_Send_Str((char*)"\r\nGot GPS fix:");//Print out the fix for debug purposes
 	printf("%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld,%1x\r\n",\
 	Gps.latitude,Gps.longitude,Gps.mslaltitude,\
 	Gps.vnorth,Gps.veast,Gps.vdown,Gps.horizontal_error,Gps.vertical_error,Gps.speedacc,Gps.nosats);
