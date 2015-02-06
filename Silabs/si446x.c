@@ -547,34 +547,48 @@ __attribute__((externally_visible)) void USART3_IRQHandler(void) {
   */
 void si446x_busy_wait_send_receive(uint8_t tx_bytes, uint8_t rx_bytes, uint8_t *tx_data, uint8_t *rx_data) {
 	NSEL_LOW;
+	uint8_t tx_count;
 	if(tx_bytes==1)
 		tx_bytes=2;			//Cannot send only a single byte due to hardware bug in the silabs
-	for(uint8_t n=0; n<tx_bytes; n++) {
+	tx_count=tx_bytes;
+	if(!tx_bytes)
+		tx_count=1;			//Send a single command
+	for(uint8_t n=0; n<tx_count; n++) {
 		SPI_I2S_SendData(SPI1,tx_data[n]);
 		while(SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_TXE) == RESET);
 	}
 	while( SPI1->SR & SPI_I2S_FLAG_BSY );	//Wait until SPI is not busy anymore
-	NSEL_HIGH;
-	uint16_t reply = SPI1->DR;		//Read this to wipe the RXNE - clear the RX buffer
-	reply=0;
-	NSEL_LOW;
-	while (reply != 0xFF) {
-		SPI1->DR=0x44;			//The read command
-		while(SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_RXNE) == RESET);
-		reply = SPI1->DR;
-		SPI1->DR=0x00;			//The read command - dummy byte
-		while(SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_RXNE) == RESET);
-		reply = SPI1->DR;
-		if (reply != 0xFF) {		//Try again
-			NSEL_HIGH;
-			Delay(40);
-			NSEL_LOW;
+	if(tx_bytes) {				//Can pass an argument of zero tx bytes to get direct mode (same as the state machine driver)
+		NSEL_HIGH;
+		uint16_t reply = SPI1->DR;	//Read this to wipe the RXNE - clear the RX buffer
+		reply=0;
+		NSEL_LOW;
+		while (reply != 0xFF) {
+			SPI1->DR=0x44;		//The read command
+			while(SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_RXNE) == RESET);
+			reply = SPI1->DR;
+			SPI1->DR=0x00;		//The read command - dummy byte
+			while(SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_RXNE) == RESET);
+			reply = SPI1->DR;
+			if (reply != 0xFF) {	//Try again
+				NSEL_HIGH;
+				Delay(40);
+				NSEL_LOW;
+			}
+		}
+		for(uint8_t n=0; n<rx_bytes; n++) {//Can now read out the rest of the data
+			SPI_I2S_SendData(SPI1,0x00);
+			while(SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_RXNE) == RESET);
+			rx_data[n]=SPI1->DR;
 		}
 	}
-	for(uint8_t n=0; n<rx_bytes; n++) {	//Can now read out the rest of the data
-		SPI_I2S_SendData(SPI1,0x00);
-		while(SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_RXNE) == RESET);
-		rx_data[n]=SPI1->DR;
+	else {
+		rx_data[0]=SPI1->DR;		//Load the first byte
+		for(uint8_t n=1; n<rx_bytes; n++) {//Can now read out the rest of the data
+			SPI_I2S_SendData(SPI1,0x00);
+			while(SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_RXNE) == RESET);
+			rx_data[n]=SPI1->DR;
+		}
 	}
 	NSEL_HIGH;
 }
