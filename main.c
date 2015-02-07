@@ -246,7 +246,9 @@ int main(void)
 	printf("Hello from rockoon project\n");		//Test the silabs RTTY
 	send_string_to_silabs(print_string);		//Send the string
 	//Wait for packet to send (could be caught by watchdog if failure)
+	Watchdog_Reset();
 	while(Silabs_driver_state);
+	Watchdog_Reset();
 	if(f_err_code) {				//There was an init error
 		shutdown_filesystem(ERR, file_opened);//So we log that something went wrong in the logfile - hopefully
 		shutdown();				//Abort, but only after sending over the radio, so we are still trackable
