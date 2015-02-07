@@ -89,7 +89,8 @@ void Init_Buffer(volatile buff_type* buff, uint16_t size) {
 }
 
 void Init_Byte_Buffer(volatile byte_buff_type* buff, uint16_t size) {
-	Init_Dma_Buffer((volatile dma_buff_type*)buff, size);
+	buff->data=(uint8_t*)malloc(size);
+	buff->size=size;
 }
 
 void Init_Dma_Buffer(volatile dma_buff_type* buff, uint16_t size) {

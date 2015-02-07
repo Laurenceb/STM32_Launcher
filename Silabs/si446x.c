@@ -116,6 +116,7 @@ uint8_t si446x_setup(void) {
 	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
 	USART_InitStructure.USART_Mode = USART_Mode_Tx;
 	USART_Init(USART3, &USART_InitStructure );
+	USART3->CR1 &=~(1<<7);	//Ensure interrupt disabled at init
 
 	/* SPI configuration */
 	SPI_InitStructure.SPI_Direction = SPI_Direction_2Lines_FullDuplex;
@@ -182,7 +183,7 @@ uint8_t si446x_setup(void) {
 	t=Millis;
 	while(Millis<t+15)
 		__WFI();					/*Wait another 15ms to boot*/
-	while(GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_11)==0);	/*Wait for CTS high after POR*/
+	while(!GET_CTS);					/*Wait for CTS high after POR*/
 
 	/* Configure EXTI11 line */
 	EXTI_InitStructure.EXTI_Line = EXTI_Line11;		/*Only enable the CTS once the init stuff has completed*/
@@ -361,7 +362,7 @@ void si446x_set_modem(void) {
 void si446x_state_machine(volatile uint8_t *state_, uint8_t reason ) {
 	uint8_t state=*state_;
 	static uint8_t rx_buffer[10];
-	static uint8_t tx_buffer[6];
+	static uint8_t tx_buffer[8];
 	static uint8_t bytes_read,unhandled_tx_data;
 	switch(state) {
 		case DEFAULT_MODE:/* State 0 is the entry point, this is Rx mode, and is exited upon NIRQ/TX data */
@@ -530,7 +531,8 @@ __attribute__((externally_visible)) void USART3_IRQHandler(void) {
 	}
 	else if(USART_GetITStatus(USART3, USART_IT_TXE) != RESET) {
 		USART_ClearITPendingBit(USART3, USART_IT_TXE);/* Clear pending bit. */
-		USART_SendData(USART3, Pop_From_Byte_Buffer((volatile byte_buff_type*)&Silabs_Tx_Buffer));/* Read the data from the tx buffer. */
+		if(bytes_in_buff((volatile byte_buff_type*)&Silabs_Tx_Buffer))/* Make sure we can send - so a glitch cant misalign the buffer */
+			USART_SendData(USART3, Pop_From_Byte_Buffer((volatile byte_buff_type*)&Silabs_Tx_Buffer));/* Read the data from the tx buffer. */
 		if(!bytes_in_buff((volatile byte_buff_type*)&Silabs_Tx_Buffer)) {/* No more data to send? */
 			USART3->CR1 &=~(1<<7);		/* Disable the interrupt here. */
 			si446x_state_machine( &Silabs_driver_state, 4 );/* Reason 4 callback is for data sent ok */
@@ -560,14 +562,14 @@ void si446x_busy_wait_send_receive(uint8_t tx_bytes, uint8_t rx_bytes, uint8_t *
 	while( SPI1->SR & SPI_I2S_FLAG_BSY );	//Wait until SPI is not busy anymore
 	if(tx_bytes) {				//Can pass an argument of zero tx bytes to get direct mode (same as the state machine driver)
 		NSEL_HIGH;
-		uint16_t reply = SPI1->DR;	//Read this to wipe the RXNE - clear the RX buffer
+		volatile uint16_t reply = SPI1->DR;//Read this to wipe the RXNE - clear the RX buffer
 		reply=0;
-		NSEL_LOW;
+		/*NSEL_LOW;
 		while (reply != 0xFF) {
 			SPI1->DR=0x44;		//The read command
 			while(SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_RXNE) == RESET);
 			reply = SPI1->DR;
-			SPI1->DR=0x00;		//The read command - dummy byte
+			SPI1->DR=0x44;		//The read command - dummy byte
 			while(SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_RXNE) == RESET);
 			reply = SPI1->DR;
 			if (reply != 0xFF) {	//Try again
@@ -575,9 +577,11 @@ void si446x_busy_wait_send_receive(uint8_t tx_bytes, uint8_t rx_bytes, uint8_t *
 				Delay(40);
 				NSEL_LOW;
 			}
-		}
+		}*/
+		while(!GET_CTS);
+		NSEL_LOW;
 		for(uint8_t n=0; n<rx_bytes; n++) {//Can now read out the rest of the data
-			SPI_I2S_SendData(SPI1,0x00);
+			SPI_I2S_SendData(SPI1,0x44);
 			while(SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_RXNE) == RESET);
 			rx_data[n]=SPI1->DR;
 		}
