@@ -59,7 +59,7 @@
 
 #define SYSTEM_STATES 4		/*Number of different control states- atm just brightness control implimented as 1, others are indicators*/
 
-#define WATCHDOG_TIMEOUT 5000	/*5 second timeout - enough for the uSD card to block its max time and a bit, and enough for RTTY*/
+#define WATCHDOG_TIMEOUT 9000	/*9 second timeout - enough for the uSD card to block its max time and a bit, and enough for RTTY*/
 
 enum{BUTTON_TURNOFF=1,USB_INSERTED,ERR,LOW_BATTERY};
 enum{BUTTON_SOURCE=0,USB_SOURCE=1};
