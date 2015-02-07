@@ -564,7 +564,8 @@ void si446x_busy_wait_send_receive(uint8_t tx_bytes, uint8_t rx_bytes, uint8_t *
 		NSEL_HIGH;
 		volatile uint16_t reply = SPI1->DR;//Read this to wipe the RXNE - clear the RX buffer
 		reply=0;
-		/*NSEL_LOW;
+		#ifndef USE_GPIO_CTS
+		NSEL_LOW;
 		while (reply != 0xFF) {
 			SPI1->DR=0x44;		//The read command
 			while(SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_RXNE) == RESET);
@@ -577,9 +578,11 @@ void si446x_busy_wait_send_receive(uint8_t tx_bytes, uint8_t rx_bytes, uint8_t *
 				Delay(40);
 				NSEL_LOW;
 			}
-		}*/
+		}
+		#else
 		while(!GET_CTS);
 		NSEL_LOW;
+		#endif
 		for(uint8_t n=0; n<rx_bytes; n++) {//Can now read out the rest of the data
 			SPI_I2S_SendData(SPI1,0x44);
 			while(SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_RXNE) == RESET);
