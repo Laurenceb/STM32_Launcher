@@ -371,8 +371,12 @@ int main(void)
 			UplinkBytes+=n;			//Stores the amount of uplinked data
 		if(n>1 && strlen(str)==6 && !strncmp(str,Silabs_Header,4)) {//We recived something, here we process the data that was received, as long as it is '$$RO**'
 			if(str[4]==Silabs_Header[4] && str[5]>47 && str[5]<56 ) {//Need to send e.g. "$$ROKx" where x is 0 to 7
-				if(str[5]-48!=UPLINK_TEST_BIT)
-					UplinkFlags|=1<<(str[5]-48);//Set the correct flag bit
+				if(str[5]-48!=UPLINK_TEST_BIT) {
+					if( UplinkFlags&(1<<(LAUNCH_PERMISSION)) && permission_time)//Sending the permission command whilst it is set increases time
+						permission_time+=PERMISSION_DURATION;
+					else
+						UplinkFlags|=1<<(str[5]-48);//Set the correct flag bit
+				}
 				else
 					UplinkFlags^=1<<UPLINK_TEST_BIT;//The test bit is toggled
 			}		
@@ -429,7 +433,7 @@ int main(void)
 		}
 		if( Millis<permission_time && permission_time ) {//Load the Flag bits during the permission time
 			UplinkFlags|=(Ignition_Selftest&0x07)<<IGNITON_FLAG_BITS;//This should change from 0 to 1 following a launch, or 2 or 3 if autosequence fails
-			if( UplinkFlags&(1<<(LAUNCH_COMMAND)) ) {//Need to send the command whilst the permission is valid
+			if( UplinkFlags&(1<<(LAUNCH_COMMAND)) && Millis<(permission_time-PERMISSION_HOLD)) {//Need to send the command whilst the permission is valid
 				UplinkFlags&=~(1<<(LAUNCH_COMMAND));//Wipe the bit
 				if( ((gps.mslaltitude/1000) > (int32_t)LAUNCH_ALTITUDE) && ((Millis-badgyro)>LAUNCH_STABLE_PERIOD ) && (Auto_volt>INDUCT_SENSE_LOW && Auto_volt<INDUCT_SENSE_HIGH)) {
 					countdown_time=Millis+COUNTDOWN_DELAY;

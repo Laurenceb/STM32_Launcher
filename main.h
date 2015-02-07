@@ -22,10 +22,11 @@
 
 #define IND_DUTY 0.2		/*PWM duty cycle for ignition*/
 
-#define XY_RATE_LIMIT 10.0	/*10 degrees per second rps*/
+#define XY_RATE_LIMIT 10.0	/*10 degrees per second max in horizontal plane*/
 #define Z_RATE_LIMIT 30.0	/*30 around the vertical axis*/
 #define LAUNCH_STABLE_PERIOD 12000 /*need 12 seconds of stability before a launch can go ahead*/
-#define PERMISSION_DURATION 45000 /*45 seconds duration for autolaunch*/
+#define PERMISSION_DURATION 90000 /*90 seconds duration for autolaunch*/
+#define PERMISSION_HOLD 10000	/*Command must be less than 10 seconds from the end of the window*/
 
 #define LAUNCH_ALTITUDE 37000UL
 
