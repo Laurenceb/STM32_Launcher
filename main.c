@@ -256,11 +256,11 @@ int main(void)
 	//Setup and test the I2C
 	I2C_Config();					//Setup the I2C bus
 	sensors=detect_sensors(0);
-	//if((sensors&((1<<L3GD20_CONFIG)|(1<<AFROESC_READ)))!=((1<<L3GD20_CONFIG)|(1<<AFROESC_READ))) {
-	//	f_puts("I2C sensor detect error\r\n",&FATFS_logfile);
-	//	shutdown_filesystem(ERR, file_opened);//So we log that something went wrong in the logfile
-	//	shutdown();
-	//}
+	if((sensors&((1<<L3GD20_CONFIG)|(1<<AFROESC_READ)))!=((1<<L3GD20_CONFIG)|(1<<AFROESC_READ))) {
+		f_puts("I2C sensor detect error\r\n",&FATFS_logfile);
+		shutdown_filesystem(ERR, file_opened);//So we log that something went wrong in the logfile
+		shutdown();
+	}
 	//Setup the Timer for PWM
 	Init_Timer();
 	PWM_Set(IND_DUTY);
@@ -275,6 +275,7 @@ int main(void)
 		print_string[0]=0x00;			//Set string length to 0
 	}
 	//Await GPS fix here, allow echoing of radio commands here, for debug purposes
+	Ubx_Gps_Type gps;				//Local copy of our GPS data
 	if(!Config_Gps()) Usart_Send_Str((char*)"Setup GPS ok - awaiting fix, enter 1 for indoor mode\r\n");//If not the function printfs its error
 	{
 	uint32_t last_message;
@@ -352,6 +353,7 @@ int main(void)
 	printf("%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld,%1x\r\n",\
 	Gps.latitude,Gps.longitude,Gps.mslaltitude,\
 	Gps.vnorth,Gps.veast,Gps.vdown,Gps.horizontal_error,Gps.vertical_error,Gps.speedacc,Gps.nosats);
+	gps=Gps;					//Initialise local GPS data copy
 	print_string[0]=0;				//Reset the print output
 	Millis=0;					//Reset system uptime, we have 50 days before overflow
 	while (1) {					//Main loop
@@ -379,16 +381,18 @@ int main(void)
 		//If the Silabs locks up, detect this and reinitialise it
 		if(silabs_cts_jammed() || silab!=0x44)
 			silab=si446x_setup();
-		//Await a full set of GPS data (Lat,Long,Alt,Sat info)
-		while(Gps.packetflag!=REQUIRED_DATA) {	//Wait for all fix data
-			while(Bytes_In_DMA_Buffer(&Gps_Buffer))//Dump all the data
-				Gps_Process_Byte((uint8_t)(Pop_From_Dma_Buffer(&Gps_Buffer)),&Gps);
+		//Look for a full set of GPS data (Lat,Long,Alt,Sat info)
+		while(Bytes_In_DMA_Buffer(&Gps_Buffer))	//Dump all the data
+			Gps_Process_Byte((uint8_t)(Pop_From_Dma_Buffer(&Gps_Buffer)),&Gps);
+		if(Gps.packetflag==REQUIRED_DATA) {	//All fix data arrived
+			gps=Gps;			//Copy to a local buffer
+			Gps.packetflag=0x00;		//Reset this here
 		}
-		Gps.packetflag=0x00;
 		//Test the Cutdown and update the appropriate bit in the Cut flags byte, check for cutdown conditions and process accordingly
-		CutFlags=(CutFlags&0xFE)|test_cutdown();//LSB is cut test status
+		if(!cutofftime)				//Only test when we arent cutting down
+			CutFlags=(CutFlags&0xFE)|test_cutdown();//LSB is cut test status
 		if(!(CutFlags&0x0E)) {			//Only check if the cutdown has not already run
-			if(!pointinpoly(Geofence, UK_GEOFENCE_POINTS, Gps.longitude, Gps.latitude) && Gps.latitude)//Check to see if we need to cutdown due to polygon here
+			if(!pointinpoly(Geofence, UK_GEOFENCE_POINTS, gps.longitude, gps.latitude) && gps.latitude && gps.status==UBLOX_3D)//Check to see if we need to cutdown due to polygon here
 				CutFlags|=(1<<1)|(1<<7);//Second bit means cutdown triggered due to polygon
 			if(UplinkFlags&(1<<CUTDOWN_COMMAND)) {//Cutdown was requested
 				CutFlags|=(1<<2)|(1<<7);
@@ -413,12 +417,12 @@ int main(void)
 			indtest=Millis;
 			Timer_GPIO_Enable();
 		}
-		if((Millis-indtest)>100 && (Millis-indtest)<500) {
+		if((Millis-indtest)>100 && indtest ) {	//Wait at least 100ms before testing the voltage, then turn off straight away
 			Auto_volt=Ind_Voltage;
 			Timer_GPIO_Disable();
-			indtest=Millis-500;
+			indtest=0;
 		}
-		//This processed and checks the actual launch command
+		//This processes and checks the actual launch command
 		if( UplinkFlags&(1<<(LAUNCH_PERMISSION)) && !permission_time) {
 			permission_time=Millis+PERMISSION_DURATION;//The permission command allows a launch to proceed at any point in this time window
 			Ignition_Selftest=0;		//Reset this here
@@ -427,7 +431,7 @@ int main(void)
 			UplinkFlags|=(Ignition_Selftest&0x07)<<IGNITON_FLAG_BITS;//This should change from 0 to 1 following a launch, or 2 or 3 if autosequence fails
 			if( UplinkFlags&(1<<(LAUNCH_COMMAND)) ) {//Need to send the command whilst the permission is valid
 				UplinkFlags&=~(1<<(LAUNCH_COMMAND));//Wipe the bit
-				if( ((Gps.mslaltitude/1000) > (int32_t)LAUNCH_ALTITUDE) && ((Millis-badgyro)>LAUNCH_STABLE_PERIOD ) && (Auto_volt>INDUCT_SENSE_LOW && Auto_volt<INDUCT_SENSE_HIGH)) {
+				if( ((gps.mslaltitude/1000) > (int32_t)LAUNCH_ALTITUDE) && ((Millis-badgyro)>LAUNCH_STABLE_PERIOD ) && (Auto_volt>INDUCT_SENSE_LOW && Auto_volt<INDUCT_SENSE_HIGH)) {
 					countdown_time=Millis+COUNTDOWN_DELAY;
 					GOPRO_TRIG_ON;		//Turn the GoPro on the record the launch, it runs an autoexec.ash script
 				} else				//Launch refused
@@ -438,7 +442,7 @@ int main(void)
 			UplinkFlags&=~(1<<LAUNCH_PERMISSION);//Wipe the bit when time expires
 			permission_time=0;		//Reset this to zero
 		}
-		if( countdown_time && Millis>countdown_time-COUNTDOWN_DELAY+GOPRO_TRIGGER_TIME )
+		if( countdown_time && Millis>(countdown_time-COUNTDOWN_DELAY+GOPRO_TRIGGER_TIME) )
 			GOPRO_TRIG_OFF;
 		if( countdown_time && Millis>countdown_time ) {
 			countdown_time=0;
@@ -489,7 +493,7 @@ int main(void)
 			last_telemetry=Millis;
 			rtc_gettime(&RTC_time);		//Get the RTC time and put a timestamp on the start of the file
 			print_string[0]=0x00;		//Set string length to 0
-			printf("$$%s,%d,%02d:%02d,%3f,%3f,%1f,%1f,%1f,%1f,%1f,%d,%d,%2x,%d,%2x,%1f,%2f",CALLSIGN,sentence_counter++,RTC_time.hour,RTC_time.min,(float)Gps.latitude*1e-7,(float)Gps.longitude*1e-7,(float)Gps.mslaltitude*1e-3,Battery_Voltage,Aux_Voltage,Gyro_XY_Rate,Gyro_Z_Rate,Gyro_Temperature,UplinkBytes,UplinkFlags,Last_RSSI,CutFlags,Auto_spin,Auto_volt);
+			printf("$$%s,%d,%02d:%02d,%3f,%3f,%1f,%1f,%1f,%1f,%1f,%d,%d,%2x,%d,%2x,%1f,%2f",CALLSIGN,sentence_counter++,RTC_time.hour,RTC_time.min,(float)gps.latitude*1e-7,(float)gps.longitude*1e-7,(float)gps.mslaltitude*1e-3,Battery_Voltage,Aux_Voltage,Gyro_XY_Rate,Gyro_Z_Rate,Gyro_Temperature,UplinkBytes,UplinkFlags,Last_RSSI,CutFlags,Auto_spin,Auto_volt);
 			uint16_t checksum=string_CRC16_checksum (print_string);//Generate the checksum
 			printf("*%04x\n",checksum);
 			send_string_to_silabs(print_string);//Output the string via the silabs
