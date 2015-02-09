@@ -11,7 +11,7 @@
 #define RSSI_THRESH -85 /*-85dBm RSSI, should be fine with ~1W into a yagi on the ground*/
 #define DEFAULT_POWER_LEVEL 32 /*gives ~ 15dBm at 3.3v*/
 #define DEFAULT_SHIFT 300 /*300 hz tone sep*/
-#define DEFAULT_FREQ 434750000UL /*carrier center at channel 0*/
+#define DEFAULT_FREQ 434075000UL /*carrier center at channel 0*/
 #define DEFAULT_CHANNEL 3000 /* 3kHz channel spacing */
 #define DEFAULT_BPS 200 /*200bps for the uplink*/
 
