@@ -223,7 +223,8 @@ uint8_t si446x_setup(void) {
 	si446x_busy_wait_send_receive(2, 12, (uint8_t [2]){0x01, 0x01}, rx_buffer);
 	part=rx_buffer[3];//Should be 0x44
 	//Only enable the packet received interrupt - global interrupt config and PH interrupt config bytes
-	si446x_busy_wait_send_receive(6, 0, (uint8_t [6]){0x11, 0x01, 0x02, 0x00, 0x01, 0x10}, rx_buffer);
+	//si446x_busy_wait_send_receive(6, 0, (uint8_t [6]){0x11, 0x01, 0x02, 0x00, 0x01, 0x10}, rx_buffer);
+	si446x_busy_wait_send_receive(7, 0, (uint8_t [7]){0x11, 0x01, 0x03, 0x00, 0x03, 0x18, 0x23}, rx_buffer);//debug code to enable the modem interrupts
 	//Setup the fist response A register to hold the RSSI of the last packet
 	si446x_busy_wait_send_receive(5, 0, (uint8_t [5]){0x11, 0x02, 0x01, 0x00, 0x0A}, rx_buffer);
 	// Configure Tx pin as input to start with, so that it can be used to monitor POR, now configure it to TX AF
@@ -344,8 +345,8 @@ void si446x_set_modem(void) {
 	//RSSI_THRESH is in dBm, it needs to be converted to 0.5dBm steps offset by ~130
 	uint8_t rssi = (2*(RSSI_THRESH+130))&0xFF;
 	si446x_busy_wait_send_receive(8, 0, (uint8_t [8]){0x11, 0x20, 0x04, 0x4A, rssi, 0x0C, 0x12, 0x3E}, rx_buffer);
-	//Configure the match value, this constrains the first 4 bytes of data to match e.g. $$RO
-	si446x_busy_wait_send_receive(16, 0, (uint8_t [16]){0x11, 0x30, 0x0C, 0x00,Silabs_Header[0], 0xFF, 0x41,Silabs_Header[1], 0xFF, 0x42,Silabs_Header[2], 0xFF, 0x43,Silabs_Header[3], 0xFF, 0x44}, rx_buffer);
+	//Configure the match value, this constrains the first 4 bytes of data to match e.g. $$RO          0x40 to enable, currently disabled
+	si446x_busy_wait_send_receive(16, 0, (uint8_t [16]){0x11, 0x30, 0x0C, 0x00,Silabs_Header[0], 0xFF, 0x00,Silabs_Header[1], 0xFF, 0x41,Silabs_Header[2], 0xFF, 0x42,Silabs_Header[3], 0xFF, 0x43}, rx_buffer);
 	//Configure the Packet handler to use seperate FIELD config for RX, and turn off after packet rx
 	si446x_busy_wait_send_receive(5, 0, (uint8_t [5]){0x11, 0x12, 0x01, 0x06, 0x80}, rx_buffer);
 	//Use CCIT-16 CRC with 0xFFFF seed on the packet handler, same as UKHAS protocol
