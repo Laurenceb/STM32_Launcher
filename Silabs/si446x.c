@@ -222,9 +222,6 @@ uint8_t si446x_setup(void) {
 	//read the device part number info
 	si446x_busy_wait_send_receive(2, 12, (uint8_t [2]){0x01, 0x01}, rx_buffer);
 	part=rx_buffer[3];//Should be 0x44
-	//Only enable the packet received interrupt - global interrupt config and PH interrupt config bytes
-	//si446x_busy_wait_send_receive(6, 0, (uint8_t [6]){0x11, 0x01, 0x02, 0x00, 0x01, 0x10}, rx_buffer);
-	si446x_busy_wait_send_receive(7, 0, (uint8_t [7]){0x11, 0x01, 0x03, 0x00, 0x03, 0x18, 0x23}, rx_buffer);//debug code to enable the modem interrupts
 	//Setup the fist response A register to hold the RSSI of the last packet
 	si446x_busy_wait_send_receive(5, 0, (uint8_t [5]){0x11, 0x02, 0x01, 0x00, 0x0A}, rx_buffer);
 	// Configure Tx pin as input to start with, so that it can be used to monitor POR, now configure it to TX AF
@@ -240,6 +237,9 @@ uint8_t si446x_setup(void) {
 	si446x_set_modem();
 	/* ready on CRC match pkt, RX on CRC packet error, FIELD config in packet handler for packet engine */
 	si446x_busy_wait_send_receive(8, 0, (uint8_t [8]){0x32, Channel_rx, 0x00, 0x00, 0x00, 0x00, 0x03, 0x08}, rx_buffer);
+	//Only enable the packet received interrupt - global interrupt config and PH interrupt config bytes
+	//si446x_busy_wait_send_receive(6, 0, (uint8_t [6]){0x11, 0x01, 0x02, 0x00, 0x01, 0x10}, rx_buffer); //TODO: re-enable this once debugging complete
+	si446x_busy_wait_send_receive(7, 0, (uint8_t [7]){0x11, 0x01, 0x03, 0x00, 0x03, 0x18, 0x3B}, rx_buffer);//debug code to enable the modem interrupts
 	}
 	Silabs_driver_state=DEFAULT_MODE;/* Make sure this is initialised */
 	EXTI_Init(&EXTI_InitStructure);	/* Only enable the NIRQ once everything is configured */
@@ -321,22 +321,22 @@ void si446x_set_deviation_channel_bps(uint32_t deviation, uint32_t channel_space
 void si446x_set_modem(void) {
 	uint8_t rx_buffer[2];
 	//Set to CW mode
-	//Sets modem into direct asynchronous 2FSK mode using GPIO0 (UART3 TX on the board)
-	si446x_busy_wait_send_receive(5, 0, (uint8_t [5]){0x11, 0x20, 0x01, 0x00, 0x8A}, rx_buffer);
+	//Sets modem into direct asynchronous 2FSK mode using GPIO0 (UART3 TX on the board), turn off Manchester mode
+	si446x_busy_wait_send_receive(6, 0, (uint8_t [6]){0x11, 0x20, 0x02, 0x00, 0x8A, 0x00}, rx_buffer);
        //Also configure the RX packet CRC stuff here, 6 byte payload for FIELD1, using CRC and CRC check for rx with seed, and 2FSK
 	si446x_busy_wait_send_receive(7, 0, (uint8_t [7]){0x11, 0x12, 0x03, 0x22, 0x06, 0x00, 0x8A}, rx_buffer);
-	//Configure the rx signal path, these setting are from WDS - lower the IF slightly and setup the CIC Rx filter
-	si446x_busy_wait_send_receive(15, 0, (uint8_t [15]){0x11, 0x20, 0x0B, 0x19, 0x80, 0x08, 0x03, 0x80, 0x00, 0xF0, 0x10, 0x74, 0xE8, 0x00, 0x55}, rx_buffer);
+	//Configure the rx signal path, these setting are from WDS - lower the IF slightly and setup the CIC Rx filter, gain x 2 on Rx path
+	si446x_busy_wait_send_receive(12, 0, (uint8_t [12]){0x11, 0x20, 0x08, 0x1C, 0x80, 0x00, 0xF0, 0x10, 0x74, 0xE8, 0x00, 0x55}, rx_buffer);
 	//Configure BCR - NCO settings for the RX signal path - WDS settings
-	si446x_busy_wait_send_receive(16, 0, (uint8_t [16]){0x11, 0x20, 0x0C, 0x24, 0x06, 0x0C, 0xAB, 0x03, 0x03, 0x02, 0xC2, 0x00, 0x04, 0x32, 0xC0, 0x01}, rx_buffer);
+	si446x_busy_wait_send_receive(16, 0, (uint8_t [16]){0x11, 0x20, 0x0C, 0x24, 0x06, 0x0C, 0xAB, 0x04, 0x04, 0x02, 0x00, 0x00, 0x00, 0x12, 0x80, 0x01}, rx_buffer);
 	//Configure AFC/AGC settings for Rx path, WDS settings - only change the AFC here, as the other settings are only slightly tweaked by WDS
-	si446x_busy_wait_send_receive(7, 0, (uint8_t [7]){0x11, 0x20, 0x03, 0x30, 0x03, 0x64, 0xC0}, rx_buffer);
+	si446x_busy_wait_send_receive(7, 0, (uint8_t [7]){0x11, 0x20, 0x03, 0x30, 0x09, 0x3A, 0xA0}, rx_buffer);
 	//Configure Rx search period control - WDS settings
 	si446x_busy_wait_send_receive(6, 0, (uint8_t [6]){0x11, 0x20, 0x02, 0x50, 0x84, 0x0A}, rx_buffer);
 	//Configure Rx BCR and AFC config - WDS settings
-	si446x_busy_wait_send_receive(6, 0, (uint8_t [6]){0x11, 0x20, 0x02, 0x54, 0x0F, 0x07}, rx_buffer);
+	si446x_busy_wait_send_receive(6, 0, (uint8_t [6]){0x11, 0x20, 0x02, 0x54, 0x87, 0x87}, rx_buffer);
 	//Configure signal arrival detect - WDS settings
-	si446x_busy_wait_send_receive(9, 0, (uint8_t [9]){0x11, 0x20, 0x05, 0x5B, 0x40, 0x04, 0x21, 0x78, 0x20}, rx_buffer);
+	si446x_busy_wait_send_receive(9, 0, (uint8_t [9]){0x11, 0x20, 0x05, 0x5B, 0x62, 0x04, 0x11, 0x78, 0x24}, rx_buffer);
 	//Configure first and second set of Rx filter coefficients - WDS settings
 	si446x_busy_wait_send_receive(16, 0, (uint8_t [16]){0x11, 0x21, 0x0C, 0x00, 0xFF, 0xBA, 0x0F, 0x51, 0xCF, 0xA9, 0xC9, 0xFC, 0x1B, 0x1E, 0x0F, 0x01}, rx_buffer);
 	si446x_busy_wait_send_receive(16, 0, (uint8_t [16]){0x11, 0x21, 0x0C, 0x0C, 0xFC, 0xFD, 0x15, 0xFF, 0x00, 0x0F, 0xFF, 0xBA, 0x0F, 0x51, 0xCF, 0xA9}, rx_buffer);
@@ -351,6 +351,8 @@ void si446x_set_modem(void) {
 	si446x_busy_wait_send_receive(5, 0, (uint8_t [5]){0x11, 0x12, 0x01, 0x06, 0x80}, rx_buffer);
 	//Use CCIT-16 CRC with 0xFFFF seed on the packet handler, same as UKHAS protocol
 	si446x_busy_wait_send_receive(5, 0, (uint8_t [5]){0x11, 0x12, 0x01, 0x00, 0x85}, rx_buffer);
+	//Use bytes for preamble length - so defaults to 8bytes
+	si446x_busy_wait_send_receive(5, 0, (uint8_t [5]){0x11, 0x10, 0x01, 0x04, 0x31}, rx_buffer);
 	//Set the sync word as two bytes 0xD391, this has good autocorrelation 8/1 peak to secondary ratio, default config used, no bit errors, 16 bit
 	si446x_busy_wait_send_receive(6, 0, (uint8_t [6]){0x11, 0x11, 0x02, 0x01, 0xD3, 0x91}, rx_buffer);
 }
