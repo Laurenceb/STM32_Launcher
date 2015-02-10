@@ -239,7 +239,7 @@ uint8_t si446x_setup(void) {
 	si446x_busy_wait_send_receive(8, 0, (uint8_t [8]){0x32, Channel_rx, 0x00, 0x00, 0x00, 0x00, 0x03, 0x08}, rx_buffer);
 	//Only enable the packet received interrupt - global interrupt config and PH interrupt config bytes
 	//si446x_busy_wait_send_receive(6, 0, (uint8_t [6]){0x11, 0x01, 0x02, 0x00, 0x01, 0x10}, rx_buffer); //TODO: re-enable this once debugging complete
-	si446x_busy_wait_send_receive(7, 0, (uint8_t [7]){0x11, 0x01, 0x03, 0x00, 0x03, 0x18, 0x3B}, rx_buffer);//debug code to enable the modem interrupts
+	si446x_busy_wait_send_receive(7, 0, (uint8_t [7]){0x11, 0x01, 0x03, 0x00, 0x03, 0x18, 0x21}, rx_buffer);//debug code to enable the modem interrupts
 	}
 	Silabs_driver_state=DEFAULT_MODE;/* Make sure this is initialised */
 	EXTI_Init(&EXTI_InitStructure);	/* Only enable the NIRQ once everything is configured */
@@ -326,11 +326,13 @@ void si446x_set_modem(void) {
        //Also configure the RX packet CRC stuff here, 6 byte payload for FIELD1, using CRC and CRC check for rx with seed, and 2FSK
 	si446x_busy_wait_send_receive(7, 0, (uint8_t [7]){0x11, 0x12, 0x03, 0x22, 0x06, 0x00, 0x8A}, rx_buffer);
 	//Configure the rx signal path, these setting are from WDS - lower the IF slightly and setup the CIC Rx filter, gain x 2 on Rx path
-	si446x_busy_wait_send_receive(12, 0, (uint8_t [12]){0x11, 0x20, 0x08, 0x1C, 0x80, 0x00, 0xF0, 0x10, 0x74, 0xE8, 0x00, 0x55}, rx_buffer);
+	si446x_busy_wait_send_receive(12, 0, (uint8_t [12]){0x11, 0x20, 0x08, 0x1C, 0x80, 0x00, 0xF0, 0x11, 0x74, 0xE8, 0x00, 0x55}, rx_buffer);
 	//Configure BCR - NCO settings for the RX signal path - WDS settings
 	si446x_busy_wait_send_receive(16, 0, (uint8_t [16]){0x11, 0x20, 0x0C, 0x24, 0x06, 0x0C, 0xAB, 0x04, 0x04, 0x02, 0x00, 0x00, 0x00, 0x12, 0x80, 0x01}, rx_buffer);
 	//Configure AFC/AGC settings for Rx path, WDS settings - only change the AFC here, as the other settings are only slightly tweaked by WDS
 	si446x_busy_wait_send_receive(7, 0, (uint8_t [7]){0x11, 0x20, 0x03, 0x30, 0x09, 0x3A, 0xA0}, rx_buffer);
+	//Configure the eye-open Rx modem settings
+	si446x_busy_wait_send_receive(9, 0, (uint8_t [9]){0x11, 0x20, 0x05, 0x45, 0x83, 0x02, 0x36, 0x01, 0x00}, rx_buffer);
 	//Configure Rx search period control - WDS settings
 	si446x_busy_wait_send_receive(6, 0, (uint8_t [6]){0x11, 0x20, 0x02, 0x50, 0x84, 0x0A}, rx_buffer);
 	//Configure Rx BCR and AFC config - WDS settings
@@ -345,7 +347,7 @@ void si446x_set_modem(void) {
 	//RSSI_THRESH is in dBm, it needs to be converted to 0.5dBm steps offset by ~130
 	uint8_t rssi = (2*(RSSI_THRESH+130))&0xFF;
 	si446x_busy_wait_send_receive(8, 0, (uint8_t [8]){0x11, 0x20, 0x04, 0x4A, rssi, 0x0C, 0x12, 0x3E}, rx_buffer);
-	//Configure the match value, this constrains the first 4 bytes of data to match e.g. $$RO          0x40 to enable, currently disabled
+	//Configure the match value, this constrains the first 4 bytes of data to match e.g. $$RO          0x40 to enable, currently disabled TODO
 	si446x_busy_wait_send_receive(16, 0, (uint8_t [16]){0x11, 0x30, 0x0C, 0x00,Silabs_Header[0], 0xFF, 0x00,Silabs_Header[1], 0xFF, 0x41,Silabs_Header[2], 0xFF, 0x42,Silabs_Header[3], 0xFF, 0x43}, rx_buffer);
 	//Configure the Packet handler to use seperate FIELD config for RX, and turn off after packet rx
 	si446x_busy_wait_send_receive(5, 0, (uint8_t [5]){0x11, 0x12, 0x01, 0x06, 0x80}, rx_buffer);
