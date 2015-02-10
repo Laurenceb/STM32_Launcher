@@ -320,7 +320,15 @@ void si446x_set_deviation_channel_bps(uint32_t deviation, uint32_t channel_space
   */
 void si446x_set_modem(void) {
 	uint8_t rx_buffer[2];
-	//Set to CW mode
+	//Configure the Packet handler to use seperate FIELD config for RX, and turn off after packet rx
+	si446x_busy_wait_send_receive(5, 0, (uint8_t [5]){0x11, 0x12, 0x01, 0x06, 0x80}, rx_buffer);
+	//Use CCIT-16 CRC with 0xFFFF seed on the packet handler, same as UKHAS protocol
+	si446x_busy_wait_send_receive(5, 0, (uint8_t [5]){0x11, 0x12, 0x01, 0x00, 0x85}, rx_buffer);
+	//Use bytes for preamble length - so defaults to 8bytes
+	si446x_busy_wait_send_receive(5, 0, (uint8_t [5]){0x11, 0x10, 0x01, 0x04, 0x31}, rx_buffer);
+	//Set the sync word as two bytes 0xD391, this has good autocorrelation 8/1 peak to secondary ratio, default config used, no bit errors, 16 bit
+	si446x_busy_wait_send_receive(6, 0, (uint8_t [6]){0x11, 0x11, 0x02, 0x01, 0xD3, 0x91}, rx_buffer);
+	//Set to async direct FSK mode for TX
 	//Sets modem into direct asynchronous 2FSK mode using GPIO0 (UART3 TX on the board), turn off Manchester mode
 	si446x_busy_wait_send_receive(6, 0, (uint8_t [6]){0x11, 0x20, 0x02, 0x00, 0x8A, 0x00}, rx_buffer);
        //Also configure the RX packet CRC stuff here, 6 byte payload for FIELD1, using CRC and CRC check for rx with seed, and 2FSK
@@ -349,14 +357,6 @@ void si446x_set_modem(void) {
 	si446x_busy_wait_send_receive(8, 0, (uint8_t [8]){0x11, 0x20, 0x04, 0x4A, rssi, 0x0C, 0x12, 0x3E}, rx_buffer);
 	//Configure the match value, this constrains the first 4 bytes of data to match e.g. $$RO          0x40 to enable, currently disabled TODO
 	si446x_busy_wait_send_receive(16, 0, (uint8_t [16]){0x11, 0x30, 0x0C, 0x00,Silabs_Header[0], 0xFF, 0x00,Silabs_Header[1], 0xFF, 0x41,Silabs_Header[2], 0xFF, 0x42,Silabs_Header[3], 0xFF, 0x43}, rx_buffer);
-	//Configure the Packet handler to use seperate FIELD config for RX, and turn off after packet rx
-	si446x_busy_wait_send_receive(5, 0, (uint8_t [5]){0x11, 0x12, 0x01, 0x06, 0x80}, rx_buffer);
-	//Use CCIT-16 CRC with 0xFFFF seed on the packet handler, same as UKHAS protocol
-	si446x_busy_wait_send_receive(5, 0, (uint8_t [5]){0x11, 0x12, 0x01, 0x00, 0x85}, rx_buffer);
-	//Use bytes for preamble length - so defaults to 8bytes
-	si446x_busy_wait_send_receive(5, 0, (uint8_t [5]){0x11, 0x10, 0x01, 0x04, 0x31}, rx_buffer);
-	//Set the sync word as two bytes 0xD391, this has good autocorrelation 8/1 peak to secondary ratio, default config used, no bit errors, 16 bit
-	si446x_busy_wait_send_receive(6, 0, (uint8_t [6]){0x11, 0x11, 0x02, 0x01, 0xD3, 0x91}, rx_buffer);
 }
 
 /**
