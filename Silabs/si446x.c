@@ -15,7 +15,7 @@ uint32_t Active_bps = DEFAULT_BPS;
 int8_t Outdiv = 8;
 uint8_t Active_banddiv = 10;
 
-//#define SILABS_IRQ_DEBUG_MODE 1	/* define this to enable IQR clearing for debugging the silabs */
+//#define SILABS_IRQ_DEBUG_MODE 0x21	/* define this to enable IQR clearing for debugging the silabs, used to set the MODEM interrupt enable bits */
 
 //Interface functions go here
 uint8_t send_string_to_silabs(uint8_t* str) {
@@ -240,8 +240,11 @@ uint8_t si446x_setup(void) {
 	/* ready on CRC match pkt, RX on CRC packet error, FIELD config in packet handler for packet engine */
 	si446x_busy_wait_send_receive(8, 0, (uint8_t [8]){0x32, Channel_rx, 0x00, 0x00, 0x00, 0x00, 0x03, 0x08}, rx_buffer);
 	//Only enable the packet received interrupt - global interrupt config and PH interrupt config bytes
-	//si446x_busy_wait_send_receive(6, 0, (uint8_t [6]){0x11, 0x01, 0x02, 0x00, 0x01, 0x10}, rx_buffer); //TODO: re-enable this once debugging complete
-	si446x_busy_wait_send_receive(7, 0, (uint8_t [7]){0x11, 0x01, 0x03, 0x00, 0x03, 0x18, 0x00}, rx_buffer);//debug code to enable the modem interrupts
+	#ifndef SILABS_IRQ_DEBUG_MODE 
+	si446x_busy_wait_send_receive(6, 0, (uint8_t [6]){0x11, 0x01, 0x02, 0x00, 0x01, 0x10}, rx_buffer); /* No debug option */
+	#else
+	si446x_busy_wait_send_receive(7, 0, (uint8_t [7]){0x11, 0x01, 0x03, 0x00, 0x03, 0x18, SILABS_IRQ_DEBUG_MODE}, rx_buffer);/* enable the modem interrupts */
+	#endif
 	}
 	Silabs_driver_state=DEFAULT_MODE;/* Make sure this is initialised */
 	EXTI_Init(&EXTI_InitStructure);	/* Only enable the NIRQ once everything is configured */
@@ -357,8 +360,12 @@ void si446x_set_modem(void) {
 	//RSSI_THRESH is in dBm, it needs to be converted to 0.5dBm steps offset by ~130
 	uint8_t rssi = (2*(RSSI_THRESH+130))&0xFF;
 	si446x_busy_wait_send_receive(8, 0, (uint8_t [8]){0x11, 0x20, 0x04, 0x4A, rssi, 0x0C, 0x12, 0x3E}, rx_buffer);
-	//Configure the match value, this constrains the first 4 bytes of data to match e.g. $$RO          0x40 to enable, currently disabled TODO
-	si446x_busy_wait_send_receive(16, 0, (uint8_t [16]){0x11, 0x30, 0x0C, 0x00,Silabs_Header[0], 0xFF, 0x00,Silabs_Header[1], 0xFF, 0x41,Silabs_Header[2], 0xFF, 0x42,Silabs_Header[3], 0xFF, 0x43}, rx_buffer);
+	//Configure the match value, this constrains the first 4 bytes of data to match e.g. $$RO          0x40 to enable, disabled using macro. All 4 must match
+	#ifdef 	SILABS_IRQ_DEBUG_MODE
+	si446x_busy_wait_send_receive(16, 0, (uint8_t [16]){0x11, 0x30, 0x0C, 0x00,Silabs_Header[0], 0xFF, 0x00,Silabs_Header[1], 0xFF, 0x01,Silabs_Header[2], 0xFF, 0x02,Silabs_Header[3], 0xFF, 0x03}, rx_buffer);
+	#else
+	si446x_busy_wait_send_receive(16, 0, (uint8_t [16]){0x11, 0x30, 0x0C, 0x00,Silabs_Header[0], 0xFF, 0x40,Silabs_Header[1], 0xFF, 0x01,Silabs_Header[2], 0xFF, 0x02,Silabs_Header[3], 0xFF, 0x03}, rx_buffer);
+	#endif
 }
 
 /**
@@ -428,6 +435,8 @@ void si446x_state_machine(volatile uint8_t *state_, uint8_t reason ) {
 					*state_=READ_COMPLETE_MODE;
 					tx_buffer[0]=0x77;
 					bytes_read=rx_buffer[2]+1;/* Offset for CMD dummy byte, note use of zero tx bytes to set direct read mode */
+					if(bytes_read>sizeof(rx_buffer))
+						bytes_read=sizeof(rx_buffer);/* Make sure a buffer overflow cannot occur */
 					si446x_spi_state_machine( &Silabs_spi_state, 0, tx_buffer, bytes_read, rx_buffer, &si446x_state_machine );
 				}
 				else
