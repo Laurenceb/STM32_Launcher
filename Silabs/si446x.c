@@ -232,7 +232,7 @@ uint8_t si446x_setup(void) {
 	GPIO_InitStructure.GPIO_Mode    = GPIO_Mode_AF_PP;
 	GPIO_Init(GPIOB, &GPIO_InitStructure);
 	//Setup the GPIO pin, note that GPIO1 defaults to CTS, but we need to reset and set GPIO0 to TX direct mode mod input
-	si446x_busy_wait_send_receive(8, 0, (uint8_t [8]){0x13, 0x04, 0x08, 0x01, 0x01, 0x00, 0x11, 0x00}, rx_buffer);
+	si446x_busy_wait_send_receive(8, 0, (uint8_t [8]){0x13, 0x04, 0x08, 0x01, 0x01, 0x00, 0x0B, 0x00}, rx_buffer);
 	//Rest of the config
 	si446x_set_frequency(Active_freq);
 	si446x_set_deviation_channel_bps(Active_shift, Active_channel, Active_bps);
@@ -368,7 +368,7 @@ void si446x_set_modem(void) {
   */
 void si446x_state_machine(volatile uint8_t *state_, uint8_t reason ) {
 	uint8_t state=*state_;
-	static uint8_t rx_buffer[10];
+	static uint8_t rx_buffer[65];/* Large enough to handle the largest possible amount that might be in the buffer */
 	static uint8_t tx_buffer[8];
 	static uint8_t bytes_read,unhandled_tx_data;
 	switch(state) {
@@ -378,8 +378,8 @@ void si446x_state_machine(volatile uint8_t *state_, uint8_t reason ) {
 				*state_=DEFAULT_MODE;/*Should happen in case of unhandled NIRQ request (after its cleared), Tx completion, or Rx re-setup*/
 			else if(reason==1) {/* Silabs interrupt, setup a read to get the status */
 				*state_=IRQ_MODE;/* Go to state 1 */
-				tx_buffer[0]=0x21;/* Get packethandler status */
-				si446x_spi_state_machine( &Silabs_spi_state, 1, tx_buffer, 4, rx_buffer, &si446x_state_machine );
+				tx_buffer[0]=0x21;tx_buffer[1]=0x00;/* Get packethandler status */
+				si446x_spi_state_machine( &Silabs_spi_state, 2, tx_buffer, 4, rx_buffer, &si446x_state_machine );
 			}
 			if(reason==2 || unhandled_tx_data==1 ) {/* We have data ready to send via TX */
 				unhandled_tx_data=0;/* Reset this here */
@@ -732,6 +732,8 @@ void si446x_spi_state_machine( volatile uint8_t *state_, uint8_t tx_bytes, uint8
 				//SPI_Cmd(SPI1, DISABLE);/* This clears NSS */
 				//SPI_Cmd(SPI1, ENABLE);
 				*state_=0;	/* Back to the default state */
+				if( callback_local )
+					(*callback_local)( &Silabs_driver_state, 0);/* The callback function with argument zero to show SPI callback */
 				break;
 			}
 		case 3: /* CTS cleared, time to read the data if there is any to read */
