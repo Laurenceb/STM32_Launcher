@@ -15,6 +15,8 @@ uint32_t Active_bps = DEFAULT_BPS;
 int8_t Outdiv = 8;
 uint8_t Active_banddiv = 10;
 
+//#define SILABS_IRQ_DEBUG_MODE 1	/* define this to enable IQR clearing for debugging the silabs */
+
 //Interface functions go here
 uint8_t send_string_to_silabs(uint8_t* str) {
 	uint8_t n=0;
@@ -239,7 +241,7 @@ uint8_t si446x_setup(void) {
 	si446x_busy_wait_send_receive(8, 0, (uint8_t [8]){0x32, Channel_rx, 0x00, 0x00, 0x00, 0x00, 0x03, 0x08}, rx_buffer);
 	//Only enable the packet received interrupt - global interrupt config and PH interrupt config bytes
 	//si446x_busy_wait_send_receive(6, 0, (uint8_t [6]){0x11, 0x01, 0x02, 0x00, 0x01, 0x10}, rx_buffer); //TODO: re-enable this once debugging complete
-	si446x_busy_wait_send_receive(7, 0, (uint8_t [7]){0x11, 0x01, 0x03, 0x00, 0x03, 0x18, 0x21}, rx_buffer);//debug code to enable the modem interrupts
+	si446x_busy_wait_send_receive(7, 0, (uint8_t [7]){0x11, 0x01, 0x03, 0x00, 0x03, 0x18, 0x01}, rx_buffer);//debug code to enable the modem interrupts
 	}
 	Silabs_driver_state=DEFAULT_MODE;/* Make sure this is initialised */
 	EXTI_Init(&EXTI_InitStructure);	/* Only enable the NIRQ once everything is configured */
@@ -389,8 +391,11 @@ void si446x_state_machine(volatile uint8_t *state_, uint8_t reason ) {
 		case IRQ_MODE: /* NIRQ during Rx mode caused PH to be read */
 			if(!reason) {/* Callback, read completed */
 				uint8_t a=rx_buffer[3]&0x18;
-				if(a==0x10) {/*Packet received */
+				if(a==0x10) {/*Packet received, the read will have cleared the packet handler interrupt request */
 					*state_=READ_STAT_MODE;
+					#ifndef SILABS_IRQ_DEBUG_MODE
+					goto READ_STAT_MODE_ENTRY;/*Normally there is no need to clear the interrupts, as only packet hander ISR enabled*/
+					#endif
 				}
 				else {/*Something bad happened, return to state 0 after spi comms */
 					*state_=DEFAULT_MODE;
@@ -405,6 +410,7 @@ void si446x_state_machine(volatile uint8_t *state_, uint8_t reason ) {
 			}
 			break;
 		case READ_STAT_MODE:/* There is data ready to be read */
+			READ_STAT_MODE_ENTRY:
 			if(!reason) {
 				*state_=READ_MODE;
 				tx_buffer[0]=0x15;
