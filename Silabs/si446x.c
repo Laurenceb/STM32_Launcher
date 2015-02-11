@@ -241,7 +241,7 @@ uint8_t si446x_setup(void) {
 	si446x_busy_wait_send_receive(8, 0, (uint8_t [8]){0x32, Channel_rx, 0x00, 0x00, 0x00, 0x00, 0x03, 0x08}, rx_buffer);
 	//Only enable the packet received interrupt - global interrupt config and PH interrupt config bytes
 	//si446x_busy_wait_send_receive(6, 0, (uint8_t [6]){0x11, 0x01, 0x02, 0x00, 0x01, 0x10}, rx_buffer); //TODO: re-enable this once debugging complete
-	si446x_busy_wait_send_receive(7, 0, (uint8_t [7]){0x11, 0x01, 0x03, 0x00, 0x03, 0x18, 0x01}, rx_buffer);//debug code to enable the modem interrupts
+	si446x_busy_wait_send_receive(7, 0, (uint8_t [7]){0x11, 0x01, 0x03, 0x00, 0x03, 0x18, 0x00}, rx_buffer);//debug code to enable the modem interrupts
 	}
 	Silabs_driver_state=DEFAULT_MODE;/* Make sure this is initialised */
 	EXTI_Init(&EXTI_InitStructure);	/* Only enable the NIRQ once everything is configured */
@@ -708,10 +708,10 @@ void si446x_spi_state_machine( volatile uint8_t *state_, uint8_t tx_bytes, uint8
 			*state_=2;/* Incriment the state */
 		case 2: /* portb, pin 11 must be high*/
 			if(tx_bytes_local) {/* Normal command/response comms */
-				DMA_Cmd(DMA1_Channel3, DISABLE);
-				DMA_Cmd(DMA1_Channel2, DISABLE);
 				/* Disable SPI TX/RX request */
 				SPI_I2S_DMACmd(SPI1, SPI_I2S_DMAReq_Rx|SPI_I2S_DMAReq_Tx, DISABLE);
+				DMA_Cmd(DMA1_Channel3, DISABLE);
+				DMA_Cmd(DMA1_Channel2, DISABLE);
 				DMA_ITConfig(DMA1_Channel2, DMA_IT_TC, DISABLE);
 				//SPI_Cmd(SPI1, DISABLE);/* This clears NSS */
 				//SPI_Cmd(SPI1, ENABLE);
@@ -790,9 +790,11 @@ __attribute__((externally_visible)) void DMA1_Channel2_IRQHandler(void) {
 		NSEL_HIGH; 	/*Deselect device*/
 		DMA_ClearFlag(DMA1_FLAG_TC2|DMA1_FLAG_HT2);  	/* make sure all flags are clear */
 		DMA_ClearFlag(DMA1_FLAG_TC3|DMA1_FLAG_HT3);  	/* make sure tx flags cleared here too */
+		DMA_ClearITPendingBit(DMA1_IT_GL2);
 		si446x_spi_state_machine( &Silabs_spi_state, 0, NULL, 0, NULL, NULL );
 	}
-	DMA_ClearITPendingBit(DMA1_IT_GL2);			/* clear all the interrupts */
+	else
+		DMA_ClearITPendingBit(DMA1_IT_GL2);		/* clear all the interrupts */
 }
 
 /**
