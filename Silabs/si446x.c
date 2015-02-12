@@ -379,7 +379,7 @@ void si446x_state_machine(volatile uint8_t *state_, uint8_t reason ) {
 	uint8_t state=*state_;
 	static uint8_t rx_buffer[65];/* Large enough to handle the largest possible amount that might be in the buffer */
 	static uint8_t tx_buffer[8];
-	static uint8_t bytes_read,unhandled_tx_data;
+	static uint8_t bytes_read,unhandled_tx_data,Bad_Channel=0,Bad_Channel_Time=0;
 	switch(state) {
 		case DEFAULT_MODE:/* State 0 is the entry point, this is Rx mode, and is exited upon NIRQ/TX data */
 			DEFAULT_RETURN:
@@ -387,8 +387,8 @@ void si446x_state_machine(volatile uint8_t *state_, uint8_t reason ) {
 				*state_=DEFAULT_MODE;/*Should happen in case of unhandled NIRQ request (after its cleared), Tx completion, or Rx re-setup*/
 			else if(reason==1) {/* Silabs interrupt, setup a read to get the status */
 				*state_=IRQ_MODE;/* Go to state 1 */
-				tx_buffer[0]=0x21;tx_buffer[1]=0x00;/* Get packethandler status */
-				si446x_spi_state_machine( &Silabs_spi_state, 2, tx_buffer, 4, rx_buffer, &si446x_state_machine );
+				memcpy(tx_buffer, (uint8_t [4]){0x20, 0x00, 0x00, 0x00}, 4*sizeof(uint8_t));/* Wipe interrupt status, all bits */
+				si446x_spi_state_machine( &Silabs_spi_state, 4, tx_buffer, 10, rx_buffer, &si446x_state_machine );
 			}
 			if(reason==2 || unhandled_tx_data==1 ) {/* We have data ready to send via TX */
 				unhandled_tx_data=0;/* Reset this here */
@@ -399,34 +399,35 @@ void si446x_state_machine(volatile uint8_t *state_, uint8_t reason ) {
 			break;
 		case IRQ_MODE: /* NIRQ during Rx mode caused PH to be read */
 			if(!reason) {/* Callback, read completed */
-				uint8_t a=rx_buffer[3]&0x18;
+				uint8_t a=((rx_buffer[4]&0x18)|(rx_buffer[6]&0x24));/*Look at Packet Rx, CRC error, Sync error and Preamble error bits */
 				if(a==0x10) {/*Packet received, the read will have cleared the packet handler interrupt request */
-					*state_=READ_STAT_MODE;
-					#ifndef SILABS_IRQ_DEBUG_MODE
-					goto READ_STAT_MODE_ENTRY;/*Normally there is no need to clear the interrupts, as only packet hander ISR enabled*/
-					#endif
+					*state_=READ_MODE;
+					Bad_Channel=0;/*The channel must be good if we have an ok uplink*/
+					tx_buffer[0]=0x15;tx_buffer[1]=0x00;/* Read number of bytes in FIFO */
+					si446x_spi_state_machine( &Silabs_spi_state, 2, tx_buffer, 4, rx_buffer, &si446x_state_machine );
+					break;
+				}/* Otherwise something involving sync or preamble error occured, check the RSSI and AFA conditions */
+				else if(a&0x24) {
+					if(rx_buffer[7]&0x08) {	/* Sync or preamble error during a period of above threshold RSSI == bad channel */
+						if(Millis-Bad_Channel_Time<AFA_BAD_SHORTTIME)
+							Bad_Channel++;
+						else if(Millis-Bad_Channel_Time>AFA_BAD_LONGTIME)
+							Bad_Channel--;/* A long time between bad events and we decrement */
+						Bad_Channel_Time=Millis;/* Bad channel events are timestamped here */
+						if(Bad_Channel>AFA_BAD_LIMIT){
+							Channel_rx=(++Channel_rx)&((1<<AFA_CHANNELS)-1);
+							Channel_tx=Channel_rx;/* This will take effect at next tx/rx entry point */
+						}
+					}
+					else
+						Bad_Channel--;	/* RSSI was not high, decrement the index */
+					if(Bad_Channel&0xF0==0xF0)
+						Bad_Channel=0;	/* Prevent wrap around of unsigned integer */
 				}
-				else {/*Something bad happened, return to state 0 after spi comms */
-					*state_=DEFAULT_MODE;
-				}
-				memcpy(tx_buffer, (uint8_t [4]){0x20, 0x00, 0x00, 0x00}, 4*sizeof(uint8_t));/* Wipe interrupt status, all bits */
-				si446x_spi_state_machine( &Silabs_spi_state, 4, tx_buffer, 10, rx_buffer, &si446x_state_machine );
+				*state_=DEFAULT_MODE;/* Any interrupt source other than packet rx causes return to normal mode */
 			}
 			else {/* This shouldnt happen, might be caused by glitchy NIRQ line or TX data being added */
 				/* Keep the state unchanged */
-				if(reason==2)
-					unhandled_tx_data=1;
-			}
-			break;
-		case READ_STAT_MODE:/* There is data ready to be read */
-			READ_STAT_MODE_ENTRY:
-			if(!reason) {
-				*state_=READ_MODE;
-				tx_buffer[0]=0x15;
-				tx_buffer[1]=0x00;/* Read number of bytes in FIFO */
-				si446x_spi_state_machine( &Silabs_spi_state, 2, tx_buffer, 4, rx_buffer, &si446x_state_machine );
-			}
-			else {/* This should not happen */
 				if(reason==2)
 					unhandled_tx_data=1;
 			}

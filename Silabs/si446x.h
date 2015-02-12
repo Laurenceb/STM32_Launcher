@@ -12,10 +12,15 @@
 #define DEFAULT_POWER_LEVEL 32 /*gives ~ 15dBm at 3.3v*/
 #define DEFAULT_SHIFT 300 /*300 hz tone sep*/
 #define DEFAULT_FREQ 434075000UL /*carrier center at channel 0*/
-#define DEFAULT_CHANNEL 3000 /* 3kHz channel spacing */
+#define DEFAULT_CHANNEL 600 /* 0.6kHz channel spacing */
 #define DEFAULT_BPS 200 /*200bps for the uplink*/
 
 #define RTTY_BAUD 50 /* This is pretty standard for balloons, means the PCLK1 has to be down at 3mhz and system clk at 24mhz*/
+
+#define AFA_BAD_SHORTTIME 250 /* AFA (Active frequency avoidance) config: avoid channel if sync or preamble errors every 250ms or more with RSSI high*/
+#define AFA_BAD_LONGTIME 800
+#define AFA_CHANNELS 4 /* Four possible channels to avoid interference */
+#define AFA_BAD_LIMIT 16 /* sixteen bad events before the channel is changed */
 
 #define SDN_LOW  GPIO_WriteBit(GPIOB,GPIO_Pin_9,Bit_RESET)
 #define SDN_HIGH GPIO_WriteBit(GPIOB,GPIO_Pin_9,Bit_SET)
@@ -29,7 +34,7 @@
 #define USE_GPIO_CTS /*The spi wait ready function is not used - use the GPIO polling instead*/
 
 /*Upper level state machine states*/
-enum{DEFAULT_MODE=0,IRQ_MODE,READ_STAT_MODE,READ_MODE,READ_COMPLETE_MODE,READ_RSSI_COMPLETED,AFC_MODE,TX_MODE,TX_COMPLETE_MODE};
+enum{DEFAULT_MODE=0,IRQ_MODE,READ_MODE,READ_COMPLETE_MODE,READ_RSSI_COMPLETED,AFC_MODE,TX_MODE,TX_COMPLETE_MODE};
 
 extern volatile uint8_t Channel_rx,Channel_tx,Silabs_spi_state,Silabs_driver_state;
 extern volatile int8_t Last_RSSI;
