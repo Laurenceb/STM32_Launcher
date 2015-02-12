@@ -362,6 +362,8 @@ void si446x_set_modem(void) {
 	//RSSI_THRESH is in dBm, it needs to be converted to 0.5dBm steps offset by ~130
 	uint8_t rssi = (2*(RSSI_THRESH+134))&0xFF;
 	si446x_busy_wait_send_receive(9, 0, (uint8_t [9]){0x11, 0x20, 0x05, 0x4A, rssi, 0x0C, 0x12, 0x3E, 0x40}, rx_buffer);
+	//Configure RSSI hysteresis to 3dB (6 steps), and 4bits RSSI holdoff 
+	si446x_busy_wait_send_receive(6, 0, (uint8_t [6]){0x11, 0x20, 0x02, 0x56, 0x06, 0x0C}, rx_buffer);
 	//Configure the match value, this constrains the first 4 bytes of data to match e.g. $$RO          0x40 to enable, disabled using macro. All 4 must match
 	#ifdef 	SILABS_IRQ_DEBUG_MODE
 	si446x_busy_wait_send_receive(16, 0, (uint8_t [16]){0x11, 0x30, 0x0C, 0x00,Silabs_Header[0], 0xFF, 0x00,Silabs_Header[1], 0xFF, 0x01,Silabs_Header[2], 0xFF, 0x02,Silabs_Header[3], 0xFF, 0x03}, rx_buffer);
