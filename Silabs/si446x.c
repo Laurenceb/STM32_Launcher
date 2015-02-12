@@ -279,7 +279,7 @@ void si446x_set_frequency(uint32_t freq) {/*Set the output divider according to 
 	uint32_t m2 = m / 0x10000;
 	uint32_t m1 = (m - m2 * 0x10000) / 0x100;
 	uint32_t m0 = (m - m2 * 0x10000 - m1 * 0x100);
-	uint32_t channel_increment = 524288 * Outdiv * Active_shift / (2 * VCXO_FREQ);
+	uint32_t channel_increment = 524288 * Outdiv * Active_channel / (2 * VCXO_FREQ);
 	uint8_t c1 = channel_increment / 0x100;
 	uint8_t c0 = channel_increment - (0x100 * c1);
 	si446x_busy_wait_send_receive(10, 0, (uint8_t [10]){0x11, 0x40, 0x06, 0x00, n, m2, m1, m0, c1, c0}, rx_buffer);
@@ -480,7 +480,8 @@ void si446x_state_machine(volatile uint8_t *state_, uint8_t reason ) {
 		case READ_RSSI_COMPLETED:
 			if(!reason) {
 				Last_RSSI=(int8_t)(rx_buffer[5]/2)-34;/* This is in dBm offset from -100dBm */
-				int16_t AFC_error=*(int16_t*)(&rx_buffer[8]);/* Read the AFC tuning error, this is in PLL step size units */
+				int16_t AFC_error=*(int16_t*)(&rx_buffer[8]);/* Read the AFC tuning error, this is in PLL step size units (*4?) */
+				AFC_error*=4;/*For some reason this in using of 4 times the PLL step? (experiment with mistuned base station)*/
 				AFC_error=(int16_t)__REVSH(*(uint16_t*)&AFC_error);/* Fix the endianess for ARM cortex */
 				if(unhandled_tx_data) {
 					*state_=TX_MODE;/* Jump directly to Tx mode*/
@@ -498,7 +499,7 @@ void si446x_state_machine(volatile uint8_t *state_, uint8_t reason ) {
 						/* here as its configured as field*/
 						si446x_spi_state_machine( &Silabs_spi_state, 8, tx_buffer, 0, rx_buffer, &si446x_state_machine );
 					}
-					else {	/* Otherwise the PLL is retuned to center the carrier onto the uplink frequency */
+					else {	/* Otherwise the PLL is retuned to center the carrier onto the uplink frequency (tuning limit is dev/2) */
 						*state_=AFC_MODE;
 						Current_PLL_frac+=AFC_error;/* Correct this */
 						uint8_t m2=0xFF&(Current_PLL_frac>>16);
