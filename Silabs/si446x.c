@@ -381,7 +381,8 @@ void si446x_state_machine(volatile uint8_t *state_, uint8_t reason ) {
 	uint8_t state=*state_;
 	static uint8_t rx_buffer[65];/* Large enough to handle the largest possible amount that might be in the buffer */
 	static uint8_t tx_buffer[8];
-	static uint8_t bytes_read,unhandled_tx_data,Bad_Channel=0,Bad_Channel_Time=0;
+	static uint8_t bytes_read,unhandled_tx_data,Bad_Channel=0;
+	static uint32_t Bad_Channel_Time=0;
 	switch(state) {
 		case DEFAULT_MODE:/* State 0 is the entry point, this is Rx mode, and is exited upon NIRQ/TX data */
 			DEFAULT_RETURN:
@@ -416,15 +417,15 @@ void si446x_state_machine(volatile uint8_t *state_, uint8_t reason ) {
 						else if(Millis-Bad_Channel_Time>AFA_BAD_LONGTIME)
 							Bad_Channel--;/* A long time between bad events and we decrement */
 						Bad_Channel_Time=Millis;/* Bad channel events are timestamped here */
-						if(Bad_Channel>AFA_BAD_LIMIT){
-							Channel_rx=(++Channel_rx)&((1<<AFA_CHANNELS)-1);
+						if(Bad_Channel>AFA_BAD_LIMIT && Bad_Channel<0xF0){
+							Channel_rx=(++Channel_rx)&((uint8_t)AFA_CHANNELS-1);
 							Channel_tx=Channel_rx;/* This will take effect at next tx/rx entry point */
 							Bad_Channel=0;
 						}
 					}
 					else
 						Bad_Channel--;	/* RSSI was not high, decrement the index */
-					if(Bad_Channel&0xF0==0xF0)
+					if((Bad_Channel&0xF0)==0xF0)
 						Bad_Channel=0;	/* Prevent wrap around of unsigned integer */
 				}
 				*state_=DEFAULT_MODE;/* Any interrupt source other than packet rx causes return to normal mode */
