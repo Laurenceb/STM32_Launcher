@@ -360,8 +360,8 @@ void si446x_set_modem(void) {
 	si446x_busy_wait_send_receive(16, 0, (uint8_t [16]){0x11, 0x21, 0x0C, 0x18, 0xC9, 0xFC, 0x1B, 0x1E, 0x0F, 0x01, 0xFC, 0xFD, 0x15, 0xFF, 0x00, 0x0F}, rx_buffer);
 	//Configure the RSSI thresholding for RX mode, with 12dB jump threshold (reset if RSSI changes this much during Rx), RSSI mean with packet toggle
 	//RSSI_THRESH is in dBm, it needs to be converted to 0.5dBm steps offset by ~130
-	uint8_t rssi = (2*(RSSI_THRESH+130))&0xFF;
-	si446x_busy_wait_send_receive(8, 0, (uint8_t [8]){0x11, 0x20, 0x04, 0x4A, rssi, 0x0C, 0x12, 0x3E}, rx_buffer);
+	uint8_t rssi = (2*(RSSI_THRESH+134))&0xFF;
+	si446x_busy_wait_send_receive(9, 0, (uint8_t [9]){0x11, 0x20, 0x05, 0x4A, rssi, 0x0C, 0x12, 0x3E, 0x40}, rx_buffer);
 	//Configure the match value, this constrains the first 4 bytes of data to match e.g. $$RO          0x40 to enable, disabled using macro. All 4 must match
 	#ifdef 	SILABS_IRQ_DEBUG_MODE
 	si446x_busy_wait_send_receive(16, 0, (uint8_t [16]){0x11, 0x30, 0x0C, 0x00,Silabs_Header[0], 0xFF, 0x00,Silabs_Header[1], 0xFF, 0x01,Silabs_Header[2], 0xFF, 0x02,Silabs_Header[3], 0xFF, 0x03}, rx_buffer);
@@ -475,7 +475,7 @@ void si446x_state_machine(volatile uint8_t *state_, uint8_t reason ) {
 			break;
 		case READ_RSSI_COMPLETED:
 			if(!reason) {
-				Last_RSSI=(int8_t)(rx_buffer[5]*2)-30;/* This is in dBm offset from -100dBm */
+				Last_RSSI=(int8_t)(rx_buffer[5]/2)-34;/* This is in dBm offset from -100dBm */
 				int16_t AFC_error=*(int16_t*)(&rx_buffer[8]);/* Read the AFC tuning error, this is in PLL step size units */
 				AFC_error=(int16_t)__REVSH(*(uint16_t*)&AFC_error);/* Fix the endianess for ARM cortex */
 				if(unhandled_tx_data) {
