@@ -242,7 +242,7 @@ uint8_t si446x_setup(void) {
 	si446x_busy_wait_send_receive(8, 0, (uint8_t [8]){0x32, Channel_rx, 0x00, 0x00, 0x00, 0x00, 0x03, 0x08}, rx_buffer);
 	//Only enable the packet received interrupt - global interrupt config and PH interrupt config bytes
 	#ifndef SILABS_IRQ_DEBUG_MODE 
-	si446x_busy_wait_send_receive(6, 0, (uint8_t [6]){0x11, 0x01, 0x02, 0x00, 0x01, 0x10}, rx_buffer); /* No debug option */
+	si446x_busy_wait_send_receive(7, 0, (uint8_t [7]){0x11, 0x01, 0x03, 0x00, 0x03, 0x10, 0x24}, rx_buffer); /* No debug option, packet rx, sync|pre error */
 	#else
 	si446x_busy_wait_send_receive(7, 0, (uint8_t [7]){0x11, 0x01, 0x03, 0x00, 0x03, 0x18, SILABS_IRQ_DEBUG_MODE}, rx_buffer);/* enable the modem interrupts */
 	#endif
@@ -419,6 +419,7 @@ void si446x_state_machine(volatile uint8_t *state_, uint8_t reason ) {
 						if(Bad_Channel>AFA_BAD_LIMIT){
 							Channel_rx=(++Channel_rx)&((1<<AFA_CHANNELS)-1);
 							Channel_tx=Channel_rx;/* This will take effect at next tx/rx entry point */
+							Bad_Channel=0;
 						}
 					}
 					else
