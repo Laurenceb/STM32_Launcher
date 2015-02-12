@@ -14,6 +14,7 @@ uint32_t Active_channel = DEFAULT_CHANNEL;
 uint32_t Active_bps = DEFAULT_BPS;
 int8_t Outdiv = 8;
 uint8_t Active_banddiv = 10;
+uint32_t Current_PLL_frac = 0;		/* this is used in AFC tracking mode */
 
 //#define SILABS_IRQ_DEBUG_MODE 0x21	/* define this to enable IQR clearing for debugging the silabs, used to set the MODEM interrupt enable bits */
 
@@ -269,6 +270,7 @@ void si446x_set_frequency(uint32_t freq) {/*Set the output divider according to 
 	float ratio = (float)freq / (float)f_pfd;
 	float rest = ratio - (float)n;
 	uint32_t m = (unsigned long)(rest * 524288UL);
+	Current_PLL_frac=m;		/* Can be used for tracking the uplink carrier */
 	// set the band parameter
 	uint32_t sy_sel = 8;
 	Active_banddiv = (band + sy_sel);/*From experience this seems to be involved in bps scaling*/
@@ -460,9 +462,9 @@ void si446x_state_machine(volatile uint8_t *state_, uint8_t reason ) {
 				}
 				else {
 					*state_=READ_RSSI_COMPLETED;/* Completed the reception */
-					tx_buffer[0]=0x50;
+					tx_buffer[0]=0x22;tx_buffer[1]=0x00;/* Read the modem status, this is used to get RSSI and AFC offset */
 					/* Read the RSSI for this packet from the FRR */
-					si446x_spi_state_machine( &Silabs_spi_state, 0, tx_buffer, 2, rx_buffer, &si446x_state_machine );
+					si446x_spi_state_machine( &Silabs_spi_state, 2, tx_buffer, 10, rx_buffer, &si446x_state_machine );
 				}
 			}
 			else {
@@ -472,7 +474,43 @@ void si446x_state_machine(volatile uint8_t *state_, uint8_t reason ) {
 			break;
 		case READ_RSSI_COMPLETED:
 			if(!reason) {
-				Last_RSSI=(int8_t)(rx_buffer[1]*2)-30;/*This is in dBm offset from -100dBm*/
+				Last_RSSI=(int8_t)(rx_buffer[5]*2)-30;/* This is in dBm offset from -100dBm */
+				int16_t AFC_error=*(int16_t*)(&rx_buffer[8]);/* Read the AFC tuning error, this is in PLL step size units */
+				AFC_error=(int16_t)__REVSH(*(uint16_t*)&AFC_error);/* Fix the endianess for ARM cortex */
+				if(unhandled_tx_data) {
+					*state_=TX_MODE;/* Jump directly to Tx mode*/
+					unhandled_tx_data=0;/* Reset this here */
+					/* Go to TX mode, use the global channel number. Direct mode - ignore the packet settings  */
+					memcpy(tx_buffer, (uint8_t [5]){0x31, Channel_tx, 0x00, 0x00, 0x00}, 5*sizeof(uint8_t));
+					si446x_spi_state_machine( &Silabs_spi_state, 5, tx_buffer, 0, rx_buffer, &si446x_state_machine );
+				}
+				else {
+					float units_per_hz = (( 0x40000 * Outdiv ) / (float)VCXO_FREQ);/* Number of PLL units per Hz */
+					if(((float)abs(AFC_error))/units_per_hz<(Active_shift/4)) {/* Under these circumstances we do not retune */
+						*state_=DEFAULT_MODE;/* Completed the reception */
+						memcpy(tx_buffer, (uint8_t [8]){0x32, Channel_rx, 0x00, 0x00, 0x00, 0x00, 0x03, 0x08}, 8*sizeof(uint8_t));
+						/* Go to RX mode, use the global channel number. Exit on CRC match, use zero length packet*/
+						/* here as its configured as field*/
+						si446x_spi_state_machine( &Silabs_spi_state, 8, tx_buffer, 0, rx_buffer, &si446x_state_machine );
+					}
+					else {	/* Otherwise the PLL is retuned to center the carrier onto the uplink frequency */
+						*state_=AFC_MODE;
+						Current_PLL_frac+=AFC_error;/* Correct this */
+						uint8_t m2=0xFF&(Current_PLL_frac>>16);
+						uint8_t m1=0xFF&(Current_PLL_frac>>8);
+						uint8_t m0=0xFF&(Current_PLL_frac);/* Load the new PLL frac settings (load at Rx/Tx entry) */
+						memcpy(tx_buffer, (uint8_t [7]){0x11, 0x40, 0x03, 0x01, m2, m1, m0}, 7*sizeof(uint8_t));
+						si446x_spi_state_machine( &Silabs_spi_state, 7, tx_buffer, 0, rx_buffer, &si446x_state_machine );
+					}
+				}
+			}
+			else {
+				if(reason==2)
+					unhandled_tx_data=1;
+			}
+			break;
+		case AFC_MODE:
+			if(!reason) {
 				if(unhandled_tx_data) {
 					*state_=TX_MODE;/* Jump directly to Tx mode*/
 					unhandled_tx_data=0;/* Reset this here */

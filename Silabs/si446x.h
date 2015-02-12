@@ -29,7 +29,7 @@
 #define USE_GPIO_CTS /*The spi wait ready function is not used - use the GPIO polling instead*/
 
 /*Upper level state machine states*/
-enum{DEFAULT_MODE=0,IRQ_MODE,READ_STAT_MODE,READ_MODE,READ_COMPLETE_MODE,READ_RSSI_COMPLETED,TX_MODE,TX_COMPLETE_MODE};
+enum{DEFAULT_MODE=0,IRQ_MODE,READ_STAT_MODE,READ_MODE,READ_COMPLETE_MODE,READ_RSSI_COMPLETED,AFC_MODE,TX_MODE,TX_COMPLETE_MODE};
 
 extern volatile uint8_t Channel_rx,Channel_tx,Silabs_spi_state,Silabs_driver_state;
 extern volatile int8_t Last_RSSI;
