@@ -18,9 +18,9 @@
 #define RTTY_BAUD 50 /* This is pretty standard for balloons, means the PCLK1 has to be down at 3mhz and system clk at 24mhz*/
 
 #define AFA_BAD_SHORTTIME 250 /* AFA (Active frequency avoidance) config: avoid channel if sync or preamble errors every 250ms or more with RSSI high*/
-#define AFA_BAD_LONGTIME 800
+#define AFA_BAD_LONGTIME 2000 /* More than two seconds between interference and the channel will be judged usable */
 #define AFA_CHANNELS 4 /* Four possible channels to avoid interference */
-#define AFA_BAD_LIMIT 16 /* sixteen bad events before the channel is changed */
+#define AFA_BAD_LIMIT 16 /* Sixteen bad events before the channel is changed */
 
 #define SDN_LOW  GPIO_WriteBit(GPIOB,GPIO_Pin_9,Bit_RESET)
 #define SDN_HIGH GPIO_WriteBit(GPIOB,GPIO_Pin_9,Bit_SET)

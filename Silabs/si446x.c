@@ -410,23 +410,24 @@ void si446x_state_machine(volatile uint8_t *state_, uint8_t reason ) {
 					si446x_spi_state_machine( &Silabs_spi_state, 2, tx_buffer, 4, rx_buffer, &si446x_state_machine );
 					break;
 				}/* Otherwise something involving sync or preamble error occured, check the RSSI and AFA conditions */
-				else if(a&0x24) {
+				else if((a&0x24) && ((Millis-Bad_Channel_Time)>AFA_BAD_SHORTTIME)) {/* Time check to stop an interrupt storm */
 					if(rx_buffer[7]&0x08) {	/* Sync or preamble error during a period of above threshold RSSI == bad channel */
-						if(Millis-Bad_Channel_Time<AFA_BAD_SHORTTIME)
-							Bad_Channel++;
-						else if(Millis-Bad_Channel_Time>AFA_BAD_LONGTIME)
+						if((Millis-Bad_Channel_Time)>AFA_BAD_LONGTIME)
 							Bad_Channel--;/* A long time between bad events and we decrement */
-						Bad_Channel_Time=Millis;/* Bad channel events are timestamped here */
-						if(Bad_Channel>AFA_BAD_LIMIT && Bad_Channel<0xF0){
-							Channel_rx=(++Channel_rx)&((uint8_t)AFA_CHANNELS-1);
-							Channel_tx=Channel_rx;/* This will take effect at next tx/rx entry point */
-							Bad_Channel=0;
+						else {
+							Bad_Channel++;/* This condition indicates continual interference */
+							if(Bad_Channel>AFA_BAD_LIMIT && Bad_Channel<0xF0){
+								Channel_tx=(++Channel_rx)%AFA_CHANNELS;
+								Channel_rx=Channel_tx;/* This will take effect at next tx/rx entry point */
+								Bad_Channel=0;
+							}
 						}
 					}
 					else
 						Bad_Channel--;	/* RSSI was not high, decrement the index */
 					if((Bad_Channel&0xF0)==0xF0)
 						Bad_Channel=0;	/* Prevent wrap around of unsigned integer */
+					Bad_Channel_Time=Millis;/* All events (high RSSI or not) are timestamped if they are seperated in time */
 				}
 				*state_=DEFAULT_MODE;/* Any interrupt source other than packet rx causes return to normal mode */
 			}
