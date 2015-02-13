@@ -4,6 +4,7 @@
 volatile uint8_t Channel_rx,Channel_tx,Silabs_spi_state,Silabs_driver_state;
 volatile byte_buff_type Silabs_Tx_Buffer,Silabs_Rx_Buffer;
 volatile int8_t Last_RSSI=0;	/*Holds RSSI of the last packet*/
+volatile int16_t Last_AFC=0;	/*Holds AFC value of the last packet (should be zero if PLL enabled and tracking converged)*/
 const uint8_t Silabs_Header[5]=UPLINK_CALLSIGN;
 
 static volatile uint32_t CTS_Low;
@@ -17,6 +18,7 @@ uint8_t Active_banddiv = 10;
 uint32_t Current_PLL_frac = 0;		/* this is used in AFC tracking mode */
 
 //#define SILABS_IRQ_DEBUG_MODE 0x21	/* define this to enable IQR clearing for debugging the silabs, used to set the MODEM interrupt enable bits */
+#define PRE_C_SILABS_REVISION		/* Digikey sent revision A2 hardware, WTF Digikey?! */
 
 //Interface functions go here
 uint8_t send_string_to_silabs(uint8_t* str) {
@@ -343,15 +345,15 @@ void si446x_set_modem(void) {
 	//Configure the rx signal path, these setting are from WDS - lower the IF slightly and setup the CIC Rx filter, gain x 2 on Rx path
 	si446x_busy_wait_send_receive(12, 0, (uint8_t [12]){0x11, 0x20, 0x08, 0x1C, 0x80, 0x00, 0xF0, 0x11, 0x74, 0xE8, 0x00, 0x55}, rx_buffer);
 	//Configure BCR - NCO settings for the RX signal path - WDS settings
-	si446x_busy_wait_send_receive(16, 0, (uint8_t [16]){0x11, 0x20, 0x0C, 0x24, 0x06, 0x0C, 0xAB, 0x04, 0x04, 0x02, 0x00, 0x00, 0x00, 0x12, 0x80, 0x01}, rx_buffer);
+	si446x_busy_wait_send_receive(16, 0, (uint8_t [16]){0x11, 0x20, 0x0C, 0x24, 0x06, 0x0C, 0xAB, 0x04, 0x04, 0x02, 0x00, 0x00, 0x00, 0x12, 0xC0, 0x01}, rx_buffer);
 	//Configure AFC/AGC settings for Rx path, WDS settings - only change the AFC here, as the other settings are only slightly tweaked by WDS
-	si446x_busy_wait_send_receive(7, 0, (uint8_t [7]){0x11, 0x20, 0x03, 0x30, 0x09, 0x3A, 0xA0}, rx_buffer);
+	si446x_busy_wait_send_receive(7, 0, (uint8_t [7]){0x11, 0x20, 0x03, 0x30, 0x00, 0x0D, 0xE0}, rx_buffer);/* Enable AFC feedback -> PLL, +-14limit */
 	//Configure the eye-open Rx modem settings
 	si446x_busy_wait_send_receive(9, 0, (uint8_t [9]){0x11, 0x20, 0x05, 0x45, 0x83, 0x02, 0x36, 0x01, 0x00}, rx_buffer);
 	//Configure Rx search period control - WDS settings
 	si446x_busy_wait_send_receive(6, 0, (uint8_t [6]){0x11, 0x20, 0x02, 0x50, 0x84, 0x0A}, rx_buffer);
-	//Configure Rx BCR and AFC config - WDS settings
-	si446x_busy_wait_send_receive(6, 0, (uint8_t [6]){0x11, 0x20, 0x02, 0x54, 0x87, 0x87}, rx_buffer);
+	//Configure Rx BCR and AFC config - WDS settings + AN734, enable one shot BCR based AFC with averaging and holdoff of 4
+	si446x_busy_wait_send_receive(6, 0, (uint8_t [6]){0x11, 0x20, 0x02, 0x54, 0x87, 0xD7}, rx_buffer);
 	//Configure signal arrival detect - WDS settings
 	si446x_busy_wait_send_receive(9, 0, (uint8_t [9]){0x11, 0x20, 0x05, 0x5B, 0x62, 0x04, 0x11, 0x78, 0x24}, rx_buffer);
 	//Configure first and second set of Rx filter coefficients - WDS settings (but used two sets of setting, 0.87kHz and then 0.52kHz after AFC has settled)
@@ -429,7 +431,13 @@ void si446x_state_machine(volatile uint8_t *state_, uint8_t reason ) {
 						Bad_Channel=0;	/* Prevent wrap around of unsigned integer */
 					Bad_Channel_Time=Millis;/* All events (high RSSI or not) are timestamped if they are seperated in time */
 				}
+				#ifdef PRE_C_SILABS_REVISION/* The one-shot AFC doesn not work on early hardware, need to try hacking the AFC */
+				memcpy(tx_buffer, (uint8_t [5]){0x11, 0x20, 0x01, 0x31, 0x00}, 5*sizeof(uint8_t));
+				si446x_spi_state_machine( &Silabs_spi_state, 5, tx_buffer, 0, rx_buffer, &si446x_state_machine );
+				*state_=AFC_HACK_MODE;/* Fix callback handler */
+				#else
 				*state_=DEFAULT_MODE;/* Any interrupt source other than packet rx causes return to normal mode */
+				#endif
 			}
 			else {/* This shouldnt happen, might be caused by glitchy NIRQ line or TX data being added */
 				/* Keep the state unchanged */
@@ -437,6 +445,20 @@ void si446x_state_machine(volatile uint8_t *state_, uint8_t reason ) {
 					unhandled_tx_data=1;
 			}
 			break;
+		#ifdef PRE_C_SILABS_REVISION
+		case AFC_HACK_MODE:
+			if(!reason) {
+				memcpy(tx_buffer, (uint8_t [5]){0x11, 0x20, 0x01, 0x31, 0x0D}, 5*sizeof(uint8_t));
+				si446x_spi_state_machine( &Silabs_spi_state, 5, tx_buffer, 0, rx_buffer, &si446x_state_machine );
+				*state_=DEFAULT_MODE;/* Normal */
+			}
+			else {/* This shouldnt happen, might be caused by glitchy NIRQ line or TX data being added */
+				/* Keep the state unchanged */
+				if(reason==2)
+					unhandled_tx_data=1;
+			}
+			break;
+		#endif
 		case READ_MODE:
 			if(!reason) {
 				if(rx_buffer[2]) {/* There is data for us */
@@ -481,9 +503,9 @@ void si446x_state_machine(volatile uint8_t *state_, uint8_t reason ) {
 		case READ_RSSI_COMPLETED:
 			if(!reason) {
 				Last_RSSI=(int8_t)(rx_buffer[5]/2)-34;/* This is in dBm offset from -100dBm */
-				int16_t AFC_error=*(int16_t*)(&rx_buffer[8]);/* Read the AFC tuning error, this is in PLL step size units (*4?) */
-				AFC_error*=4;/*For some reason this in using of 4 times the PLL step? (experiment with mistuned base station)*/
-				AFC_error=(int16_t)__REVSH(*(uint16_t*)&AFC_error);/* Fix the endianess for ARM cortex */
+				Last_AFC=*(int16_t*)(&rx_buffer[8]);/* Read the AFC tuning error, this is in PLL step size units (*4?) */
+				Last_AFC*=4;/*For some reason this in using of 4 times the PLL step? (experiment with mistuned base station)*/
+				Last_AFC=(int16_t)__REVSH(*(uint16_t*)&Last_AFC);/* Fix the endianess for ARM cortex */
 				if(unhandled_tx_data) {
 					*state_=TX_MODE;/* Jump directly to Tx mode*/
 					unhandled_tx_data=0;/* Reset this here */
@@ -492,23 +514,11 @@ void si446x_state_machine(volatile uint8_t *state_, uint8_t reason ) {
 					si446x_spi_state_machine( &Silabs_spi_state, 5, tx_buffer, 0, rx_buffer, &si446x_state_machine );
 				}
 				else {
-					float units_per_hz = (( 0x40000 * Outdiv ) / (float)VCXO_FREQ);/* Number of PLL units per Hz */
-					if(((float)abs(AFC_error))/units_per_hz<(Active_shift/4)) {/* Under these circumstances we do not retune */
-						*state_=DEFAULT_MODE;/* Completed the reception */
-						memcpy(tx_buffer, (uint8_t [8]){0x32, Channel_rx, 0x00, 0x00, 0x00, 0x00, 0x03, 0x08}, 8*sizeof(uint8_t));
-						/* Go to RX mode, use the global channel number. Exit on CRC match, use zero length packet*/
-						/* here as its configured as field*/
-						si446x_spi_state_machine( &Silabs_spi_state, 8, tx_buffer, 0, rx_buffer, &si446x_state_machine );
-					}
-					else {	/* Otherwise the PLL is retuned to center the carrier onto the uplink frequency (tuning limit is dev/2) */
-						*state_=AFC_MODE;
-						Current_PLL_frac+=AFC_error;/* Correct this */
-						uint8_t m2=0xFF&(Current_PLL_frac>>16);
-						uint8_t m1=0xFF&(Current_PLL_frac>>8);
-						uint8_t m0=0xFF&(Current_PLL_frac);/* Load the new PLL frac settings (load at Rx/Tx entry) */
-						memcpy(tx_buffer, (uint8_t [7]){0x11, 0x40, 0x03, 0x01, m2, m1, m0}, 7*sizeof(uint8_t));
-						si446x_spi_state_machine( &Silabs_spi_state, 7, tx_buffer, 0, rx_buffer, &si446x_state_machine );
-					}
+					*state_=DEFAULT_MODE;/* Completed the reception */
+					memcpy(tx_buffer, (uint8_t [8]){0x32, Channel_rx, 0x00, 0x00, 0x00, 0x00, 0x03, 0x08}, 8*sizeof(uint8_t));
+					/* Go to RX mode, use the global channel number. Exit on CRC match, use zero length packet*/
+					/* here as its configured as field*/
+					si446x_spi_state_machine( &Silabs_spi_state, 8, tx_buffer, 0, rx_buffer, &si446x_state_machine );
 				}
 			}
 			else {
