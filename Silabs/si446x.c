@@ -504,30 +504,8 @@ void si446x_state_machine(volatile uint8_t *state_, uint8_t reason ) {
 			if(!reason) {
 				Last_RSSI=(int8_t)(rx_buffer[5]/2)-34;/* This is in dBm offset from -100dBm */
 				Last_AFC=*(int16_t*)(&rx_buffer[8]);/* Read the AFC tuning error, this is in PLL step size units (*4?) */
-				Last_AFC*=4;/*For some reason this in using of 4 times the PLL step? (experiment with mistuned base station)*/
 				Last_AFC=(int16_t)__REVSH(*(uint16_t*)&Last_AFC);/* Fix the endianess for ARM cortex */
-				if(unhandled_tx_data) {
-					*state_=TX_MODE;/* Jump directly to Tx mode*/
-					unhandled_tx_data=0;/* Reset this here */
-					/* Go to TX mode, use the global channel number. Direct mode - ignore the packet settings  */
-					memcpy(tx_buffer, (uint8_t [5]){0x31, Channel_tx, 0x00, 0x00, 0x00}, 5*sizeof(uint8_t));
-					si446x_spi_state_machine( &Silabs_spi_state, 5, tx_buffer, 0, rx_buffer, &si446x_state_machine );
-				}
-				else {
-					*state_=DEFAULT_MODE;/* Completed the reception */
-					memcpy(tx_buffer, (uint8_t [8]){0x32, Channel_rx, 0x00, 0x00, 0x00, 0x00, 0x03, 0x08}, 8*sizeof(uint8_t));
-					/* Go to RX mode, use the global channel number. Exit on CRC match, use zero length packet*/
-					/* here as its configured as field*/
-					si446x_spi_state_machine( &Silabs_spi_state, 8, tx_buffer, 0, rx_buffer, &si446x_state_machine );
-				}
-			}
-			else {
-				if(reason==2)
-					unhandled_tx_data=1;
-			}
-			break;
-		case AFC_MODE:
-			if(!reason) {
+				Last_AFC*=4;/*For some reason this in using of 4 times the PLL step? (experiment with mistuned base station)*/
 				if(unhandled_tx_data) {
 					*state_=TX_MODE;/* Jump directly to Tx mode*/
 					unhandled_tx_data=0;/* Reset this here */
