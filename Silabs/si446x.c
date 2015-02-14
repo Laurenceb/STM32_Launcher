@@ -347,7 +347,7 @@ void si446x_set_modem(void) {
 	//Configure BCR - NCO settings for the RX signal path - WDS settings
 	si446x_busy_wait_send_receive(16, 0, (uint8_t [16]){0x11, 0x20, 0x0C, 0x24, 0x03, 0x06, 0x55, 0x02, 0x05, 0x02, 0x00, 0x00, 0x00, 0x12, 0xC0, 0x02}, rx_buffer);
 	//Configure AFC/AGC settings for Rx path, WDS settings - only change the AFC here, as the other settings are only slightly tweaked by WDS
-	si446x_busy_wait_send_receive(7, 0, (uint8_t [7]){0x11, 0x20, 0x03, 0x30, 0x00, 0x0D, 0xE0}, rx_buffer);/* Enable AFC feedback -> PLL, +-14limit */
+	si446x_busy_wait_send_receive(7, 0, (uint8_t [7]){0x11, 0x20, 0x03, 0x30, 0x00, 0x01, 0xE0}, rx_buffer);/* Enable AFC feedback -> PLL, +-14limit */
 	//Configure attack and decay times of AFC peak detectors
 	si446x_busy_wait_send_receive(6, 0, (uint8_t [6]){0x11, 0x20, 0x02, 0x39, 0x25, 0x25}, rx_buffer);
 	//Configure the eye-open Rx modem settings
@@ -357,7 +357,7 @@ void si446x_set_modem(void) {
 	//Configure Rx BCR and AFC config - WDS settings + AN734, enable one shot BCR based AFC with averaging and holdoff of 4
 	si446x_busy_wait_send_receive(6, 0, (uint8_t [6]){0x11, 0x20, 0x02, 0x54, 0x87, 0xD7}, rx_buffer);
 	//Configure signal arrival detect - WDS settings
-	si446x_busy_wait_send_receive(9, 0, (uint8_t [9]){0x11, 0x20, 0x05, 0x5B, 0x62, 0x04, 0x09, 0x78, 0x24}, rx_buffer);
+	si446x_busy_wait_send_receive(9, 0, (uint8_t [9]){0x11, 0x20, 0x05, 0x5B, 0x40, 0x04, 0x09, 0x78, 0x20}, rx_buffer);
 	//Configure first and second set of Rx filter coefficients - WDS settings (but used two sets of setting, 0.93kHz and then 0.55kHz after AFC has settled)
 	si446x_busy_wait_send_receive(16, 0, (uint8_t [16]){0x11, 0x21, 0x0C, 0x00, 0xFF, 0xC4, 0x30, 0x7F, 0xF5, 0xB5, 0xB8, 0xDE, 0x05, 0x17, 0x16, 0x0C}, rx_buffer);
 	si446x_busy_wait_send_receive(16, 0, (uint8_t [16]){0x11, 0x21, 0x0C, 0x0C, 0x03, 0x00, 0x15, 0xFF, 0x00, 0x00, 0x39, 0x2B, 0x00, 0xC3, 0x7F, 0x3F}, rx_buffer);
@@ -450,7 +450,7 @@ void si446x_state_machine(volatile uint8_t *state_, uint8_t reason ) {
 		#ifdef PRE_C_SILABS_REVISION
 		case AFC_HACK_MODE:
 			if(!reason) {
-				memcpy(tx_buffer, (uint8_t [5]){0x11, 0x20, 0x01, 0x31, 0x0D}, 5*sizeof(uint8_t));
+				memcpy(tx_buffer, (uint8_t [5]){0x11, 0x20, 0x01, 0x31, 0x02}, 5*sizeof(uint8_t));
 				si446x_spi_state_machine( &Silabs_spi_state, 5, tx_buffer, 0, rx_buffer, &si446x_state_machine );
 				*state_=DEFAULT_MODE;/* Normal */
 			}
