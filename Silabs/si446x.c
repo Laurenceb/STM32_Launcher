@@ -18,7 +18,7 @@ uint8_t Active_banddiv = 10;
 uint32_t Current_PLL_frac = 0;		/* this is used in AFC tracking mode */
 
 //#define SILABS_IRQ_DEBUG_MODE 0x21	/* define this to enable IQR clearing for debugging the silabs, used to set the MODEM interrupt enable bits */
-#define PRE_C_SILABS_REVISION		/* Digikey sent revision A2 hardware, WTF Digikey?! */
+#define PRE_C_SILABS_REVISION		/* This can also be enabled to use normal AFC (outperforms one-shot) on C revision */
 
 //Interface functions go here
 uint8_t send_string_to_silabs(uint8_t* str) {
@@ -343,23 +343,25 @@ void si446x_set_modem(void) {
 	//Also configure the RX packet CRC stuff here, 6 byte payload for FIELD1, using CRC and CRC check for rx with seed, and 2FSK
 	si446x_busy_wait_send_receive(7, 0, (uint8_t [7]){0x11, 0x12, 0x03, 0x22, 0x06, 0x00, 0x8A}, rx_buffer);
 	//Configure the rx signal path, these setting are from WDS - lower the IF slightly and setup the CIC Rx filter, gain x 2 on Rx path
-	si446x_busy_wait_send_receive(12, 0, (uint8_t [12]){0x11, 0x20, 0x08, 0x1C, 0x80, 0x00, 0xF0, 0x11, 0x74, 0xE8, 0x00, 0x55}, rx_buffer);
+	si446x_busy_wait_send_receive(12, 0, (uint8_t [12]){0x11, 0x20, 0x08, 0x1C, 0x80, 0x00, 0xF0, 0x11, 0x54, 0xE8, 0x00, 0xA9}, rx_buffer);
 	//Configure BCR - NCO settings for the RX signal path - WDS settings
-	si446x_busy_wait_send_receive(16, 0, (uint8_t [16]){0x11, 0x20, 0x0C, 0x24, 0x06, 0x0C, 0xAB, 0x04, 0x04, 0x02, 0x00, 0x00, 0x00, 0x12, 0xC0, 0x01}, rx_buffer);
+	si446x_busy_wait_send_receive(16, 0, (uint8_t [16]){0x11, 0x20, 0x0C, 0x24, 0x03, 0x06, 0x55, 0x02, 0x05, 0x02, 0x00, 0x00, 0x00, 0x12, 0xC0, 0x02}, rx_buffer);
 	//Configure AFC/AGC settings for Rx path, WDS settings - only change the AFC here, as the other settings are only slightly tweaked by WDS
-	si446x_busy_wait_send_receive(7, 0, (uint8_t [7]){0x11, 0x20, 0x03, 0x30, 0x00, 0x0D, 0xE0}, rx_buffer);/* Enable AFC feedback -> PLL, +-14limit */
+	si446x_busy_wait_send_receive(7, 0, (uint8_t [7]){0x11, 0x20, 0x03, 0x30, 0x00, 0x0C, 0xE0}, rx_buffer);/* Enable AFC feedback -> PLL, +-12limit */
+	//Configure AGC settings - WDS
+	si446x_busy_wait_send_receive(6, 0, (uint8_t [6]){0x11, 0x20, 0x03, 0x39, 0x25, 0x25}, rx_buffer);
 	//Configure the eye-open Rx modem settings
-	si446x_busy_wait_send_receive(9, 0, (uint8_t [9]){0x11, 0x20, 0x05, 0x45, 0x83, 0x02, 0x36, 0x01, 0x00}, rx_buffer);
+	si446x_busy_wait_send_receive(9, 0, (uint8_t [9]){0x11, 0x20, 0x05, 0x45, 0x03, 0x01, 0x1B, 0x02, 0x00}, rx_buffer);
 	//Configure Rx search period control - WDS settings
 	si446x_busy_wait_send_receive(6, 0, (uint8_t [6]){0x11, 0x20, 0x02, 0x50, 0x84, 0x0A}, rx_buffer);
-	//Configure Rx BCR and AFC config - WDS settings + AN734, enable one shot BCR based AFC with averaging and holdoff of 4
-	si446x_busy_wait_send_receive(6, 0, (uint8_t [6]){0x11, 0x20, 0x02, 0x54, 0x87, 0xD7}, rx_buffer);
+	//Configure Rx BCR and AFC config - WDS settings 
+	si446x_busy_wait_send_receive(6, 0, (uint8_t [6]){0x11, 0x20, 0x02, 0x54, 0x04, 0x07}, rx_buffer);
 	//Configure signal arrival detect - WDS settings
-	si446x_busy_wait_send_receive(9, 0, (uint8_t [9]){0x11, 0x20, 0x05, 0x5B, 0x62, 0x04, 0x11, 0x78, 0x24}, rx_buffer);
+	si446x_busy_wait_send_receive(9, 0, (uint8_t [9]){0x11, 0x20, 0x05, 0x5B, 0x40, 0x04, 0x09, 0x78, 0x20}, rx_buffer);
 	//Configure first and second set of Rx filter coefficients - (Used matlab to configure two sets of settings, 0.87kHz and then 0.52kHz after AFC has settled)
-	si446x_busy_wait_send_receive(16, 0, (uint8_t [16]){0x11, 0x21, 0x0C, 0x00, 0xFF, 0xFE, 0x1E, 0x73, 0x1B, 0x35, 0x9C, 0xF4, 0xA9, 0xFA, 0x28, 0x10}, rx_buffer);
-	si446x_busy_wait_send_receive(16, 0, (uint8_t [16]){0x11, 0x21, 0x0C, 0x0C, 0xFD, 0xFE, 0xD5, 0xC3, 0x0F, 0x0F, 0xFF, 0xBA, 0x0F, 0x51, 0xCF, 0xA9}, rx_buffer);
-	si446x_busy_wait_send_receive(16, 0, (uint8_t [16]){0x11, 0x21, 0x0C, 0x18, 0xC9, 0xFC, 0x1B, 0x1E, 0x0F, 0x01, 0xFC, 0xFD, 0x15, 0xFF, 0x00, 0x0F}, rx_buffer);
+	si446x_busy_wait_send_receive(16, 0, (uint8_t [16]){0x11, 0x21, 0x0C, 0x00, 0xFF, 0xC4, 0x30, 0x7F, 0xF5, 0xB5, 0xB8, 0xDE, 0x05, 0x17, 0x16, 0x0C}, rx_buffer);
+	si446x_busy_wait_send_receive(16, 0, (uint8_t [16]){0x11, 0x21, 0x0C, 0x0C, 0x03, 0x00, 0x15, 0xFF, 0x00, 0x00, 0x39, 0x2B, 0x00, 0xC3, 0x7F, 0x3F}, rx_buffer);
+	si446x_busy_wait_send_receive(16, 0, (uint8_t [16]){0x11, 0x21, 0x0C, 0x18, 0x0C, 0xEC, 0xDC, 0xDC, 0xE3, 0xED, 0xF6, 0xFD, 0x15, 0xC0, 0xFF, 0x0F}, rx_buffer);
 	//Configure the RSSI thresholding for RX mode, with 12dB jump threshold (reset if RSSI changes this much during Rx), RSSI mean with packet toggle
 	//RSSI_THRESH is in dBm, it needs to be converted to 0.5dBm steps offset by ~130
 	uint8_t rssi = (2*(RSSI_THRESH+134))&0xFF;
@@ -431,7 +433,7 @@ void si446x_state_machine(volatile uint8_t *state_, uint8_t reason ) {
 						Bad_Channel=0;	/* Prevent wrap around of unsigned integer */
 					Bad_Channel_Time=Millis;/* All events (high RSSI or not) are timestamped if they are seperated in time */
 				}
-				#ifdef PRE_C_SILABS_REVISION/* The one-shot AFC doesn not work on early hardware, need to try hacking the AFC */
+				#ifdef PRE_C_SILABS_REVISION/* The one-shot AFC does not work on early hardware, need to try hacking the AFC */
 				memcpy(tx_buffer, (uint8_t [5]){0x11, 0x20, 0x01, 0x31, 0x00}, 5*sizeof(uint8_t));
 				si446x_spi_state_machine( &Silabs_spi_state, 5, tx_buffer, 0, rx_buffer, &si446x_state_machine );
 				*state_=AFC_HACK_MODE;/* Fix callback handler */
@@ -448,7 +450,7 @@ void si446x_state_machine(volatile uint8_t *state_, uint8_t reason ) {
 		#ifdef PRE_C_SILABS_REVISION
 		case AFC_HACK_MODE:
 			if(!reason) {
-				memcpy(tx_buffer, (uint8_t [5]){0x11, 0x20, 0x01, 0x31, 0x02}, 5*sizeof(uint8_t));
+				memcpy(tx_buffer, (uint8_t [5]){0x11, 0x20, 0x01, 0x31, 0x0C}, 5*sizeof(uint8_t));
 				si446x_spi_state_machine( &Silabs_spi_state, 5, tx_buffer, 0, rx_buffer, &si446x_state_machine );
 				*state_=DEFAULT_MODE;/* Normal */
 			}
