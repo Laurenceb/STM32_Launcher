@@ -347,7 +347,7 @@ void si446x_set_modem(void) {
 	//Configure BCR - NCO settings for the RX signal path - WDS settings
 	si446x_busy_wait_send_receive(16, 0, (uint8_t [16]){0x11, 0x20, 0x0C, 0x24, 0x03, 0x06, 0x55, 0x02, 0x05, 0x02, 0x00, 0x00, 0x00, 0x12, 0xC0, 0x02}, rx_buffer);
 	//Configure AFC/AGC settings for Rx path, WDS settings - only change the AFC here, as the other settings are only slightly tweaked by WDS
-	si446x_busy_wait_send_receive(7, 0, (uint8_t [7]){0x11, 0x20, 0x03, 0x30, 0x00, 0x0C, 0xE0}, rx_buffer);/* Enable AFC feedback -> PLL, +-12limit */
+	si446x_busy_wait_send_receive(7, 0, (uint8_t [7]){0x11, 0x20, 0x03, 0x30, 0x04, 0x21, 0xE0}, rx_buffer);/* Enable AFC feedback -> PLL, WDS limit */
 	//Configure AGC settings - WDS
 	si446x_busy_wait_send_receive(6, 0, (uint8_t [6]){0x11, 0x20, 0x03, 0x39, 0x25, 0x25}, rx_buffer);
 	//Configure the eye-open Rx modem settings
@@ -434,8 +434,8 @@ void si446x_state_machine(volatile uint8_t *state_, uint8_t reason ) {
 					Bad_Channel_Time=Millis;/* All events (high RSSI or not) are timestamped if they are seperated in time */
 				}
 				#ifdef PRE_C_SILABS_REVISION/* The one-shot AFC does not work on early hardware, need to try hacking the AFC */
-				memcpy(tx_buffer, (uint8_t [5]){0x11, 0x20, 0x01, 0x31, 0x00}, 5*sizeof(uint8_t));
-				si446x_spi_state_machine( &Silabs_spi_state, 5, tx_buffer, 0, rx_buffer, &si446x_state_machine );
+				memcpy(tx_buffer, (uint8_t [6]){0x11, 0x20, 0x02, 0x30, 0x00, 0x00}, 6*sizeof(uint8_t));
+				si446x_spi_state_machine( &Silabs_spi_state, 6, tx_buffer, 0, rx_buffer, &si446x_state_machine );
 				*state_=AFC_HACK_MODE;/* Fix callback handler */
 				#else
 				*state_=DEFAULT_MODE;/* Any interrupt source other than packet rx causes return to normal mode */
@@ -450,8 +450,8 @@ void si446x_state_machine(volatile uint8_t *state_, uint8_t reason ) {
 		#ifdef PRE_C_SILABS_REVISION
 		case AFC_HACK_MODE:
 			if(!reason) {
-				memcpy(tx_buffer, (uint8_t [5]){0x11, 0x20, 0x01, 0x31, 0x0C}, 5*sizeof(uint8_t));
-				si446x_spi_state_machine( &Silabs_spi_state, 5, tx_buffer, 0, rx_buffer, &si446x_state_machine );
+				memcpy(tx_buffer, (uint8_t [6]){0x11, 0x20, 0x02, 0x30, 0x04, 0x21}, 6*sizeof(uint8_t));
+				si446x_spi_state_machine( &Silabs_spi_state, 6, tx_buffer, 0, rx_buffer, &si446x_state_machine );
 				*state_=DEFAULT_MODE;/* Normal */
 			}
 			else {/* This shouldnt happen, might be caused by glitchy NIRQ line or TX data being added */
@@ -507,7 +507,6 @@ void si446x_state_machine(volatile uint8_t *state_, uint8_t reason ) {
 				Last_RSSI=(int8_t)(rx_buffer[5]/2)-34;/* This is in dBm offset from -100dBm */
 				Last_AFC=*(int16_t*)(&rx_buffer[8]);/* Read the AFC tuning error, this is in PLL step size units (*4?) */
 				Last_AFC=(int16_t)__REVSH(*(uint16_t*)&Last_AFC);/* Fix the endianess for ARM cortex */
-				Last_AFC*=4;/*For some reason this in using of 4 times the PLL step? (experiment with mistuned base station)*/
 				if(unhandled_tx_data) {
 					*state_=TX_MODE;/* Jump directly to Tx mode*/
 					unhandled_tx_data=0;/* Reset this here */
