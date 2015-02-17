@@ -108,7 +108,7 @@ __attribute__((externally_visible)) void SysTick_Handler(void)
 {
 	static uint32_t Last_Button_Press;			//Holds the timestamp for the previous button press
 	static uint8_t System_state_counter;			//Holds the system state counter
-	static uint8_t button;					//Used for interrupt free button press detection
+	static uint8_t button=1;				//Used for interrupt free button press detection, initialise as one to prevent erranous press at boot
 	static int16_t com;					//AfroESC commutation counter
 	//FatFS timer function
 	disk_timerproc();
