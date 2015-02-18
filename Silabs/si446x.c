@@ -140,7 +140,8 @@ uint8_t si446x_setup(void) {
 	SPI_Cmd(SPI1, ENABLE);
 
 	/* drain SPI */
-	while (SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_RXNE) == SET) { dummyread = SPI_I2S_ReceiveData(SPI1); }
+	while (SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_TXE) == RESET);
+	dummyread = SPI_I2S_ReceiveData(SPI1);
 
 	/* enable DMA clock */
 	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
@@ -506,7 +507,7 @@ void si446x_state_machine(volatile uint8_t *state_, uint8_t reason ) {
 			if(!reason) {
 				Last_RSSI=(int8_t)(rx_buffer[5]/2)-34;/* This is in dBm offset from -100dBm */
 				Last_AFC=*(int16_t*)(&rx_buffer[8]);/* Read the AFC tuning error, this is in PLL step size units (*4?) */
-				Last_AFC=(int16_t)__REVSH(*(uint16_t*)&Last_AFC);/* Fix the endianess for ARM cortex */
+				Last_AFC=(int16_t)__REVSH(*(volatile uint16_t*)&Last_AFC);/* Fix the endianess for ARM cortex */
 				if(unhandled_tx_data) {
 					*state_=TX_MODE;/* Jump directly to Tx mode*/
 					unhandled_tx_data=0;/* Reset this here */
@@ -623,21 +624,23 @@ void si446x_busy_wait_send_receive(uint8_t tx_bytes, uint8_t rx_bytes, uint8_t *
 		while (reply != 0xFF) {
 			SPI1->DR=0x44;		//The read command
 			while(SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_RXNE) == RESET);
-			reply = SPI1->DR;
+			rx_data[0] = SPI1->DR;
 			SPI1->DR=0x44;		//The read command - dummy byte
 			while(SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_RXNE) == RESET);
-			reply = SPI1->DR;
+			rx_data[1] = SPI1->DR;
+			reply = rx_data[1];
 			if (reply != 0xFF) {	//Try again
 				NSEL_HIGH;
 				Delay(40);
 				NSEL_LOW;
 			}
 		}
+		for(uint8_t n=2; n<rx_bytes; n++) {//Can now read out the rest of the data
 		#else
 		while(!GET_CTS);
 		NSEL_LOW;
-		#endif
 		for(uint8_t n=0; n<rx_bytes; n++) {//Can now read out the rest of the data
+		#endif
 			SPI_I2S_SendData(SPI1,0x44);
 			while(SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_RXNE) == RESET);
 			rx_data[n]=SPI1->DR;
