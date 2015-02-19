@@ -139,7 +139,8 @@ __attribute__((externally_visible)) void SysTick_Handler(void)
 		Gyro_Z_Rate=Gyro_Z_Rate*0.99+0.01*L3GD20_GAIN*((float)(*(int16_t*)&z)*(float)(*(int16_t*)&z));//1 second time constant on the Turn rate
 		Gyro_Temperature=50-*(int8_t*)L3GD20_Data_Buffer;//This signed 8 bit temperature is just transferred directly to the global
 	}
-	I2C1_Request_Job(L3GD20_READ);				//Request a L3GD20 read 
+	if(Completed_Jobs&(1<<L3GD20_CONFIG))
+		I2C1_Request_Job(L3GD20_READ);			//Request a L3GD20 read 
 	if(Completed_Jobs&(1<<AFROESC_READ)) {
 		Completed_Jobs&=~(1<<AFROESC_READ);
 		uint16_t com_=*(uint16_t*)AFROESC_Data_Buffer;	//Commutation counter
@@ -151,8 +152,8 @@ __attribute__((externally_visible)) void SysTick_Handler(void)
 		int16_t volt_aux=*(int16_t*)&AFROESC_Data_Buffer[2];
 		Flipbytes(volt_aux);
 		Aux_Voltage=((float)volt_aux)*0.0315;		//33k,180k PD on AFROESC, with 10bit adc running from 5v supply
+		I2C1_Request_Job(AFROESC_READ);			//Read ESC temperature and voltage
 	}
-	I2C1_Request_Job(AFROESC_READ);				//Read ESC temperature and voltage
 	//Ignition and launch autosequence
 	if(AutoSequence) {
 		if(AutoSequence==1)				//Setup the PWM to the induction system

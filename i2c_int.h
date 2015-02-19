@@ -38,11 +38,11 @@ extern volatile buff_type Gyro_x_buffer,Gyro_y_buffer,Gyro_z_buffer;
 //Number of jobs
 #define I2C_NUMBER_JOBS 4
 //Setup for the core sensors - other sensors have setup in their respective header files - look in /sensors 
-#define L3GD20_SETUP {0x0F,0x29,0x00,0x40,0x53,0x5F} /*configure the L3GD20 sensor for 9mHz-12.5Hz bandpass filtered output, +-250dps, FIFO*/
+#define L3GD20_SETUP {0x0F,0x29,0x00,0xC0,0x13} /*configure the L3GD20 sensor for 9mHz-12.5Hz bandpass filtered output, +-250dps, Black updt, no FIFO*/
 //Jobs structure initialiser 
 #define I2C_JOBS_INITIALISER {\
 {L3GD20_ADDR,I2C_Direction_Receiver,8,L3GD20_DATA,NULL}, /*Read the gyro temperature and rotation info*/\
-{L3GD20_ADDR,I2C_Direction_Transmitter,6,L3GD20_CONF,L3GD20_setup}, /*Setup L3GD20*/\
+{L3GD20_ADDR,I2C_Direction_Transmitter,5,L3GD20_CONF,L3GD20_setup}, /*Setup L3GD20*/\
 {AFROESC_ADDR,I2C_Direction_Transmitter,2,AFROESC_CONF,NULL}, /*Setup throttle*/\
 {AFROESC_ADDR,I2C_Direction_Receiver,7,AFROESC_DATA,NULL}, /*Read ESC data*/\
 }
