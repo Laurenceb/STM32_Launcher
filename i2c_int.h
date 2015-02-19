@@ -31,7 +31,7 @@ extern volatile buff_type Gyro_x_buffer,Gyro_y_buffer,Gyro_z_buffer;
 //Sensor specific defines
 #define L3GD20_ADDR 0xD4
 #define L3GD20_DATA 0xA6			/*sub address where data begins*/
-#define L3GD20_CONF 0x20			/*sub address for configuration*/
+#define L3GD20_CONF 0xA0			/*sub address for configuration*/
 #define AFROESC_ADDR 0x52
 #define AFROESC_DATA 0x02			/*Data is commutations (one per 2 poles), voltage and temperature (only updates when no throttle), big endian, 0xad*/
 #define AFROESC_CONF 0x00			/*Afro ESC config starts here - two bytes of throttle command, most significant first, as signed 16 bit*/
