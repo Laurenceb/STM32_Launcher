@@ -53,6 +53,7 @@ int main(void)
 	uint16_t UplinkBytes=0;				//Counters and flags for telemetry
 	uint32_t last_telemetry=0,cutofftime=0,indtest=0,badgyro=0,permission_time=0,countdown_time=0;
 	uint16_t sentence_counter=0;
+	uint8_t silab;
 	//Cutdown config stuff here, atm uses hardcoded polygon defined in polygon.h
 	static const int32_t Geofence[UK_GEOFENCE_POINTS*2]=UK_GEOFENCE;
 	RTC_t RTC_time;
@@ -118,8 +119,11 @@ int main(void)
 	}
 	if(Battery_Voltage<BATTERY_STARTUP_LIMIT)	//We will have to turn off
 		shutdown();
-	Watchdog_Reset();			//Card Init can take a second or two
+	Watchdog_Reset();				//Card Init can take a second or two
 	// system has passed battery level check and so file can be opened
+	{//Context
+	uint8_t silabs_header[5]={};
+	uint8_t* silabs_header_=silabs_header;		//Pointer to the array
 	if((f_err_code = f_mount(0, &FATFS_Obj)))Usart_Send_Str((char*)"FatFs mount error\r\n");//This should only error if internal error
 	else {						//FATFS initialised ok, try init the card, this also sets up the SPI1
 		if(!(f_err_code=f_open(&FATFS_logfile,(const TCHAR*)"time.txt",FA_OPEN_EXISTING|FA_READ|FA_WRITE))){//Try to open time file get system time
@@ -171,6 +175,11 @@ int main(void)
 					BKP_WriteBackupRegister(BKP_DR1,shutdown_lock);//Wipe the shutdown lock setting
                                		PWR_BackupAccessCmd(DISABLE);
 				}
+			}
+			if(br==2) {			//Read was successful, next try to read 5 bytes of packet header
+				f_read(&FATFS_logfile, (void*)(silabs_header),5,&br);
+				if(br!=5)
+					silabs_header_=NULL;
 			}
 			f_close(&FATFS_logfile);	//Close the settings.dat file
 		}
@@ -233,7 +242,7 @@ int main(void)
 	f_err_code|=write_wave_header(&FATFS_wavfile_gyro, 3, 100, 16);
 	Watchdog_Reset();				//Card Init can take a second or two
 	//Setup and test the silabs radio
-	uint8_t silab=si446x_setup();
+	silab=si446x_setup(silabs_header_);
 	if(silab!=0x44) {				//Should return the device code
 		print_string[0]=0x00;
 		printf("Silabs: %02x\n",silab);
@@ -242,6 +251,7 @@ int main(void)
 		shutdown_filesystem(ERR, file_opened);//So we log that something went wrong in the logfile
 		shutdown();
 	}
+	}//Context
 	print_string[0]=0;				//Otherwise silabs is now initialised, and can be used via its buffers
 	printf("Hello from rockoon project\n");		//Test the silabs RTTY
 	send_string_to_silabs(print_string);		//Send the string
@@ -384,7 +394,7 @@ int main(void)
 		}
 		//If the Silabs locks up, detect this and reinitialise it
 		if(silabs_cts_jammed() || silab!=0x44)
-			silab=si446x_setup();
+			silab=si446x_setup(NULL);	//The packet header will be reloaded from the global variable in si446x.c
 		//Look for a full set of GPS data (Lat,Long,Alt,Sat info)
 		while(Bytes_In_DMA_Buffer(&Gps_Buffer))	//Dump all the data
 			Gps_Process_Byte((uint8_t)(Pop_From_Dma_Buffer(&Gps_Buffer)),&Gps);

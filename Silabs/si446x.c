@@ -5,7 +5,7 @@ volatile uint8_t Channel_rx,Channel_tx,Silabs_spi_state,Silabs_driver_state;
 volatile byte_buff_type Silabs_Tx_Buffer,Silabs_Rx_Buffer;
 volatile int8_t Last_RSSI=0;	/*Holds RSSI of the last packet*/
 volatile int16_t Last_AFC=0;	/*Holds AFC value of the last packet (should be zero if PLL enabled and tracking converged)*/
-const uint8_t Silabs_Header[5]=UPLINK_CALLSIGN;
+uint8_t Silabs_Header[5]=UPLINK_CALLSIGN;
 
 static volatile uint32_t CTS_Low;
 uint32_t Active_freq = DEFAULT_FREQ;
@@ -54,7 +54,7 @@ uint8_t silabs_cts_jammed(void) {/* More than 20 milliseconds of jammed CTS caus
   * @param  None
   * @retval Part number - used for self test
   */
-uint8_t si446x_setup(void) {
+uint8_t si446x_setup(uint8_t* header) {
 	GPIO_InitTypeDef    GPIO_InitStructure;
 	USART_InitTypeDef   USART_InitStructure;
 	SPI_InitTypeDef   SPI_InitStructure;
@@ -240,6 +240,8 @@ uint8_t si446x_setup(void) {
 	//Rest of the config
 	si446x_set_frequency(Active_freq);
 	si446x_set_deviation_channel_bps(Active_shift, Active_channel, Active_bps);
+	if(header)
+		memcpy(Silabs_Header,header,5);/* Set the header using the pointer if it is not NULL */
 	si446x_set_modem();
 	/* ready on CRC match pkt, RX on CRC packet error, FIELD config in packet handler for packet engine */
 	si446x_busy_wait_send_receive(8, 0, (uint8_t [8]){0x32, Channel_rx, 0x00, 0x00, 0x00, 0x00, 0x03, 0x08}, rx_buffer);
