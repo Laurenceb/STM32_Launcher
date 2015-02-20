@@ -143,7 +143,7 @@ __attribute__((externally_visible)) void SysTick_Handler(void)
 		Spin_Rate*=100/(MOTOR_POLES/2);			//This is the current spin rate in Hz
 		Spin_Rate_LPF=Spin_Rate_LPF*0.8+Spin_Rate*0.2;	//A ~50ms time constant with reduced ~+-85rpm jitter
 		int16_t volt_aux=(int16_t)__REVSH(*(volatile int16_t*)&AFROESC_Data_Buffer[2]);
-		Aux_Voltage=((float)volt_aux)*0.0315;		//33k,180k PD on AFROESC, with 10bit adc running from 5v supply
+		Aux_Voltage=((float)(volt_aux>>6))*0.0315;	//33k,180k PD on AFROESC, with 10bit adc left aligned running from 5v supply
 		I2C1_Request_Job(AFROESC_READ);			//Read ESC temperature and voltage
 	}
 	//Ignition and launch autosequence
