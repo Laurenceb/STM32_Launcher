@@ -51,7 +51,7 @@ int main(void)
 	uint8_t L3GD20_Data_Buffer_old[8];		//Used to test for noise in the gyro data (indicating that it is working)
 	uint8_t UplinkFlags=0,CutFlags=0;
 	uint16_t UplinkBytes=0;				//Counters and flags for telemetry
-	uint32_t last_telemetry=0,cutofftime=0,indtest=0,badgyro=0,permission_time=0,countdown_time=0;
+	uint32_t last_telemetry=0,cutofftime=0,indtest=0,badgyro=0,permission_time=0,countdown_time=0,last_cuttest=0;
 	uint16_t sentence_counter=0;
 	uint8_t silab;
 	//Cutdown config stuff here, atm uses hardcoded polygon defined in polygon.h
@@ -403,8 +403,10 @@ int main(void)
 			Gps.packetflag=0x00;		//Reset this here
 		}
 		//Test the Cutdown and update the appropriate bit in the Cut flags byte, check for cutdown conditions and process accordingly
-		if(!cutofftime)				//Only test when we arent cutting down
+		if(!cutofftime && (Millis-last_cuttest)>30000){//Only test when we arent cutting down
 			CutFlags=(CutFlags&0xFE)|test_cutdown();//LSB is cut test status
+			last_cuttest=Millis;
+		}
 		if(!(CutFlags&0x0E)) {			//Only check if the cutdown has not already run
 			if(!pointinpoly(Geofence, UK_GEOFENCE_POINTS, gps.longitude, gps.latitude) && gps.latitude && gps.status==UBLOX_3D)//Check to see if we need to cutdown due to polygon here
 				CutFlags|=(1<<1)|(1<<7);//Second bit means cutdown triggered due to polygon
@@ -430,11 +432,11 @@ int main(void)
 		if((Millis-indtest)>100000) {		//Test the induction system every 100 seconds
 			indtest=Millis;
 			Timer_GPIO_Enable();
+			Auto_volt=0;			//Clear this here
 		}
-		if((Millis-indtest)>100 && indtest ) {	//Wait at least 100ms before testing the voltage, then turn off straight away
+		if((Millis-indtest)>100 && !Auto_volt ) {//Wait at least 100ms before testing the voltage, then turn off straight away
 			Auto_volt=Ind_Voltage;
 			Timer_GPIO_Disable();
-			indtest=0;
 		}
 		//This processes and checks the actual launch command
 		if( UplinkFlags&(1<<(LAUNCH_PERMISSION)) && !permission_time) {
