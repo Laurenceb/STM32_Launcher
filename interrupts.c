@@ -125,11 +125,8 @@ __attribute__((externally_visible)) void SysTick_Handler(void)
 	if((Completed_Jobs&(1<<L3GD20_READ))&&Gyro_x_buffer.data) {//The data also has to exist
 		Completed_Jobs&=~(1<<L3GD20_READ);
 		uint16_t x=*((uint16_t*)&L3GD20_Data_Buffer[2]);
-		Flipbytes(x);
 		uint16_t y=*((uint16_t*)&L3GD20_Data_Buffer[4]);
-		Flipbytes(y);
 		uint16_t z=*((uint16_t*)&L3GD20_Data_Buffer[6]);
-		Flipbytes(z);
 		Realign_Axes((int16_t*)&x,(int16_t*)&y,(int16_t*)&z);//Moves from gyro co-ordinates to launcher space co-ordinates
 		//Add the data to the buffers
 		Add_To_Buffer(x,&Gyro_x_buffer); 
@@ -137,7 +134,7 @@ __attribute__((externally_visible)) void SysTick_Handler(void)
 		Add_To_Buffer(z,&Gyro_z_buffer);		//Add the raw 100hz data to the x,y,z bins
 		Gyro_XY_Rate=Gyro_XY_Rate*0.99+0.01*L3GD20_GAIN*((float)(*(int16_t*)&x)*(float)(*(int16_t*)&x)+(float)(*(int16_t*)&y)*(float)(*(int16_t*)&y));
 		Gyro_Z_Rate=Gyro_Z_Rate*0.99+0.01*L3GD20_GAIN*((float)(*(int16_t*)&z)*(float)(*(int16_t*)&z));//1 second time constant on the Turn rate
-		Gyro_Temperature=50-*(int8_t*)L3GD20_Data_Buffer;//This signed 8 bit temperature is just transferred directly to the global
+		Gyro_Temperature=40-*(int8_t*)L3GD20_Data_Buffer;//This signed 8 bit temperature is just transferred directly to the global
 	}
 	if(Completed_Jobs&(1<<L3GD20_CONFIG))
 		I2C1_Request_Job(L3GD20_READ);			//Request a L3GD20 read 
