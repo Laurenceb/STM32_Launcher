@@ -109,7 +109,6 @@ __attribute__((externally_visible)) void SysTick_Handler(void)
 	static uint32_t Last_Button_Press;			//Holds the timestamp for the previous button press
 	static uint8_t System_state_counter;			//Holds the system state counter
 	static uint8_t button=1;				//Used for interrupt free button press detection, initialise as one to prevent erranous press at boot
-	static int16_t com;					//AfroESC commutation counter
 	//FatFS timer function
 	disk_timerproc();
 	//Incr the system uptime
@@ -140,14 +139,10 @@ __attribute__((externally_visible)) void SysTick_Handler(void)
 		I2C1_Request_Job(L3GD20_READ);			//Request a L3GD20 read 
 	if(Completed_Jobs&(1<<AFROESC_READ)) {
 		Completed_Jobs&=~(1<<AFROESC_READ);
-		uint16_t com_=*(uint16_t*)AFROESC_Data_Buffer;	//Commutation counter
-		Flipbytes(com_);				//AfroESC is big endian
-		Spin_Rate=*(int16_t*)&com_-com;
-		com=*(int16_t*)&com_;
+		Spin_Rate=(float)__REVSH(*(volatile int16_t*)&AFROESC_Data_Buffer);//Commutation counter. AfroESC is big endian
 		Spin_Rate*=100/(MOTOR_POLES/2);			//This is the current spin rate in Hz
 		Spin_Rate_LPF=Spin_Rate_LPF*0.8+Spin_Rate*0.2;	//A ~50ms time constant with reduced ~+-85rpm jitter
-		int16_t volt_aux=*(int16_t*)&AFROESC_Data_Buffer[2];
-		Flipbytes(volt_aux);
+		int16_t volt_aux=(int16_t)__REVSH(*(volatile int16_t*)&AFROESC_Data_Buffer[2]);
 		Aux_Voltage=((float)volt_aux)*0.0315;		//33k,180k PD on AFROESC, with 10bit adc running from 5v supply
 		I2C1_Request_Job(AFROESC_READ);			//Read ESC temperature and voltage
 	}
