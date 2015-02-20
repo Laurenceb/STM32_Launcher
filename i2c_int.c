@@ -123,16 +123,16 @@ void I2C1_EV_IRQHandler(void) {
 			index++;	//to show job is complete
 	}
 	else if(SReg_1&0x0080) {//Byte transmitted -EV8/EV8_1
-		if(-1!=index) {		//we dont have a subaddress to send
+		if(-1!=index && (I2C1->CR2&0x400)) {	//we dont have a subaddress to send, and BUF is enabled
 			I2C_SendData(I2C1,I2C_jobs[job].data_pointer[index++]);
 			if(I2C_jobs[job].bytes==index)//we have sent all the data
 				I2C_ITConfig(I2C1, I2C_IT_BUF, DISABLE);//disable TXE to allow the buffer to flush
 		}		
 		else {
 			index++;
-			I2C_SendData(I2C1,I2C_jobs[job].subaddress);//send the subaddress
 			if(I2C_Direction_Receiver==I2C_jobs[job].direction || !I2C_jobs[job].bytes)//if receiving or sending 0 bytes, flush now
 				I2C_ITConfig(I2C1, I2C_IT_BUF, DISABLE);//disable TXE to allow the buffer to flush
+			I2C_SendData(I2C1,I2C_jobs[job].subaddress);//send the subaddress
 		}
 	}
 	if((I2C_jobs[job].bytes+1)==index) {//we have completed the current job
