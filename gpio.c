@@ -89,7 +89,8 @@ uint8_t test_cutdown() {
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
 	Delay(20);				//Beware, this function is blocking
 	uint8_t t=GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_15);//High value means power is good and continuity is ok
-	GPIO_Init( GPIOA, &GPIO_InitStructure );//Return to origional state
+	GPIO_WriteBit(GPIOA,GPIO_Pin_15,Bit_SET);
+	GPIO_Init( GPIOA, &GPIO_InitStructure );//Return to origonal state
 	GPIO_WriteBit(GPIOA,GPIO_Pin_15,Bit_SET);//Make sure CUT disabled (note its inverted due to driver)
 	return t;
 }

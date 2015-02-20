@@ -321,7 +321,10 @@ int main(void)
 		//Now some radio debug and 10 secondly output
 		if(Millis-last_message>10000) {
 			print_string[0]=0;
-			printf("Rockoon project:%d sats\n",Gps.nosats);	//Test the silabs RTTY
+			if(test_cutdown())//Cutdown self test
+				printf("Rockoon project:%d sats, Cut:ok\n",Gps.nosats);//Test the silabs RTTY
+			else
+				printf("Rockoon project:%d sats, Cut:fail\n",Gps.nosats);
 			send_string_to_silabs(print_string);		//Send the string
 			last_message=Millis;
 		}
