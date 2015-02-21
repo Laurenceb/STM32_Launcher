@@ -396,8 +396,8 @@ int main(void)
 		if(n>1 && strlen(str)==6 && !strncmp(str,Silabs_Header,4)) {//We recived something, here we process the data that was received, as long as it is '$$RO**'
 			if(str[4]==Silabs_Header[4] && str[5]>47 && str[5]<56 ) {//Need to send e.g. "$$ROKx" where x is 0 to 7
 				if(str[5]-48!=UPLINK_TEST_BIT) {
-					if( UplinkFlags&(1<<(LAUNCH_PERMISSION)) && permission_time)//Sending the permission command whilst it is set increases time
-						permission_time+=PERMISSION_DURATION;
+					if( UplinkFlags&(1<<(LAUNCH_PERMISSION)) && permission_time && ((str[5]-48)==LAUNCH_PERMISSION))//Sending permission
+						permission_time+=PERMISSION_DURATION;//command whilst it is set increases time
 					else
 						UplinkFlags|=1<<(str[5]-48);//Set the correct flag bit
 				}
