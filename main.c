@@ -288,7 +288,7 @@ int main(void)
 	Ubx_Gps_Type gps;				//Local copy of our GPS data
 	if(!Config_Gps()) Usart_Send_Str((char*)"Setup GPS ok - awaiting fix, enter 1 for indoor mode\r\n");//If not the function printfs its error
 	{
-	uint32_t last_message;
+	uint32_t last_message=0;
 	while(Gps.status!=UBLOX_3D ) {			//Wait for a 3D fix
 		Watchdog_Reset();			//Reset the watchdog each main loop iteration
 		__WFI();				//Wait for something to happen - saves power
@@ -313,7 +313,16 @@ int main(void)
 				printf("Indoor mode\r\n");
 				mode=1;
 			}
+			else if(system_state==2 && (shutdown_lock!=SHUTDOWNLOCK_MAGIC)) {//Double button press tests the cutdown
+				printf("Cutdown test\r\n");
+				CUTDOWN;
+				cutofftime=Millis+6000;	//Cutter on for 6 seconds
+			}
 			System_state_Global&=~0x80;	//Wipe the flag bit to show this has been processed
+		}
+		if(Millis>cutofftime && cutofftime) {	//Reset the cutdown later
+			CUTOFF;
+			cutofftime=0;
 		}
 		//Generate the Telemetry string
 		if(mode==1)
