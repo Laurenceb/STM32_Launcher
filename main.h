@@ -62,7 +62,7 @@
 
 #define WATCHDOG_TIMEOUT 9000	/*9 second timeout - enough for the uSD card to block its max time and a bit, and enough for RTTY*/
 
-enum{BUTTON_TURNOFF=1,USB_INSERTED,ERR,LOW_BATTERY};
+enum{BUTTON_TURNOFF=1,USB_INSERTED,ERR,LOW_BATTERY,MULTIPRESS_TURNOFF};
 enum{BUTTON_SOURCE=0,USB_SOURCE=1};
 //Battery specific config goes here
 #define BATTERY_STARTUP_LIMIT 3.7 /*Around 25% capacity remaining for lithium polymer at 25C slow discharge*/

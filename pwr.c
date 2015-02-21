@@ -42,8 +42,12 @@ void shutdown_filesystem(uint8_t reason, uint8_t file_flags) {
 		strncpy(c,"\r\nUSB cable inserted\r\n",sizeof(c));
 	else if(reason==ERR)
 		strncpy(c,"\r\nError\r\n",sizeof(c));
-	else
+	else if(reason==LOW_BATTERY)
 		strncpy(c,"\r\nLow Battery\r\n",sizeof(c));
+	else if(reason==MULTIPRESS_TURNOFF)
+		strncpy(c,"\r\nTriple press turnoff\r\n",sizeof(c));
+	else
+		strncpy(c,"\r\nUnknown reason\r\n",sizeof(c));
 	if(file_flags&0x01) {
 		UINT a;
 		f_write(&FATFS_logfile,c,strlen(c),&a);	//Write the error to the file

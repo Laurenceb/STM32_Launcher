@@ -318,6 +318,11 @@ int main(void)
 				CUTDOWN;
 				cutofftime=Millis+6000;	//Cutter on for 6 seconds
 			}
+			else if(system_state==2 && (shutdown_lock!=SHUTDOWNLOCK_MAGIC)) {//Treble press turns off
+				Shutdown_System=MULTIPRESS_TURNOFF;
+				shutdown_filesystem(Shutdown_System, file_opened);
+				shutdown();
+			}
 			System_state_Global&=~0x80;	//Wipe the flag bit to show this has been processed
 		}
 		if(Millis>cutofftime && cutofftime) {	//Reset the cutdown later
@@ -513,7 +518,9 @@ int main(void)
 		if(System_state_Global&0x80) {		//A "control" button press
 			system_state=System_state_Global&~0x80;//Copy to local variable
 			if(system_state==1)		//A single button press
-				//Function call can go here
+				;//Function call can go here
+			else if(system_state==3)	//A triple button press will turn off the device even if it is in proper flight mode
+				Shutdown_System=MULTIPRESS_TURNOFF;
 			System_state_Global&=~0x80;	//Wipe the flag bit to show this has been processed
 		}
 		//Generate the Telemetry string
@@ -541,7 +548,7 @@ int main(void)
 		//Deal with file size - may need to preallocate some more
 		file_preallocation_control(&FATFS_logfile);
 		file_preallocation_control(&FATFS_wavfile_gyro);
-                if(Shutdown_System) {			//A system shutdown has been requested
+                if((Shutdown_System&&(shutdown_lock!=SHUTDOWNLOCK_MAGIC))||Shutdown_System==MULTIPRESS_TURNOFF) {//A system shutdown has been requested
 			if(file_opened)
 				shutdown_filesystem(Shutdown_System, file_opened);
 			if(Shutdown_System==USB_INSERTED)
