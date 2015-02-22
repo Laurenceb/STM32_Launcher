@@ -189,7 +189,7 @@ uint8_t si446x_setup(uint8_t* header) {
 	t=Millis;
 	while(Millis<t+15)
 		__WFI();					/*Wait another 15ms to boot*/
-	while(!GET_CTS);					/*Wait for CTS high after POR*/
+	while(!GET_CTS||(!GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_10)));/*Wait for CTS high and POR completed*/
 
 	/* Configure EXTI11 line */
 	EXTI_InitStructure.EXTI_Line = EXTI_Line11;		/*Only enable the CTS once the init stuff has completed*/
@@ -213,7 +213,7 @@ uint8_t si446x_setup(uint8_t* header) {
 	uint8_t x1 = (VCXO_FREQ - (uint32_t)x3 * 0x1000000 - (uint32_t)x2 * 0x10000) / 0x100;
 	uint8_t x0 = (VCXO_FREQ - (uint32_t)x3 * 0x1000000 - (uint32_t)x2 * 0x10000 - (uint32_t)x1 * 0x100); 
 	si446x_busy_wait_send_receive(7, 2, (uint8_t [7]){0x02, 0x01, 0x01, x3, x2, x1, x0}, rx_buffer);
-	while(GET_NIRQ|(!GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_10)));/*Wait for NIRQ low and POR high*/
+	while(GET_NIRQ||(!GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_10)));/*Wait for NIRQ low and POR high*/
 	/* Configure EXTI0 line */
 	EXTI_InitStructure.EXTI_Line = EXTI_Line0;		/*Only enable NIRQ here*/
 	EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
