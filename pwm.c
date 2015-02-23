@@ -58,7 +58,7 @@ void Init_Timer(void) {
 void Timer_RCC_Configuration(void)
 {
   /* TIM1 clock enable */
-  RCC_APB1PeriphClockCmd(RCC_APB2Periph_TIM1, ENABLE);
+  RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1, ENABLE);
 }
 
 /**
