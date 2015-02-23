@@ -343,9 +343,9 @@ int main(void)
 			Timer_GPIO_Disable();
 			print_string[0]=0;
 			if(test_cutdown())//Cutdown self test
-				printf("Rockoon:%d sats, Cut:ok, Ind:%2f\n",Gps.nosats,Ind_Voltage);//Test the silabs RTTY
+				printf("Rockoon:%d sats, Cut:ok, Ind:%2f\n",Gps.nosats,Auto_volt);//Test the silabs RTTY
 			else
-				printf("Rockoon:%d sats, Cut:fail, Ind:%2f\n",Gps.nosats,Ind_Voltage);
+				printf("Rockoon:%d sats, Cut:fail, Ind:%2f\n",Gps.nosats,Auto_volt);
 			send_string_to_silabs(print_string);//Send the string
 			last_message=Millis;
 		}
