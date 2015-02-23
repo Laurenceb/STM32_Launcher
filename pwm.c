@@ -16,22 +16,22 @@ void Init_Timer(void) {
     The TIMxCLK frequency is set to SystemCoreClock (Hz), to get TIM3 counter
     clock at 24 MHz the Prescaler is computed as following:
      - Prescaler = (TIM3CLK / TIM3 counter clock) - 1
-    SystemCoreClock is set to 24 MHz
+    SystemCoreClock is set to 48 MHz
     The timer TIM1 is running at 50kHz
     TIM1 Channel1 duty cycle = PWM to ignition
   ----------------------------------------------------------------------- */
-  /* Compute the prescaler value - at 24Mhz, 0 gives a 24Mhz timer clk*/
+  /* Compute the prescaler value - at 48Mhz, 0 gives a 48Mhz timer clk*/
   uint16_t PrescalerValue = (uint16_t) 0;
   /* Time base configuration - gives 50kHz pwm*/
-  TIM_TimeBaseStructure.TIM_Period = 480;
+  TIM_TimeBaseStructure.TIM_Period = 960;
   TIM_TimeBaseStructure.TIM_Prescaler = PrescalerValue;
   TIM_TimeBaseStructure.TIM_ClockDivision = 0;
   TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
 
   /* Enable the timer clocks */
   Timer_RCC_Configuration();
-  TIM_TimeBaseInit(TIM1, &TIM_TimeBaseStructure);
   TIM_DeInit(TIM1);
+  TIM_TimeBaseInit(TIM1, &TIM_TimeBaseStructure);
 
   /* PWM1 Mode configuration: Channel1 on TIM1 */
   TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;
@@ -100,7 +100,7 @@ void PWM_Set(float duty)
 {
 	duty=(duty<0)?0:duty;
 	duty=(duty>0.5)?0.5:duty;
-	duty*=480;
+	duty*=960;
 	TIM_SetCompare1(TIM1, (uint16_t)duty);
 
 }
