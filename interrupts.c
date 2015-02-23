@@ -120,6 +120,10 @@ __attribute__((externally_visible)) void SysTick_Handler(void)
 	}
 	Low_Battery_Warning-=1;
 	ADC_SoftwareStartInjectedConvCmd(ADC2, ENABLE);		//Trigger the injected channel group
+	//Trigger an ADC1 read of the Inductor sense
+	if(ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC) == SET)
+		Ind_Voltage=(float)ADC_GetConversionValue(ADC1)/1241.2;//Ind measurement in volts
+	ReadADC1_noblock(1);				//Ind sense on PortB.1	
 	//Read any I2C bus sensors here (100Hz)
 	if((Completed_Jobs&(1<<L3GD20_READ))&&Gyro_x_buffer.data) {//The data also has to exist
 		Completed_Jobs&=~(1<<L3GD20_READ);
@@ -150,10 +154,6 @@ __attribute__((externally_visible)) void SysTick_Handler(void)
 	if(AutoSequence) {
 		if(AutoSequence==1)				//Setup the PWM to the induction system
 			Timer_GPIO_Enable();
-		//Trigger an ADC1 read of the Inductor sense
-		if(ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC) == SET)
-			Ind_Voltage=(float)ADC_GetConversionValue(ADC1)/1241.2;//Ind measurement in volts
-		ReadADC1_noblock(1);				//Ind sense on PortB.1	
 		//AFROESC throttle control
 		float throt;
 		if(AutoSequence<(IGNITION_END/10))		//Ramp up to 100% from 0 until RAMP_DURATION, 100% until IGNITION_END, down over SHUTDOWN_DURATION 

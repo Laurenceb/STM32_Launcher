@@ -58,7 +58,7 @@
 
 #define SHUTDOWNLOCK_MAGIC 0xFEED/*Used in the setting file to set flightmode - i.e. unit cannot be turned off unless USB is configured*/
 
-#define SYSTEM_STATES 4		/*Number of different control states- atm just brightness control implimented as 1, others are indicators*/
+#define SYSTEM_STATES 5		/*Number of different control states- skip GPS, test CUT, shutdown, test GoPro*/
 
 #define WATCHDOG_TIMEOUT 9000	/*9 second timeout - enough for the uSD card to block its max time and a bit, and enough for RTTY*/
 

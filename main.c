@@ -288,7 +288,7 @@ int main(void)
 	Ubx_Gps_Type gps;				//Local copy of our GPS data
 	if(!Config_Gps()) Usart_Send_Str((char*)"Setup GPS ok - awaiting fix, enter 1 for indoor mode\r\n");//If not the function printfs its error
 	{
-	uint32_t last_message=0;
+	uint32_t last_message=0,gopro=0;
 	while(Gps.status!=UBLOX_3D ) {			//Wait for a 3D fix
 		Watchdog_Reset();			//Reset the watchdog each main loop iteration
 		__WFI();				//Wait for something to happen - saves power
@@ -320,25 +320,37 @@ int main(void)
 			}
 			else if(system_state==3 ) 	//Treble press turns off
 				Shutdown_System=MULTIPRESS_TURNOFF;
+			else if(system_state==4) {
+				GOPRO_TRIG_ON;
+				gopro=Millis+500;
+			}
 			System_state_Global&=~0x80;	//Wipe the flag bit to show this has been processed
 		}
 		if(Millis>cutofftime && cutofftime) {	//Reset the cutdown later
 			CUTOFF;
 			cutofftime=0;
 		}
+		if(Millis>gopro && gopro) {
+			GOPRO_TRIG_OFF;
+			gopro=0;
+		}
 		//Generate the Telemetry string
 		if(mode==1)
 			break;
 		//Now some radio debug and 10 secondly output
 		if(Millis-last_message>10000) {
+			Auto_volt=Ind_Voltage;
+			Timer_GPIO_Disable();
 			print_string[0]=0;
 			if(test_cutdown())//Cutdown self test
-				printf("Rockoon project:%d sats, Cut:ok\n",Gps.nosats);//Test the silabs RTTY
+				printf("Rockoon:%d sats, Cut:ok, Ind:%2f\n",Gps.nosats,Ind_Voltage);//Test the silabs RTTY
 			else
-				printf("Rockoon project:%d sats, Cut:fail\n",Gps.nosats);
-			send_string_to_silabs(print_string);		//Send the string
+				printf("Rockoon:%d sats, Cut:fail, Ind:%2f\n",Gps.nosats,Ind_Voltage);
+			send_string_to_silabs(print_string);//Send the string
 			last_message=Millis;
 		}
+		if(Millis-last_message>9960)
+			Timer_GPIO_Disable();		//PWM runs for the last 40 milliseconds before the telemetry string is sent
 		//Check for Silabs uplinked data, and process it
 		{
 		uint8_t stat=2;
