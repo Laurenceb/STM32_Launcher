@@ -31,6 +31,9 @@
 #define GET_NIRQ GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_0)
 #define GET_CTS GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_11)
 
+#define SI_PORTB GPIO_Pin_9|GPIO_Pin_0|GPIO_Pin_10|GPIO_Pin_11
+#define SI_PORTA GPIO_Pin_4|GPIO_Pin_5|GPIO_Pin_6|GPIO_Pin_7
+
 #define USE_GPIO_CTS /*The spi wait ready function is not used - use the GPIO polling instead*/
 
 /*Upper level state machine states*/

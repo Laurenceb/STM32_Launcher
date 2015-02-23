@@ -2,6 +2,7 @@
 #include "pwr.h"
 #include "main.h"
 #include "Util/delay.h"
+#include "si446x.h"
 
 uint8_t bootsource;
 
@@ -11,9 +12,12 @@ void setup_gpio(void)
 	//enable the clocks 
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB|RCC_APB2Periph_GPIOA|RCC_APB2Periph_AFIO, ENABLE);//GPIO/AFIO clks
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD;//pulldown
-	//Pull down all four lines to the microSD card during bootup
-	GPIO_InitStructure.GPIO_Pin =  (GPIO_Pin_8 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15);
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+	//Pull down all four lines to the microSD card during bootup + the si446x
+	GPIO_InitStructure.GPIO_Pin =  (GPIO_Pin_8 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15 | SI_PORTB);
 	GPIO_Init( GPIOB, &GPIO_InitStructure );
+	GPIO_InitStructure.GPIO_Pin =  (SI_PORTA);
+	GPIO_Init( GPIOA, &GPIO_InitStructure );
 	GPIO_WriteBit(GPIOB,GPIO_Pin_5,Bit_RESET);//Then ensure that this is low to power cycle the secondary supply in case of a reset
 	setuppwr();				//configure power control
 	disable_pin();				//disable WKUP pin functionality

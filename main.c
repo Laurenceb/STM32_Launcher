@@ -350,7 +350,7 @@ int main(void)
 			last_message=Millis;
 		}
 		if(Millis-last_message>9960)
-			Timer_GPIO_Disable();		//PWM runs for the last 40 milliseconds before the telemetry string is sent
+			Timer_GPIO_Enable();		//PWM runs for the last 40 milliseconds before the telemetry string is sent
 		//Check for Silabs uplinked data, and process it
 		{
 		uint8_t stat=2;
