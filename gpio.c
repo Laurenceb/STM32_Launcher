@@ -36,14 +36,11 @@ void setup_gpio(void)
 		}
 	}
 	//Configure the io pins
-	//Pull up the SD CS pin
-	GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_8;
+	//Pull up all the SD pins before card init
+	GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_8 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;//pullup
-	GPIO_Init( GPIOB, &GPIO_InitStructure );/* configure SDSEL pin as input pull up until the SD driver is intialised*/
 	//Pull up all the SD SPI lines until the bus is intialized - SD spec says MISO and MOSI should be pulled up at poweron
-	GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_13 | GPIO_Pin_15;
-	GPIO_Init( GPIOB, &GPIO_InitStructure );		
-
+	GPIO_Init( GPIOB, &GPIO_InitStructure );/* configure SDSEL pin as input pull up until the SD driver is intialised*/
 	//Power button
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;
 	if(USB_SOURCE==bootsource)		//Configure for turnoff on usb removal or pwr button
