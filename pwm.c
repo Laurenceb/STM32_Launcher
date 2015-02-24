@@ -20,10 +20,10 @@ void Init_Timer(void) {
     The timer TIM1 is running at 50kHz
     TIM1 Channel1 duty cycle = PWM to ignition
   ----------------------------------------------------------------------- */
-  /* Compute the prescaler value - at 48Mhz, 0 gives a 48Mhz timer clk*/
+  /* Compute the prescaler value - at 48Mhz, 0 gives a 24Mhz timer clk*/
   uint16_t PrescalerValue = (uint16_t) 0;
   /* Time base configuration - gives 50kHz pwm*/
-  TIM_TimeBaseStructure.TIM_Period = 960;
+  TIM_TimeBaseStructure.TIM_Period = 480;
   TIM_TimeBaseStructure.TIM_Prescaler = PrescalerValue;
   TIM_TimeBaseStructure.TIM_ClockDivision = 0;
   TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
@@ -100,7 +100,7 @@ void PWM_Set(float duty)
 {
 	duty=(duty<0)?0:duty;
 	duty=(duty>0.5)?0.5:duty;
-	duty*=960;
+	duty*=480;
 	TIM_SetCompare1(TIM1, (uint16_t)duty);
 
 }

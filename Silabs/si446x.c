@@ -61,6 +61,9 @@ uint8_t si446x_setup(uint8_t* header) {
 	EXTI_InitTypeDef   EXTI_InitStructure;
 	NVIC_InitTypeDef   NVIC_InitStructure;
 
+	SPI_StructInit(&SPI_InitStructure);
+	GPIO_StructInit(&GPIO_InitStructure);
+
 	uint16_t dummyread;
 	// Initialise the Silabs buffers
 	Init_Byte_Buffer(&Silabs_Tx_Buffer, 256);//256 samples
