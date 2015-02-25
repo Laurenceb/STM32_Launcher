@@ -110,7 +110,6 @@ __attribute__((externally_visible)) void SysTick_Handler(void)
 	static uint32_t Last_Button_Press;			//Holds the timestamp for the previous button press
 	static uint8_t System_state_counter;			//Holds the system state counter
 	static uint8_t button=1;				//Used for interrupt free button press detection, initialise as one to prevent erranous press at boot
-	static uint16_t x,y,z;					//Used for holding the Gyro data and padding
 	//FatFS timer function
 	disk_timerproc();
 	//Incr the system uptime
@@ -129,12 +128,10 @@ __attribute__((externally_visible)) void SysTick_Handler(void)
 	//Read any I2C bus sensors here (100Hz)
 	if((Completed_Jobs&(1<<L3GD20_STATUS))&&Gyro_x_buffer.data) {//The data also has to exist
 		Completed_Jobs&=~(1<<L3GD20_STATUS);
-		if(Completed_Jobs&(1<<L3GD20_READ)) {		//If we have new data on all axes
-			x=*((uint16_t*)&L3GD20_Data_Buffer[2]);
-			y=*((uint16_t*)&L3GD20_Data_Buffer[4]);
-			z=*((uint16_t*)&L3GD20_Data_Buffer[6]);
-			Realign_Axes((int16_t*)&x,(int16_t*)&y,(int16_t*)&z);//Moves from gyro co-ordinates to launcher space co-ordinates
-		}
+		uint16_t x=*((uint16_t*)&L3GD20_Data_Buffer[2]);//Always load these, if the gyro didnt update then the data won't have been changed
+		uint16_t y=*((uint16_t*)&L3GD20_Data_Buffer[4]);
+		uint16_t z=*((uint16_t*)&L3GD20_Data_Buffer[6]);
+		Realign_Axes((int16_t*)&x,(int16_t*)&y,(int16_t*)&z);//Moves from gyro co-ordinates to launcher space co-ordinates
 		//Add the data to the buffers
 		Add_To_Buffer(x,&Gyro_x_buffer); 
 		Add_To_Buffer(y,&Gyro_y_buffer); 
