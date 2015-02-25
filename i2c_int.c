@@ -17,7 +17,6 @@ volatile uint8_t job;			//stores the current job
 volatile I2C_Error_Type I2C1error;	//stores current error status
 
 //Setup the const jobs descriptors
-const uint8_t L3GD20_setup[]=L3GD20_SETUP;
 volatile I2C_Job_Type I2C_jobs[]=I2C_JOBS_INITIALISER;//sets up the const jobs
 
 /**

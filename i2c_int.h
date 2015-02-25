@@ -32,27 +32,31 @@ extern volatile buff_type Gyro_x_buffer,Gyro_y_buffer,Gyro_z_buffer;
 #define L3GD20_ADDR 0xD4
 #define L3GD20_DATA 0xA6			/*sub address where data begins*/
 #define L3GD20_CONF 0xA0			/*sub address for configuration*/
+#define L3GD20_CONF2 0xAE
 #define AFROESC_ADDR 0x52
 #define AFROESC_DATA 0x02			/*Data is commutations (one per 2 poles), voltage and temperature (only updates when no throttle), big endian, 0xad*/
 #define AFROESC_CONF 0x00			/*Afro ESC config starts here - two bytes of throttle command, most significant first, as signed 16 bit*/
 //Number of jobs
-#define I2C_NUMBER_JOBS 4
+#define I2C_NUMBER_JOBS 5
 //Setup for the core sensors - other sensors have setup in their respective header files - look in /sensors 
-#define L3GD20_SETUP {0x0F,0x29,0x00,0x80,0x13} /*configure the L3GD20 sensor for 9mHz-12.5Hz bandpass filtered output, +-250dps, Block updt, no FIFO*/
+#define L3GD20_SETUP {0x0F,0x29,0x00,0x80,0x53} /*configure the L3GD20 sensor for 9mHz-12.5Hz bandpass filtered output, +-250dps, Block updt, en FIFO*/
+#define L3GD20_SETUP2 {0x5F}			/*stream mode*/
 //Jobs structure initialiser 
 #define I2C_JOBS_INITIALISER {\
 {L3GD20_ADDR,I2C_Direction_Receiver,8,L3GD20_DATA,NULL}, /*Read the gyro temperature and rotation info*/\
-{L3GD20_ADDR,I2C_Direction_Transmitter,5,L3GD20_CONF,L3GD20_setup}, /*Setup L3GD20*/\
+{L3GD20_ADDR,I2C_Direction_Transmitter,5,L3GD20_CONF,(uint8_t [5]) L3GD20_SETUP }, /*Setup L3GD20*/\
+{L3GD20_ADDR,I2C_Direction_Transmitter,1,L3GD20_CONF2,(uint8_t [1]) L3GD20_SETUP2 }, /*Setup L3GD20 part two*/\
 {AFROESC_ADDR,I2C_Direction_Transmitter,2,AFROESC_CONF,NULL}, /*Setup throttle*/\
 {AFROESC_ADDR,I2C_Direction_Receiver,7,AFROESC_DATA,NULL}, /*Read ESC data*/\
 }
 //Job identifiers used to run the gyro sampler and the ESC status info, ESC commands, and Gyro config
 #define L3GD20_READ  0
 #define L3GD20_CONFIG 1
-#define AFROESC_THROTTLE 2
-#define AFROESC_READ 3
+#define L3GD20_CONFIG2 2
+#define AFROESC_THROTTLE 3
+#define AFROESC_READ 4
 //Config all the sensors
-#define CONFIG_SENSORS (1<<AFROESC_READ)	/*Read esc to test its there and running*/
+#define CONFIG_SENSORS ((1<<L3GD20_CONFIG2)|(1<<AFROESC_READ))	/*Read esc to test its there and running*/
 #define SCHEDULE_CONFIG I2C1_Request_Job(L3GD20_CONFIG);Jobs|=CONFIG_SENSORS/*Just adds directly - job request call starts i2c interrupts off*/
 
 //Function prototypes
