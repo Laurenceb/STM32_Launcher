@@ -133,7 +133,6 @@ __attribute__((externally_visible)) void SysTick_Handler(void)
 			x=*((uint16_t*)&L3GD20_Data_Buffer[2]);
 			y=*((uint16_t*)&L3GD20_Data_Buffer[4]);
 			z=*((uint16_t*)&L3GD20_Data_Buffer[6]);
-			x=Flipbytes(x);
 			Realign_Axes((int16_t*)&x,(int16_t*)&y,(int16_t*)&z);//Moves from gyro co-ordinates to launcher space co-ordinates
 		}
 		//Add the data to the buffers

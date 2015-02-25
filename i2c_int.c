@@ -143,7 +143,10 @@ void I2C1_EV_IRQHandler(void) {
 	}
 	if((I2C_jobs[job].bytes+1)==index) {//we have completed the current job
 		//Completion Tasks go here
-
+		if(job==L3GD20_STATUS) {
+			if((L3GD20_Data_Buffer[1]&0x0F)==0x0F)
+				I2C1_Request_Job(L3GD20_READ);//If there is data we read the data from the device
+		}
 		//End of completion tasks
 		Jobs&=~(0x00000001<<job);//tick off current job as complete
 		Completed_Jobs|=(0x00000001<<job);//These can be polled by other tasks to see if a job has been completed or is scheduled 
@@ -262,7 +265,8 @@ void I2C_Config() {			//Configure I2C1 for the sensor bus
 	I2C_InitStructure.I2C_AcknowledgedAddress= I2C_AcknowledgedAddress_7bit;
 	I2C_InitStructure.I2C_ClockSpeed = 100000;
 	//Setup the pointers to the read data
-	I2C1_Setup_Job(L3GD20_READ, (volatile uint8_t*)&L3GD20_Data_Buffer);//Gyro data buffer
+	I2C1_Setup_Job(L3GD20_STATUS, (volatile uint8_t*)&L3GD20_Data_Buffer);//Gyro data buffer
+	I2C1_Setup_Job(L3GD20_READ, (volatile uint8_t*)&(L3GD20_Data_Buffer[2]));//Gyro data buffer, index to the mems data
 	I2C1_Setup_Job(AFROESC_READ, (volatile uint8_t*)&AFROESC_Data_Buffer);//ESC data buffer
 	I2C1_Setup_Job(AFROESC_THROTTLE, (volatile uint8_t*)&AFROESC_Throttle);//ESC throttle
 	//Assert the bus
