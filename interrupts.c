@@ -127,9 +127,9 @@ __attribute__((externally_visible)) void SysTick_Handler(void)
 		Ind_Voltage=(float)ADC_GetConversionValue(ADC1)/1241.2;//Ind measurement in volts
 	ReadADC1_noblock(9);					//Ind sense on PortB.1	
 	//Read any I2C bus sensors here (100Hz)
-	if((Completed_Jobs&(1<<L3GD20_READ))&&Gyro_x_buffer.data) {//The data also has to exist
-		Completed_Jobs&=~(1<<L3GD20_READ);
-		if((L3GD20_Data_Buffer[1]&0x0F)==0x0F) {	//If we have new data on all axes
+	if((Completed_Jobs&(1<<L3GD20_STATUS))&&Gyro_x_buffer.data) {//The data also has to exist
+		Completed_Jobs&=~(1<<L3GD20_STATUS);
+		if(Completed_Jobs&(1<<L3GD20_READ)) {		//If we have new data on all axes
 			x=*((uint16_t*)&L3GD20_Data_Buffer[2]);
 			y=*((uint16_t*)&L3GD20_Data_Buffer[4]);
 			z=*((uint16_t*)&L3GD20_Data_Buffer[6]);
