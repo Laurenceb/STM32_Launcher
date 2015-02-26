@@ -265,9 +265,9 @@ void I2C_Config() {			//Configure I2C1 for the sensor bus
 	I2C_InitStructure.I2C_AcknowledgedAddress= I2C_AcknowledgedAddress_7bit;
 	I2C_InitStructure.I2C_ClockSpeed = 100000;
 	//Setup the pointers to the read data
-	I2C1_Setup_Job(L3GD20_STATUS, (volatile uint8_t*)&L3GD20_Data_Buffer);//Gyro data buffer
+	I2C1_Setup_Job(L3GD20_STATUS, (volatile uint8_t*)L3GD20_Data_Buffer);//Gyro data buffer
 	I2C1_Setup_Job(L3GD20_READ, (volatile uint8_t*)&(L3GD20_Data_Buffer[2]));//Gyro data buffer, index to the mems data
-	I2C1_Setup_Job(AFROESC_READ, (volatile uint8_t*)&AFROESC_Data_Buffer);//ESC data buffer
+	I2C1_Setup_Job(AFROESC_READ, (volatile uint8_t*)AFROESC_Data_Buffer);//ESC data buffer
 	I2C1_Setup_Job(AFROESC_THROTTLE, (volatile uint8_t*)&AFROESC_Throttle);//ESC throttle
 	//Assert the bus
 	GPIO_InitTypeDef	GPIO_InitStructure;
