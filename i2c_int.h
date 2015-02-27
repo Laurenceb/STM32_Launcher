@@ -30,21 +30,22 @@ extern volatile buff_type Gyro_x_buffer,Gyro_y_buffer,Gyro_z_buffer;
 
 //Sensor specific defines
 #define L3GD20_ADDR 0xD4
-#define L3GD20_DATA 0xA6			/*sub address where data begins*/
+#define L3GD20_STAT 0xA6			/*sub address where status begins*/
+#define L3GD20_DATA 0xA8			/*sub address for the data*/
 #define L3GD20_CONF 0xA0			/*sub address for configuration*/
 #define L3GD20_CONF2 0xAE
 #define AFROESC_ADDR 0x52
 #define AFROESC_DATA 0x02			/*Data is commutations (one per 2 poles), voltage and temperature (only updates when no throttle), big endian, 0xad*/
 #define AFROESC_CONF 0x00			/*Afro ESC config starts here - two bytes of throttle command, most significant first, as signed 16 bit*/
 //Number of jobs
-#define I2C_NUMBER_JOBS 5
+#define I2C_NUMBER_JOBS 6
 //Setup for the core sensors - other sensors have setup in their respective header files - look in /sensors 
 #define L3GD20_SETUP {0x0F,0x29,0x00,0x80,0x53} /*configure the L3GD20 sensor for 9mHz-12.5Hz bandpass filtered output, +-250dps, Block updt, en FIFO*/
 #define L3GD20_SETUP2 {0x5F}			/*stream mode*/
 //Jobs structure initialiser 
 #define I2C_JOBS_INITIALISER {\
-{L3GD20_ADDR,I2C_Direction_Receiver,2,L3GD20_DATA,NULL}, /*Read the gyro temperature and rotation status*/\
-{L3GD20_ADDR,I2C_Direction_Receiver,6,0xFF,NULL}, /* Read the data, dont send a subaddress */\
+{L3GD20_ADDR,I2C_Direction_Receiver,2,L3GD20_STAT,NULL}, /*Read the gyro temperature and rotation status*/\
+{L3GD20_ADDR,I2C_Direction_Receiver,6,L3GD20_DATA,NULL}, /* Read the data, must send subaddress or data will be offset*/\
 {L3GD20_ADDR,I2C_Direction_Transmitter,5,L3GD20_CONF,(uint8_t [5]) L3GD20_SETUP }, /*Setup L3GD20*/\
 {L3GD20_ADDR,I2C_Direction_Transmitter,1,L3GD20_CONF2,(uint8_t [1]) L3GD20_SETUP2 }, /*Setup L3GD20 part two*/\
 {AFROESC_ADDR,I2C_Direction_Transmitter,2,AFROESC_CONF,NULL}, /*Setup throttle*/\

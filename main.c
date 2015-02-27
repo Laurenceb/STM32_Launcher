@@ -453,7 +453,7 @@ int main(void)
 			cutofftime=0;
 		}
 		//The launch functionality, needs an uplink command and for the gyro rates, induction self test and altitude conditions to be met
-		if((Gyro_XY_Rate>XY_RATE_LIMIT)||(Gyro_Z_Rate>Z_RATE_LIMIT))
+		if((Gyro_XY_Rate>(XY_RATE_LIMIT*XY_RATE_LIMIT))||(Gyro_Z_Rate>(Z_RATE_LIMIT*Z_RATE_LIMIT)))
 			badgyro=Millis;			//This is used for timestamping bad events
 		if((Millis-indtest)>100000) {		//Test the induction system every 100 seconds
 			indtest=Millis;
@@ -502,9 +502,11 @@ int main(void)
 		//Check for changed data
 		if(!I2C1error.error && repetition_counter<32) {
 			Watchdog_Reset();		//Reset the watchdog each main loop iteration if everything looks ok
-			if(!memcmp(&L3GD20_Data_Buffer,&L3GD20_Data_Buffer_old,sizeof(L3GD20_Data_Buffer))) //If data differs
+			if(!memcmp(L3GD20_Data_Buffer,L3GD20_Data_Buffer_old,sizeof(L3GD20_Data_Buffer))) //If data differs
 				repetition_counter++;	//Incriment the lockup detector
-			memcpy(&L3GD20_Data_Buffer_old,&L3GD20_Data_Buffer,sizeof(L3GD20_Data_Buffer_old));//Copy for reference
+			else
+				repetition_counter=0;
+			memcpy(L3GD20_Data_Buffer_old,L3GD20_Data_Buffer,sizeof(L3GD20_Data_Buffer_old));//Copy for reference
 		}
 		else {
 			uint8_t sensors_;

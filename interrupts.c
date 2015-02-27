@@ -128,9 +128,9 @@ __attribute__((externally_visible)) void SysTick_Handler(void)
 	//Read any I2C bus sensors here (100Hz)
 	if((Completed_Jobs&(1<<L3GD20_STATUS))&&Gyro_x_buffer.data) {//The data also has to exist
 		Completed_Jobs&=~(1<<L3GD20_STATUS);
-		uint16_t x=*((uint16_t*)&L3GD20_Data_Buffer[2]);//Always load these, if the gyro didnt update then the data won't have been changed
-		uint16_t y=*((uint16_t*)&L3GD20_Data_Buffer[4]);
-		uint16_t z=*((uint16_t*)&L3GD20_Data_Buffer[6]);
+		uint16_t x=*((uint16_t*)&(L3GD20_Data_Buffer[2]));//Always load these, if the gyro didnt update then the data won't have been changed
+		uint16_t y=*((uint16_t*)&(L3GD20_Data_Buffer[4]));
+		uint16_t z=*((uint16_t*)&(L3GD20_Data_Buffer[6]));
 		Realign_Axes((int16_t*)&x,(int16_t*)&y,(int16_t*)&z);//Moves from gyro co-ordinates to launcher space co-ordinates
 		//Add the data to the buffers
 		Add_To_Buffer(x,&Gyro_x_buffer); 
@@ -141,7 +141,7 @@ __attribute__((externally_visible)) void SysTick_Handler(void)
 		Gyro_Temperature=40-*(int8_t*)L3GD20_Data_Buffer;//This signed 8 bit temperature is just transferred directly to the global
 	}
 	if(Completed_Jobs&(1<<L3GD20_CONFIG))
-		I2C1_Request_Job(L3GD20_READ);			//Request a L3GD20 read 
+		I2C1_Request_Job(L3GD20_STATUS);		//Request a L3GD20 status read 
 	if(Completed_Jobs&(1<<AFROESC_READ)) {
 		Completed_Jobs&=~(1<<AFROESC_READ);
 		Spin_Rate=(float)__REVSH(*(volatile int16_t*)&AFROESC_Data_Buffer);//Commutation counter. AfroESC is big endian
@@ -170,7 +170,7 @@ __attribute__((externally_visible)) void SysTick_Handler(void)
 		if(AutoSequence==(IGNITION_TEST/10)) {		//At this point we test the voltage and the rpm
 			Auto_spin=Spin_Rate_LPF;
 			Auto_volt=Ind_Voltage;
-			if(Gyro_XY_Rate>XY_RATE_LIMIT)
+			if(Gyro_XY_Rate>(XY_RATE_LIMIT*XY_RATE_LIMIT))
 				Ignition_Selftest=3;		//3==xy axis stability failure
 			else {
 				if(Spin_Rate_LPF<SPIN_RATE_LOW || Spin_Rate>SPIN_RATE_HIGH)

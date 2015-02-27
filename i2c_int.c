@@ -134,7 +134,7 @@ void I2C1_EV_IRQHandler(void) {
 			if(I2C_jobs[job].bytes==index)//we have sent all the data
 				I2C_ITConfig(I2C1, I2C_IT_BUF, DISABLE);//disable TXE to allow the buffer to flush
 		}		
-		else {
+		else if(I2C1->CR2&0x400) {
 			index++;
 			if(I2C_Direction_Receiver==I2C_jobs[job].direction || !I2C_jobs[job].bytes)//if receiving or sending 0 bytes, flush now
 				I2C_ITConfig(I2C1, I2C_IT_BUF, DISABLE);//disable TXE to allow the buffer to flush
@@ -263,7 +263,7 @@ void I2C_Config() {			//Configure I2C1 for the sensor bus
 	I2C_InitStructure.I2C_OwnAddress1 = 0xAD;//0xAM --> ADAM
 	I2C_InitStructure.I2C_Ack = I2C_Ack_Enable;
 	I2C_InitStructure.I2C_AcknowledgedAddress= I2C_AcknowledgedAddress_7bit;
-	I2C_InitStructure.I2C_ClockSpeed = 100000;
+	I2C_InitStructure.I2C_ClockSpeed = 200000;
 	//Setup the pointers to the read data
 	I2C1_Setup_Job(L3GD20_STATUS, (volatile uint8_t*)L3GD20_Data_Buffer);//Gyro data buffer
 	I2C1_Setup_Job(L3GD20_READ, (volatile uint8_t*)&(L3GD20_Data_Buffer[2]));//Gyro data buffer, index to the mems data
