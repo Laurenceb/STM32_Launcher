@@ -185,7 +185,7 @@ __attribute__((externally_visible)) void SysTick_Handler(void)
 		if(AutoSequence<(IGNITION_END/10))		//Ramp up to 100% from 0 until RAMP_DURATION, 100% until IGNITION_END, down over SHUTDOWN_DURATION 
 			throt=(float)AutoSequence/(RAMP_DURATION/10);
 		else {
-			throt=(float)((IGNITION_END/10)-AutoSequence)/(SHUTDOWN_DURATION/10);
+			throt=0.9+(float)((IGNITION_END/10)-AutoSequence)/(SHUTDOWN_DURATION/10);//Ramp down over 90% of shutdown duration
 			throt=(throt<0)?0:throt;
 		}
 		uint16_t t=(((throt>1)?1:throt)*0x7FFF);
