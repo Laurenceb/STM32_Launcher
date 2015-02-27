@@ -5,6 +5,7 @@ volatile uint8_t Channel_rx,Channel_tx,Silabs_spi_state,Silabs_driver_state;
 volatile byte_buff_type Silabs_Tx_Buffer,Silabs_Rx_Buffer;
 volatile int8_t Last_RSSI=0;	/*Holds RSSI of the last packet*/
 volatile int16_t Last_AFC=0;	/*Holds AFC value of the last packet (should be zero if PLL enabled and tracking converged)*/
+volatile uint16_t Silabs_Part=0;/*Holds the part number, used as a lock to prevent state machines running until we have a booted device*/
 uint8_t Silabs_Header[5]=UPLINK_CALLSIGN;
 
 static volatile uint32_t CTS_Low;
@@ -217,20 +218,14 @@ uint8_t si446x_setup(uint8_t* header) {
 	uint8_t x0 = (VCXO_FREQ - (uint32_t)x3 * 0x1000000 - (uint32_t)x2 * 0x10000 - (uint32_t)x1 * 0x100); 
 	si446x_busy_wait_send_receive(7, 2, (uint8_t [7]){0x02, 0x01, 0x01, x3, x2, x1, x0}, rx_buffer);
 	while(GET_NIRQ||(!GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_10)));/*Wait for NIRQ low and POR high*/
-	/* Configure EXTI0 line */
-	EXTI_InitStructure.EXTI_Line = EXTI_Line0;		/*Only enable NIRQ here*/
-	EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
-	EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling; //NIRQ is active low  
-	EXTI_InitStructure.EXTI_LineCmd = ENABLE;
-	/* Enable and set EXTI0 Interrupt to the lowest priority */
-	NVIC_InitStructure.NVIC_IRQChannel = EXTI0_IRQn;	//The NIRQ triggered interrupt	
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x07;	//Lowest group priority
-	NVIC_Init(&NVIC_InitStructure);
 	//clear all interrupts
 	si446x_busy_wait_send_receive(4, 0, (uint8_t [4]){0x20, 0x00, 0x00, 0x00}, rx_buffer);
 	//read the device part number info
 	si446x_busy_wait_send_receive(2, 12, (uint8_t [2]){0x01, 0x01}, rx_buffer);
-	part=rx_buffer[3];//Should be 0x44
+	part=rx_buffer[3];/* Should be 0x44 */
+	Silabs_Part=__REV16(*(uint16_t*)(&rx_buffer[3]));/* Load the full part number into here */
+	if((Silabs_Part&0xFFF0) != 0x4460)/* Quit early on failure - need 446x */
+		return part;
 	//Setup the fist response A register to hold the RSSI of the last packet
 	si446x_busy_wait_send_receive(5, 0, (uint8_t [5]){0x11, 0x02, 0x01, 0x00, 0x0A}, rx_buffer);
 	// Configure Tx pin as input to start with, so that it can be used to monitor POR, now configure it to TX AF
@@ -256,6 +251,15 @@ uint8_t si446x_setup(uint8_t* header) {
 	#endif
 	}
 	Silabs_driver_state=DEFAULT_MODE;/* Make sure this is initialised */
+	/* Configure EXTI0 line */
+	EXTI_InitStructure.EXTI_Line = EXTI_Line0;		/*Only enable NIRQ here*/
+	EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
+	EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling; //NIRQ is active low  
+	EXTI_InitStructure.EXTI_LineCmd = ENABLE;
+	/* Enable and set EXTI0 Interrupt to the lowest priority */
+	NVIC_InitStructure.NVIC_IRQChannel = EXTI0_IRQn;	//The NIRQ triggered interrupt	
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x07;	//Lowest group priority
+	NVIC_Init(&NVIC_InitStructure);
 	EXTI_Init(&EXTI_InitStructure);	/* Only enable the NIRQ once everything is configured */
 	return part;			/* Return the part number */
 }
