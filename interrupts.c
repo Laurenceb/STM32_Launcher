@@ -12,6 +12,28 @@ volatile uint8_t Ignition_Selftest;				//Used for status readout
 #define MOTOR_POLES 14		/* Turnigy motor */
 #define L3GD20_GAIN (1/(114.28*114.28))	/* This is actually 1/gain^2 */
 
+/* Digital filter designed by mkfilter/mkshape/gencode   A.J. Fisher, 2.5hz lowpass Bessel filter
+   Command line: /www/usr/fisher/helpers/mkfilter -Be -Lp -o 4 -a 2.5000000000e-02 0.0000000000e+00 -l */
+
+#define NZEROS 4
+#define NPOLES 4
+#define GAIN   7.139674717e+03
+
+static float xvx[NZEROS+1], yvx[NPOLES+1];
+static float xvy[NZEROS+1], yvy[NPOLES+1];
+static float xvz[NZEROS+1], yvz[NPOLES+1];
+
+float filterloop(float input, float* xv, float* yv) { 
+	xv[0] = xv[1]; xv[1] = xv[2]; xv[2] = xv[3]; xv[3] = xv[4]; 
+        xv[4] = input / GAIN;
+        yv[0] = yv[1]; yv[1] = yv[2]; yv[2] = yv[3]; yv[3] = yv[4]; 
+        yv[4] =   (xv[0] + xv[4]) + 4 * (xv[1] + xv[3]) + 6 * xv[2]
+                     + ( -0.4754955444 * yv[0]) + (  2.2671885493 * yv[1])
+                     + ( -4.0800349994 * yv[2]) + (  3.2861009961 * yv[3]);
+        return yv[4];
+}
+
+
 /**
   * @brief  Configure all interrupts accept on/off pin
   * @param  None
@@ -136,8 +158,11 @@ __attribute__((externally_visible)) void SysTick_Handler(void)
 		Add_To_Buffer(x,&Gyro_x_buffer); 
 		Add_To_Buffer(y,&Gyro_y_buffer); 
 		Add_To_Buffer(z,&Gyro_z_buffer);		//Add the raw 100hz data to the x,y,z bins
-		Gyro_XY_Rate=Gyro_XY_Rate*0.99+0.01*L3GD20_GAIN*((float)(*(int16_t*)&x)*(float)(*(int16_t*)&x)+(float)(*(int16_t*)&y)*(float)(*(int16_t*)&y));
-		Gyro_Z_Rate=Gyro_Z_Rate*0.99+0.01*L3GD20_GAIN*((float)(*(int16_t*)&z)*(float)(*(int16_t*)&z));//1 second time constant on the Turn rate
+		float xf=filterloop((float)(*(int16_t*)&x), xvx, yvx);//Run a 4th order Bessel filter over the data
+		float yf=filterloop((float)(*(int16_t*)&y), xvy, yvy);
+		float zf=filterloop((float)(*(int16_t*)&z), xvz, yvz);
+		Gyro_XY_Rate=Gyro_XY_Rate*0.89+0.11*L3GD20_GAIN*(xf*xf+yf*yf);
+		Gyro_Z_Rate=Gyro_Z_Rate*0.89+0.11*L3GD20_GAIN*(zf*zf);//90 millisecond time constant on the turn rate
 		Gyro_Temperature=40-*(int8_t*)L3GD20_Data_Buffer;//This signed 8 bit temperature is just transferred directly to the global
 	}
 	if(Completed_Jobs&(1<<L3GD20_CONFIG))
