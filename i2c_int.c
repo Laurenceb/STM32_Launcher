@@ -28,14 +28,14 @@ void I2C1_EV_IRQHandler(void) {
 	static uint8_t subaddress_sent,final_stop;//flag to indicate if subaddess sent, flag to indicate final bus condition
 	static int8_t index;		//index is signed -1==send the subaddress
 	volatile uint32_t debugme;
-	uint8_t SReg_1=I2C1->SR1;	//read the status register here
+	volatile uint8_t SReg_1=I2C1->SR1;//read the status register here
 	if(!((Jobs>>job)&0x00000001)) {	//if the current job bit is not set
 		for(job=0;!((Jobs>>job)&0x00000001) && job<(I2C_NUMBER_JOBS-1);job++);//find the first uncompleted job, starting at current job zero
 		subaddress_sent=0;
 		if(!Jobs)
 			I2C_GenerateSTOP(I2C1,ENABLE);//program a stop to get out of here
 	}
-	if(SReg_1&0x0001 && !(SReg_1&0x0040)) {//we just sent a start - EV5 in ref manual, but no RXNE data
+	if(SReg_1&0x0001 && !((SReg_1&0x0040) && (I2C1->CR2&0x400))) {//we just sent a start - EV5 in ref manual, but no RXNE data with BUF event
 		I2C_AcknowledgeConfig(I2C1, ENABLE);//make sure ACK is on
 		index=0;		//reset the index
 		if(I2C_Direction_Receiver==I2C_jobs[job].direction && (subaddress_sent || 0xFF==I2C_jobs[job].subaddress)) {//we have sent the subaddr
@@ -75,7 +75,7 @@ void I2C1_EV_IRQHandler(void) {
 				I2C_ITConfig(I2C1, I2C_IT_BUF, ENABLE);
 		}
 	}
-	else if(SReg_1&0x004) {//Byte transfer finished - EV7_2, EV7_3 or EV8_2
+	else if((SReg_1&0x004) && !(I2C1->CR2&0x400)) {//Byte transfer finished - EV7_2, EV7_3 or EV8_2 (Check that BUF disabled)
 		if(Jobs&~(1<<job)) 	//check if there are other jobs requested other than the current one
 			final_stop=0;
 		else
@@ -158,7 +158,7 @@ void I2C1_EV_IRQHandler(void) {
 		//Completion Tasks go here
 		if(job==L3GD20_STATUS) {
 			if((L3GD20_Data_Buffer[1]&0x0F)==0x0F)
-				I2C1_Request_Job(L3GD20_READ);//If there is data we read the data from the device
+				Jobs|=(1<<L3GD20_READ);//If there is data we read the data from the device
 		}
 		//End of completion tasks
 		Jobs&=~(0x00000001<<job);//tick off current job as complete
