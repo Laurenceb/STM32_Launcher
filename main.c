@@ -513,6 +513,7 @@ int main(void)
 			do {
 				I2C1error.error=0;	//Reset both of these
 				repetition_counter=0;
+				Completed_Jobs=0;	//Prevent any bus reads from running
 				I2C_Config();		//Setup the I2C bus
 				sensors_=detect_sensors(1);//Search for connected sensors -argument means the i2c data output buffers are not reinitialised
 				Delay(100000);
