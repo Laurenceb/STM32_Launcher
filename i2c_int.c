@@ -35,7 +35,7 @@ void I2C1_EV_IRQHandler(void) {
 		if(!Jobs)
 			I2C_GenerateSTOP(I2C1,ENABLE);//program a stop to get out of here
 	}
-	if(SReg_1&0x0001 && !((SReg_1&0x0040) && (I2C1->CR2&0x400))) {//we just sent a start - EV5 in ref manual, but no RXNE data with BUF event
+	if(SReg_1&0x0001 /*&& !((SReg_1&0x0040) && (I2C1->CR2&0x400))*/) {//we just sent a start - EV5 in ref manual, but no RXNE data with BUF event
 		I2C_AcknowledgeConfig(I2C1, ENABLE);//make sure ACK is on
 		index=0;		//reset the index
 		if(I2C_Direction_Receiver==I2C_jobs[job].direction && (subaddress_sent || 0xFF==I2C_jobs[job].subaddress)) {//we have sent the subaddr
