@@ -149,6 +149,15 @@ __attribute__((externally_visible)) void SysTick_Handler(void)
 		Ind_Voltage=(float)ADC_GetConversionValue(ADC1)/1241.2;//Ind measurement in volts
 	ReadADC1_noblock(9);					//Ind sense on PortB.1	
 	//Read any I2C bus sensors here (100Hz)
+	if(Completed_Jobs&(1<<AFROESC_READ)) {
+		Completed_Jobs&=~(1<<AFROESC_READ);
+		Spin_Rate=(float)__REVSH(*(volatile int16_t*)&AFROESC_Data_Buffer);//Commutation counter. AfroESC is big endian
+		Spin_Rate*=100/(MOTOR_POLES/2);			//This is the current spin rate in Hz
+		Spin_Rate_LPF=Spin_Rate_LPF*0.8+Spin_Rate*0.2;	//A ~50ms time constant with reduced ~+-85rpm jitter
+		int16_t volt_aux=(int16_t)__REVSH(*(volatile int16_t*)&AFROESC_Data_Buffer[2]);
+		Aux_Voltage=((float)(volt_aux>>6))*0.0315;	//33k,180k PD on AFROESC, with 10bit adc left aligned running from 5v supply
+		I2C1_Request_Job(AFROESC_READ);			//Read ESC temperature and voltage
+	}
 	if((Completed_Jobs&(1<<L3GD20_STATUS))&&Gyro_x_buffer.data) {//The data also has to exist
 		Completed_Jobs&=~(1<<L3GD20_STATUS);
 		uint16_t x=*((uint16_t*)&(L3GD20_Data_Buffer[2]));//Always load these, if the gyro didnt update then the data won't have been changed
@@ -168,15 +177,6 @@ __attribute__((externally_visible)) void SysTick_Handler(void)
 	}
 	if(Completed_Jobs&(1<<L3GD20_CONFIG))
 		I2C1_Request_Job(L3GD20_STATUS);		//Request a L3GD20 status read 
-	if(Completed_Jobs&(1<<AFROESC_READ)) {
-		Completed_Jobs&=~(1<<AFROESC_READ);
-		Spin_Rate=(float)__REVSH(*(volatile int16_t*)&AFROESC_Data_Buffer);//Commutation counter. AfroESC is big endian
-		Spin_Rate*=100/(MOTOR_POLES/2);			//This is the current spin rate in Hz
-		Spin_Rate_LPF=Spin_Rate_LPF*0.8+Spin_Rate*0.2;	//A ~50ms time constant with reduced ~+-85rpm jitter
-		int16_t volt_aux=(int16_t)__REVSH(*(volatile int16_t*)&AFROESC_Data_Buffer[2]);
-		Aux_Voltage=((float)(volt_aux>>6))*0.0315;	//33k,180k PD on AFROESC, with 10bit adc left aligned running from 5v supply
-		I2C1_Request_Job(AFROESC_READ);			//Read ESC temperature and voltage
-	}
 	//Ignition and launch autosequence
 	if(AutoSequence) {
 		if(AutoSequence==1)				//Setup the PWM to the induction system
