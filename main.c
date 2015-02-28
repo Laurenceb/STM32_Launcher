@@ -47,7 +47,7 @@ int main(void)
 {
 	uint8_t system_state=0;				//used to track button press functionality
 	uint8_t sensors=0;
-	uint8_t repetition_counter=0;			//Used to detect any I2C lockup
+	uint32_t repetition_counter=0;			//Used to detect any I2C lockup
 	uint8_t L3GD20_Data_Buffer_old[8];		//Used to test for noise in the gyro data (indicating that it is working)
 	uint8_t UplinkFlags=0,CutFlags=0;
 	uint16_t UplinkBytes=0;				//Counters and flags for telemetry
@@ -500,12 +500,10 @@ int main(void)
 		}
 		//Other sensors etc can go here
 		//Check for changed data
-		if(!I2C1error.error && repetition_counter<32) {
+		if(!I2C1error.error && (Millis-repetition_counter)<3500) {
 			Watchdog_Reset();		//Reset the watchdog each main loop iteration if everything looks ok
-			if(!memcmp(L3GD20_Data_Buffer,L3GD20_Data_Buffer_old,sizeof(L3GD20_Data_Buffer))) //If data differs
-				repetition_counter++;	//Incriment the lockup detector
-			else
-				repetition_counter=0;
+			if(memcmp(L3GD20_Data_Buffer,L3GD20_Data_Buffer_old,sizeof(L3GD20_Data_Buffer))) //If data differs
+				repetition_counter=Millis;
 			memcpy(L3GD20_Data_Buffer_old,L3GD20_Data_Buffer,sizeof(L3GD20_Data_Buffer_old));//Copy for reference
 		}
 		else {

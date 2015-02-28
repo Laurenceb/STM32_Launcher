@@ -105,6 +105,7 @@ void I2C1_EV_IRQHandler(void) {
 					I2C_GenerateSTOP(I2C1,ENABLE);//program the Stop
 				else
 					I2C_GenerateSTART(I2C1,ENABLE);//program a rep start
+				asm volatile ("dmb" ::: "memory");
 				if(I2C_jobs[job].data_pointer) {
 					I2C_jobs[job].data_pointer[index++]=I2C_ReceiveData(I2C1);//read data N-1
 					I2C_jobs[job].data_pointer[index++]=I2C_ReceiveData(I2C1);//read data N
@@ -135,6 +136,7 @@ void I2C1_EV_IRQHandler(void) {
 	else if(SReg_1&0x0040 ) {//Byte received - EV7 
 		//(note that at end of >2 byte read with rep start, we may get RXNE+START in same call, so this will not clear the start bit)
 		volatile uint8_t dummy=I2C_ReceiveData(I2C1);
+		asm volatile ("dmb" ::: "memory");
 		if(I2C_jobs[job].data_pointer)
 			I2C_jobs[job].data_pointer[index++]=dummy;
 		else
@@ -253,7 +255,8 @@ void I2C1_Request_Job(uint8_t job_) {
 					I2C1error.job=job_;
 					return;
 				}
-				I2C_GenerateSTART(I2C1,ENABLE);//send the start for the new job
+				if(!(I2C1->CR1&0x0100))//check nothing has changed here
+					I2C_GenerateSTART(I2C1,ENABLE);//send the start for the new job
 			}
 			I2C_ITConfig(I2C1, I2C_IT_EVT|I2C_IT_ERR, ENABLE);//allow the interrupts to fire off again
 		}
