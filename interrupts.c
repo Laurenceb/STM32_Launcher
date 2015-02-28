@@ -141,7 +141,8 @@ __attribute__((externally_visible)) void SysTick_Handler(void)
 		ADC_ClearFlag(ADC2, ADC_FLAG_JEOC);		//Clear the flag
 		Battery_Voltage=((float)ADC_GetInjectedConversionValue(ADC2, ADC_InjectedChannel_1))*0.001611*BAT_FUDGE_FACTOR;
 	}
-	Low_Battery_Warning-=1;
+	if(Low_Battery_Warning)
+		Low_Battery_Warning-=1;
 	ADC_SoftwareStartInjectedConvCmd(ADC2, ENABLE);		//Trigger the injected channel group
 	//Trigger an ADC1 read of the Inductor sense
 	if(ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC) == SET)
