@@ -81,7 +81,7 @@ void I2C1_EV_IRQHandler(void) {
 		else
 			final_stop=1;
 		if(I2C_Direction_Receiver==I2C_jobs[job].direction && subaddress_sent) {//EV7_2, EV7_3
-			if(I2C_jobs[job].bytes>2) {//EV7_2
+			if(I2C_jobs[job].bytes>2 && index!=(I2C_jobs[job].bytes-2)) {//EV7_2 (modified to give BTF at end of >2 byte read)
 				I2C_AcknowledgeConfig(I2C1, DISABLE);//turn off ACK
 				volatile uint8_t dummy;
 				if(I2C_jobs[job].data_pointer)
@@ -90,12 +90,8 @@ void I2C1_EV_IRQHandler(void) {
 					dummy=I2C_ReceiveData(I2C1);
 					index++;
 				}
-				//I2C_GenerateSTOP(I2C1,ENABLE);//program the Stop
-				//final_stop=1;//required to fix hardware
-				if(final_stop)
-					I2C_GenerateSTOP(I2C1,ENABLE);//program the Stop
-				else
-					I2C_GenerateSTART(I2C1,ENABLE);//program a rep start
+				I2C_GenerateSTOP(I2C1,ENABLE);//program the Stop
+				final_stop=1;			//force this - means an added job between interrupt calls wont cause a lockup
 				if(I2C_jobs[job].data_pointer)
 					I2C_jobs[job].data_pointer[index++]=I2C_ReceiveData(I2C1);//read data N-1
 				else {
@@ -143,9 +139,17 @@ void I2C1_EV_IRQHandler(void) {
 			I2C_jobs[job].data_pointer[index++]=dummy;
 		else
 			index++;	
-		if(I2C_jobs[job].bytes==(index+3))
-			I2C_ITConfig(I2C1, I2C_IT_BUF, DISABLE);//disable TXE to allow the buffer to flush so we can get an EV7_2
-		if(I2C_jobs[job].bytes==index)//We have completed a final EV7
+		if(I2C_jobs[job].bytes==(index+3)) {
+			if(!(Jobs&~(1<<job)))//only do this if there are no other job bits set, so we need to send stop
+				I2C_ITConfig(I2C1, I2C_IT_BUF, DISABLE);//disable TXE to allow the buffer to flush so we can get an EV7_2
+			else
+				I2C1->CR1|=0x0800;//set the POS bit so NACK applied to the final byte in the two byte read
+		}
+		else if(I2C_jobs[job].bytes==(index+2)) {//this will run if we are going to send a repeated start
+			I2C_AcknowledgeConfig(I2C1, DISABLE);//turn off ACK
+			I2C_ITConfig(I2C1, I2C_IT_BUF, DISABLE);
+		}
+		else if(I2C_jobs[job].bytes==index)//We have completed a final EV7
 			index++;	//to show job is complete
 	}
 	else if(SReg_1&0x0080) {//Byte transmitted -EV8/EV8_1
