@@ -86,8 +86,10 @@ void I2C1_EV_IRQHandler(void) {
 				volatile uint8_t dummy;
 				if(I2C_jobs[job].data_pointer)
 					I2C_jobs[job].data_pointer[index++]=I2C_ReceiveData(I2C1);//read data N-2
-				else
+				else {
 					dummy=I2C_ReceiveData(I2C1);
+					index++;
+				}
 				//I2C_GenerateSTOP(I2C1,ENABLE);//program the Stop
 				//final_stop=1;//required to fix hardware
 				if(final_stop)
@@ -96,8 +98,10 @@ void I2C1_EV_IRQHandler(void) {
 					I2C_GenerateSTART(I2C1,ENABLE);//program a rep start
 				if(I2C_jobs[job].data_pointer)
 					I2C_jobs[job].data_pointer[index++]=I2C_ReceiveData(I2C1);//read data N-1
-				else
+				else {
 					dummy=I2C_ReceiveData(I2C1);
+					index++;
+				}
 				I2C_ITConfig(I2C1, I2C_IT_BUF, ENABLE);//enable TXE to allow the final EV7
 			}
 			else {		//EV7_3
@@ -112,6 +116,7 @@ void I2C1_EV_IRQHandler(void) {
 				else {
 					volatile uint8_t dummy=I2C_ReceiveData(I2C1);
 					dummy=I2C_ReceiveData(I2C1);
+					index+=2;
 				}
 				index++;//to show job completed
 			}
@@ -135,7 +140,9 @@ void I2C1_EV_IRQHandler(void) {
 		//(note that at end of >2 byte read with rep start, we may get RXNE+START in same call, so this will not clear the start bit)
 		volatile uint8_t dummy=I2C_ReceiveData(I2C1);
 		if(I2C_jobs[job].data_pointer)
-			I2C_jobs[job].data_pointer[index++]=dummy;		
+			I2C_jobs[job].data_pointer[index++]=dummy;
+		else
+			index++;	
 		if(I2C_jobs[job].bytes==(index+3))
 			I2C_ITConfig(I2C1, I2C_IT_BUF, DISABLE);//disable TXE to allow the buffer to flush so we can get an EV7_2
 		if(I2C_jobs[job].bytes==index)//We have completed a final EV7
