@@ -142,7 +142,7 @@ void I2C1_EV_IRQHandler(void) {
 		else
 			index++;	
 		if(I2C_jobs[job].bytes==(index+3)) {
-			if(!(Jobs&~(1<<job)))//only do this if there are no other job bits set, so we need to send stop
+			if(!(Jobs&~(1<<job)) || (job==L3GD20_READ))//only do this if there are no other job bits set, so we need to send stop (force stop on L3GD20)
 				I2C_ITConfig(I2C1, I2C_IT_BUF, DISABLE);//disable TXE to allow the buffer to flush so we can get an EV7_2
 			else
 				I2C1->CR1|=0x0800;//set the POS bit so NACK applied to the final byte in the two byte read
