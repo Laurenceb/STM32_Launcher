@@ -142,7 +142,7 @@ void I2C1_EV_IRQHandler(void) {
 		else
 			index++;	
 		if(I2C_jobs[job].bytes==(index+3)) {
-			if(!(Jobs&~(1<<job)) || (job==L3GD20_READ))//only do this if there are no other job bits set, so we need to send stop (force stop on L3GD20)
+			if(!(Jobs&~(1<<job)) /*|| (job==L3GD20_READ)*/)//only do this if there are no other job bits set, so we need to send stop (force stop on L3GD20)
 				I2C_ITConfig(I2C1, I2C_IT_BUF, DISABLE);//disable TXE to allow the buffer to flush so we can get an EV7_2
 			else
 				I2C1->CR1|=0x0800;//set the POS bit so NACK applied to the final byte in the two byte read
@@ -297,16 +297,29 @@ void I2C_Config() {			//Configure I2C1 for the sensor bus
 	I2C1_Setup_Job(AFROESC_READ, (volatile uint8_t*)AFROESC_Data_Buffer);//ESC data buffer
 	I2C1_Setup_Job(AFROESC_THROTTLE, (volatile uint8_t*)&AFROESC_Throttle);//ESC throttle
 	//Assert the bus
+	GPIO_SetBits(GPIOB,I2C1_SDA|I2C1_SCL);//Set bus high, make sure GPIO in correct state to start with
 	GPIO_InitTypeDef	GPIO_InitStructure;
 	GPIO_InitStructure.GPIO_Pin = I2C1_SCL|I2C1_SDA;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_OD;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init( GPIOB, &GPIO_InitStructure );//Configure the pins as output open drain so we can clk them as GPIO
 	GPIO_SetBits(GPIOB,I2C1_SDA|I2C1_SCL);//Set bus high
+        /* Wait for any clock stretching to finish - this has a timeout of 2.55ms*/
+	uint8_t count=255;
+        while (!GPIO_ReadInputDataBit(GPIOB,I2C1_SCL)&&count) {
+	        Delay(10);
+		count--;
+	}
+	/* Generate a start condition */
+	GPIO_ResetBits(GPIOB,I2C1_SDA);//Set bus data low
+	Delay(10);
+ 	GPIO_ResetBits(GPIOB,I2C1_SCL);//Set bus scl low
+	Delay(10);
+	GPIO_SetBits(GPIOB,I2C1_SDA);//Set bus data high
 	//Make sure the bus is free by clocking it until any slaves release the line - 8 clocks
 	for(uint8_t n=0;n<8;n++) {
         	/* Wait for any clock stretching to finish - this has a timeout of 2.55ms*/
-		uint8_t count=255;
+		count=255;
         	while (!GPIO_ReadInputDataBit(GPIOB,I2C1_SCL)&&count) {
 		        Delay(10);
 			count--;
@@ -318,10 +331,17 @@ void I2C_Config() {			//Configure I2C1 for the sensor bus
 		GPIO_SetBits(GPIOB,I2C1_SCL);//Set bus high
 		Delay(10);
 	}
-	/* Generate a start then stop condition */
-	GPIO_ResetBits(GPIOB,I2C1_SDA);//Set bus data low
+        /* Wait for any clock stretching to finish - this has a timeout of 2.55ms*/
+	count=255;
+        while (!GPIO_ReadInputDataBit(GPIOB,I2C1_SCL)&&count) {
+	        Delay(10);
+		count--;
+	}
+	/* Pull low - the slave should now release for NACK (no devices allowed at 0xFF)*/
+	GPIO_ResetBits(GPIOB,I2C1_SCL);//Set bus low, end of 8th clock pulse
 	Delay(10);
- 	GPIO_ResetBits(GPIOB,I2C1_SCL);//Set bus scl low
+	/* Generate a stop condition */
+ 	GPIO_ResetBits(GPIOB,I2C1_SDA);//Set bus sda low
 	Delay(10);
  	GPIO_SetBits(GPIOB,I2C1_SCL);//Set bus scl high
 	Delay(10);
