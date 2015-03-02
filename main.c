@@ -123,7 +123,7 @@ int main(void)
 	// system has passed battery level check and so file can be opened
 	{//Context
 	uint8_t silabs_header[5]={};
-	uint8_t* silabs_header_=silabs_header;		//Pointer to the array
+	uint8_t* silabs_header_=NULL;			//Pointer to the array (if all goes ok)
 	if((f_err_code = f_mount(0, &FATFS_Obj)))Usart_Send_Str((char*)"FatFs mount error\r\n");//This should only error if internal error
 	else {						//FATFS initialised ok, try init the card, this also sets up the SPI1
 		if(!(f_err_code=f_open(&FATFS_logfile,(const TCHAR*)"time.txt",FA_OPEN_EXISTING|FA_READ|FA_WRITE))){//Try to open time file get system time
@@ -179,7 +179,7 @@ int main(void)
 			if(br==2) {			//Read was successful, next try to read 5 bytes of packet header
 				f_read(&FATFS_logfile, (void*)(silabs_header),5,&br);
 				if(br!=5)
-					silabs_header_=NULL;
+					silabs_header_=silabs_header;
 			}
 			f_close(&FATFS_logfile);	//Close the settings.dat file
 		}
@@ -404,10 +404,10 @@ int main(void)
 			n++;
 		} while(!stat && n<=10);
 		if(n>1)
-			UplinkBytes+=n;			//Stores the amount of uplinked data
+			UplinkBytes+=(n-1);			//Stores the amount of uplinked data
 		if(n>1 && strlen(str)==6 && !strncmp(str,Silabs_Header,4)) {//We recived something, here we process the data that was received, as long as it is '$$RO**'
 			if(str[4]==Silabs_Header[4] && str[5]>47 && str[5]<56 ) {//Need to send e.g. "$$ROKx" where x is 0 to 7
-				if(str[5]-48!=UPLINK_TEST_BIT) {
+				if((str[5]-48)!=UPLINK_TEST_BIT) {
 					if( UplinkFlags&(1<<(LAUNCH_PERMISSION)) && permission_time && ((str[5]-48)==LAUNCH_PERMISSION))//Sending permission
 						permission_time+=PERMISSION_DURATION;//command whilst it is set increases time
 					else
@@ -419,7 +419,7 @@ int main(void)
 		}
 		}
 		//If the Silabs locks up, detect this and reinitialise it
-		if(silabs_cts_jammed() || silab!=0x44)
+		if(silabs_cts_jammed() || silab!=0x44 || silabs_state_machine_jammed() )
 			silab=si446x_setup(NULL);	//The packet header will be reloaded from the global variable in si446x.c
 		//Look for a full set of GPS data (Lat,Long,Alt,Sat info)
 		while(Bytes_In_DMA_Buffer(&Gps_Buffer))	//Dump all the data
@@ -436,7 +436,7 @@ int main(void)
 		if(!(CutFlags&0x0E)) {			//Only check if the cutdown has not already run
 			if(!pointinpoly(Geofence, UK_GEOFENCE_POINTS, gps.longitude, gps.latitude) && gps.latitude && gps.status==UBLOX_3D)//Check to see if we need to cutdown due to polygon here
 				CutFlags|=(1<<1)|(1<<7);//Second bit means cutdown triggered due to polygon
-			if(UplinkFlags&(1<<CUTDOWN_COMMAND)) {//Cutdown was requested
+			if( (UplinkFlags&(1<<CUTDOWN_COMMAND)) && Millis<permission_time && permission_time) {//Cutdown was requested, uses the lock bit
 				CutFlags|=(1<<2)|(1<<7);
 				UplinkFlags&=~(1<<CUTDOWN_COMMAND);//Wipe the bit
 			}

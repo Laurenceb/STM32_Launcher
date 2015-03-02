@@ -46,6 +46,7 @@ uint8_t send_string_to_silabs(uint8_t* str);
 void add_to_silabs_buffer(uint8_t data);
 uint8_t get_from_silabs_buffer(uint8_t* status);
 uint8_t silabs_cts_jammed(void);
+uint8_t silabs_state_machine_jammed(void);
 extern uint8_t Silabs_Header[5];
 
 void si446x_busy_wait_send_receive(uint8_t tx_bytes, uint8_t rx_bytes, uint8_t *tx_data, uint8_t *rx_data);

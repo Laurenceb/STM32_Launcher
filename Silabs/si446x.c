@@ -44,11 +44,15 @@ uint8_t get_from_silabs_buffer(uint8_t* status) {
 }
 
 uint8_t silabs_cts_jammed(void) {/* More than 20 milliseconds of jammed CTS causes an issue to be flagged */
-	if( CTS_Low && (Millis-CTS_Low)>20 )
+	if( CTS_Low && Millis>CTS_Low && (Millis-CTS_Low)>20 )
 		return 1;
 	else
 		return 0;
 }
+
+uint8_t silabs_state_machine_jammed(void) {/* Closer than 2 bytes to a filled buffer suggests something has gone wrong */
+	return ((count_in_buff((volatile byte_buff_type*)&Silabs_Tx_Buffer))>=(Silabs_Tx_Buffer.size-1))?1:0;
+} 
 
 /**
   * @brief  This function handles silabs config

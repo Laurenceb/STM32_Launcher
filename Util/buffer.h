@@ -2,6 +2,7 @@
 #pragma once
 
 #define bytes_in_buff(buffer) !((buffer)->head==(buffer)->tail)
+#define count_in_buff(buffer) ((buffer)->head-(buffer)->tail+(buffer)->size)%(buffer)->size
 
 typedef struct{
 	uint16_t head;
