@@ -279,11 +279,6 @@ void I2C1_Setup_Job(uint8_t job_, volatile uint8_t* data) {
   * @retval None
   */
 void I2C_Config() {			//Configure I2C1 for the sensor bus
-	I2C_DeInit(I2C1);		//Deinit and reset the I2C to avoid it locking up
-	/*Enable the I2C1 clk*/
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C1, ENABLE);
-	I2C_SoftwareResetCmd(I2C1, ENABLE);
-	I2C_SoftwareResetCmd(I2C1, DISABLE);
 	I2C_InitTypeDef I2C_InitStructure;
 	I2C_InitStructure.I2C_Mode = I2C_Mode_I2C;
 	I2C_InitStructure.I2C_DutyCycle = I2C_DutyCycle_2;
@@ -316,8 +311,11 @@ void I2C_Config() {			//Configure I2C1 for the sensor bus
  	GPIO_ResetBits(GPIOB,I2C1_SCL);//Set bus scl low
 	Delay(10);
 	GPIO_SetBits(GPIOB,I2C1_SDA);//Set bus data high
-	//Make sure the bus is free by clocking it until any slaves release the line - 8 clocks
-	for(uint8_t n=0;n<8;n++) {
+	Delay(10);
+ 	GPIO_SetBits(GPIOB,I2C1_SCL);//Set bus scl high
+	Delay(10);
+	//Make sure the bus is free by clocking it until any slaves release the line - 8 clocks (-1 as we already generated parts of one pulse)
+	for(uint8_t n=0;n<7;n++) {
         	/* Wait for any clock stretching to finish - this has a timeout of 2.55ms*/
 		count=255;
         	while (!GPIO_ReadInputDataBit(GPIOB,I2C1_SCL)&&count) {
@@ -346,11 +344,16 @@ void I2C_Config() {			//Configure I2C1 for the sensor bus
  	GPIO_SetBits(GPIOB,I2C1_SCL);//Set bus scl high
 	Delay(10);
  	GPIO_SetBits(GPIOB,I2C1_SDA);//Set bus sda high
-	//Configure the hardware as alt function
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_OD;
-	GPIO_Init( GPIOB, &GPIO_InitStructure );
 	//Enable the hardware
+	/*Enable the I2C1 clk*/
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C1, ENABLE);
+	I2C_DeInit(I2C1);		//Deinit and reset the I2C to avoid it locking up
+	I2C_SoftwareResetCmd(I2C1, ENABLE);
+	I2C_SoftwareResetCmd(I2C1, DISABLE);
 	I2C_ITConfig(I2C1, I2C_IT_EVT|I2C_IT_ERR, DISABLE);//Disable EVT and ERR interrupts - they are enabled by the first request
 	I2C_Init( I2C1, &I2C_InitStructure );
 	I2C_Cmd( I2C1, ENABLE );
+	//Configure the hardware as alt function
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_OD;
+	GPIO_Init( GPIOB, &GPIO_InitStructure );
 }
