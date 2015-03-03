@@ -361,7 +361,7 @@ int main(void)
 			n++;
 		} while(!stat && n<=10);		//stat is 0 for "no error"
 		if(n>1)
-			UplinkBytes+=n;			//Stores the amount of uplinked data
+			UplinkBytes+=(n-1);		//Stores the amount of uplinked data
 		if(n>1 && strlen(str)==6 && !strncmp(str,Silabs_Header,4)) {
 			print_string[0]=0;
 			printf("Rockoon project: received: %s\n",str);//Test the silabs RTTY - echo function
@@ -510,8 +510,10 @@ int main(void)
 			uint8_t sensors_;
 			do {
 				I2C1error.error=0;	//Reset both of these
-				repetition_counter=0;
+				repetition_counter=Millis;
 				Completed_Jobs=0;	//Prevent any bus reads from running
+				while(Jobs && Millis<(repetition_counter+20));//Wait for any jobs to finish (with timeout)
+				Completed_Jobs=0;	//Ensure this is zeroed
 				I2C_Config();		//Setup the I2C bus
 				sensors_=detect_sensors(1);//Search for connected sensors -argument means the i2c data output buffers are not reinitialised
 				Delay(100000);
