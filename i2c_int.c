@@ -35,7 +35,7 @@ void I2C1_EV_IRQHandler(void) {
 		if(!Jobs)
 			I2C_GenerateSTOP(I2C1,ENABLE);//program a stop to get out of here
 	}
-	if(SReg_1&0x0001 /*&& !((SReg_1&0x0040) && (I2C1->CR2&0x400))*/) {//we just sent a start - EV5 in ref manual, but no RXNE data with BUF event
+	if(SReg_1&0x0001 && !((SReg_1&0x0040) && (I2C1->CR2&0x400) && subaddress_sent)) {//we just sent a start -EV5 in ref manual, but no RXNE + BUF event
 		I2C_AcknowledgeConfig(I2C1, ENABLE);//make sure ACK is on
 		index=0;		//reset the index
 		if(I2C_Direction_Receiver==I2C_jobs[job].direction && (subaddress_sent || 0xFF==I2C_jobs[job].subaddress)) {//we have sent the subaddr
@@ -81,7 +81,7 @@ void I2C1_EV_IRQHandler(void) {
 		else
 			final_stop=1;
 		if(I2C_Direction_Receiver==I2C_jobs[job].direction && subaddress_sent) {//EV7_2, EV7_3
-			if(I2C_jobs[job].bytes>2 && index!=(I2C_jobs[job].bytes-2)) {//EV7_2 (modified to give BTF at end of >2 byte read)
+			if(I2C_jobs[job].bytes>2) {//EV7_2 
 				I2C_AcknowledgeConfig(I2C1, DISABLE);//turn off ACK
 				volatile uint8_t dummy;
 				if(I2C_jobs[job].data_pointer)
@@ -90,8 +90,11 @@ void I2C1_EV_IRQHandler(void) {
 					dummy=I2C_ReceiveData(I2C1);
 					index++;
 				}
-				I2C_GenerateSTOP(I2C1,ENABLE);//program the Stop
-				final_stop=1;			//force this - means an added job between interrupt calls wont cause a lockup
+				asm volatile ("dmb" ::: "memory");
+				if(final_stop)
+					I2C_GenerateSTOP(I2C1,ENABLE);//program the Stop
+				else
+					I2C_GenerateSTART(I2C1,ENABLE);//program a rep start
 				if(I2C_jobs[job].data_pointer)
 					I2C_jobs[job].data_pointer[index++]=I2C_ReceiveData(I2C1);//read data N-1
 				else {
@@ -133,7 +136,7 @@ void I2C1_EV_IRQHandler(void) {
 			}
 		}
 	}
-	else if(SReg_1&0x0040 ) {//Byte received - EV7 
+	else if(SReg_1&0x0040 && (I2C1->CR2&0x400)) {//Byte received - EV7 
 		//(note that at end of >2 byte read with rep start, we may get RXNE+START in same call, so this will not clear the start bit)
 		volatile uint8_t dummy=I2C_ReceiveData(I2C1);
 		asm volatile ("dmb" ::: "memory");
@@ -141,16 +144,8 @@ void I2C1_EV_IRQHandler(void) {
 			I2C_jobs[job].data_pointer[index++]=dummy;
 		else
 			index++;	
-		if(I2C_jobs[job].bytes==(index+3)) {
-			if(!(Jobs&~(1<<job)) /*|| (job==L3GD20_READ)*/)//only do this if there are no other job bits set, so we need to send stop (force stop on L3GD20)
-				I2C_ITConfig(I2C1, I2C_IT_BUF, DISABLE);//disable TXE to allow the buffer to flush so we can get an EV7_2
-			else
-				I2C1->CR1|=0x0800;//set the POS bit so NACK applied to the final byte in the two byte read
-		}
-		else if(I2C_jobs[job].bytes==(index+2)) {//this will run if we are going to send a repeated start
-			I2C_AcknowledgeConfig(I2C1, DISABLE);//turn off ACK
-			I2C_ITConfig(I2C1, I2C_IT_BUF, DISABLE);
-		}
+		if(I2C_jobs[job].bytes==(index+3))
+			I2C_ITConfig(I2C1, I2C_IT_BUF, DISABLE);//disable TXE to allow the buffer to flush so we can get an EV7_2
 		else if(I2C_jobs[job].bytes==index)//We have completed a final EV7
 			index++;	//to show job is complete
 	}
