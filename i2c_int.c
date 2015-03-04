@@ -212,7 +212,12 @@ void I2C1_ER_IRQHandler(void) {
 		Jobs&=~(0x00000001<<job);//cancel the current job - abandoned
 		if(Jobs) {		//ensure start of a new job if there are still jobs left
 			if(!(I2C1->CR1&0x0100)) {//if we are not already sending a start
-				while(I2C1->CR1&0x0200);//wait for any stop to finish sending
+				uint16_t timeout=50000;
+				while(I2C1->CR1&0x0200 && timeout){timeout++;}//wait for any stop to finish sending
+				if(!timeout) {//timeout error - save the job (this means hardware is really screwed, but at least we dont lock up processor)
+					I2C1error.error|=0x40;
+					I2C1error.job=job;
+				}
 				I2C_GenerateSTART(I2C1,ENABLE);//sets a start
 			}
 			I2C_ITConfig(I2C1, I2C_IT_EVT|I2C_IT_ERR, ENABLE);//Ensure EVT and ERR interrupts enabled 
@@ -221,7 +226,12 @@ void I2C1_ER_IRQHandler(void) {
 			if(I2C1->CR1&0x0100) {//We are currently trying to send a start, this is very bad as start,stop will hang the peripheral
 				while(I2C1->CR1&0x0100);//wait for any start to finish sending
 				I2C_GenerateSTOP(I2C1,ENABLE);//send stop to finalise bus transaction
-				while(I2C1->CR1&0x0200);//wait for stop to finish sending
+				uint16_t timeout=50000;
+				while(I2C1->CR1&0x0200 && timeout){timeout++;}//wait for stop to finish sending
+				if(!timeout) {//timeout error - save the job (this means hardware is really screwed, but at least we dont lock up processor)
+					I2C1error.error|=0x80;
+					I2C1error.job=job;
+				}
 				I2C_Config();//reset and configure the hardware						
 			}
 			else {
