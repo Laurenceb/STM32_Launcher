@@ -224,9 +224,10 @@ void I2C1_ER_IRQHandler(void) {
 		}
 		else if(!(SR1Register & 0x0200) && !(I2C1->CR1&0x0200)) {//if we dont have an ARLO error, ensure sending of a stop
 			if(I2C1->CR1&0x0100) {//We are currently trying to send a start, this is very bad as start,stop will hang the peripheral
-				while(I2C1->CR1&0x0100);//wait for any start to finish sending
-				I2C_GenerateSTOP(I2C1,ENABLE);//send stop to finalise bus transaction
 				uint16_t timeout=50000;
+				while(I2C1->CR1&0x0100 && timeout){timeout++;}//wait for any start to finish sending
+				I2C_GenerateSTOP(I2C1,ENABLE);//send stop to finalise bus transaction
+				timeout=50000;
 				while(I2C1->CR1&0x0200 && timeout){timeout++;}//wait for stop to finish sending
 				if(!timeout) {//timeout error - save the job (this means hardware is really screwed, but at least we dont lock up processor)
 					I2C1error.error|=0x80;
