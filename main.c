@@ -45,7 +45,7 @@ wave_stuffer Gyro_wav_stuffer;
 
 int main(void)
 {
-	uint8_t system_state=0;				//used to track button press functionality
+	uint8_t system_state=0, i2c_resets=0, si446x_resets=0;//used to track button press functionality and any errors
 	uint8_t sensors=0;
 	uint32_t repetition_counter=0;			//Used to detect any I2C lockup
 	uint8_t L3GD20_Data_Buffer_old[8];		//Used to test for noise in the gyro data (indicating that it is working)
@@ -419,8 +419,10 @@ int main(void)
 		}
 		}
 		//If the Silabs locks up, detect this and reinitialise it
-		if(silabs_cts_jammed() || silab!=0x44 || silabs_state_machine_jammed() )
+		if(silabs_cts_jammed() || silab!=0x44 || silabs_state_machine_jammed() ) {
 			silab=si446x_setup(NULL);	//The packet header will be reloaded from the global variable in si446x.c
+			si446x_resets++;
+		}
 		//Look for a full set of GPS data (Lat,Long,Alt,Sat info)
 		while(Bytes_In_DMA_Buffer(&Gps_Buffer))	//Dump all the data
 			Gps_Process_Byte((uint8_t)(Pop_From_Dma_Buffer(&Gps_Buffer)),&Gps);
@@ -523,7 +525,8 @@ int main(void)
 					f_sync(&FATFS_wavfile_gyro);
 				}			//Loop forever if we dont find correct sensors - watchdog will kill us in the end
 			} while((sensors_&((1<<L3GD20_CONFIG)|(1<<AFROESC_READ)))!=((1<<L3GD20_CONFIG)|(1<<AFROESC_READ)));
-			sensors=sensors_;	
+			sensors=sensors_;
+			i2c_resets++;	
 			Watchdog_Reset();		//Recovered ok, so reset
 		}
 		//Button multipress status
@@ -550,7 +553,7 @@ int main(void)
 			print_string[0]=0;
 			printf("%d",Millis/1000);	
 			memcpy(&print_string[strlen(print_string)],endhead,endstring-endhead+1);//Compress the contents backwards
-			printf(",%d\n",system_state);	//Adds the state and newline to the end of the string
+			printf(",%02x\n",system_state|((i2c_resets<<6)&0xC0)|((si446x_resets<<4)&0x30));//Adds the state and newline to the end of the string
 		}
 		system_state=0;				//Reset this
 		if((file_opened&0x01) &&strlen(print_string)) {
