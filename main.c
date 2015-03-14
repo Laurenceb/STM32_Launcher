@@ -338,14 +338,18 @@ int main(void)
 		if(mode==1)
 			break;
 		//Now some radio debug and 10 secondly output
-		if(Millis-last_message>10000) {
+		if(Millis-last_message>10000 || !last_message) {
 			Auto_volt=Ind_Voltage;
 			Timer_GPIO_Disable();
 			print_string[0]=0;
-			if(test_cutdown())//Cutdown self test
+			if(test_cutdown()) {//Cutdown self test
 				printf("Rockoon:%d sats, Cut:ok, Ind:%2f\n",Gps.nosats,Auto_volt);//Test the silabs RTTY
-			else
+				CutFlags|=0x01;//LSB is cut test status
+			}
+			else {
 				printf("Rockoon:%d sats, Cut:fail, Ind:%2f\n",Gps.nosats,Auto_volt);
+				CutFlags&=0xFE;//LSB is cut test status
+			}
 			send_string_to_silabs(print_string);//Send the string
 			last_message=Millis;
 		}
