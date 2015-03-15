@@ -65,6 +65,7 @@ int main(void)
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR | RCC_APB1Periph_BKP, ENABLE);/* Enable PWR and BKP clocks */
 	PWR_BackupAccessCmd(ENABLE);/* Allow access to BKP Domain */
 	uint16_t shutdown_lock=BKP_ReadBackupRegister(BKP_DR1);	//Holds the shutdown lock setting
+	uint16_t reset_counter=BKP_ReadBackupRegister(BKP_DR2); //The number of consecutive failed reboot cycles
 	PWR_BackupAccessCmd(DISABLE);
 	if(RCC->CSR&RCC_CSR_IWDGRSTF && shutdown_lock!=SHUTDOWNLOCK_MAGIC) {//Watchdog reset, turn off
 		RCC->CSR|=RCC_CSR_RMVF;			//Reset the reset flags
@@ -117,8 +118,10 @@ int main(void)
 	uint32_t t=Millis;
 	while(Millis<(t+100)){__WFI();}			//Sensor+inst amplifier takes about 100ms to stabilise after power on
 	}
-	if(Battery_Voltage<BATTERY_STARTUP_LIMIT)	//We will have to turn off
-		shutdown();
+	if(Battery_Voltage<BATTERY_STARTUP_LIMIT) {	//We will have to turn off
+		if(reset_counter<10)
+			shutdown();
+	}
 	Watchdog_Reset();				//Card Init can take a second or two
 	// system has passed battery level check and so file can be opened
 	{//Context
@@ -261,7 +264,8 @@ int main(void)
 	Watchdog_Reset();
 	if(f_err_code) {				//There was an init error
 		shutdown_filesystem(ERR, file_opened);//So we log that something went wrong in the logfile - hopefully
-		shutdown();				//Abort, but only after sending over the radio, so we are still trackable
+		if(reset_counter<10)
+			shutdown();			//Abort, but only after sending over the radio, so we are still trackable
 	}
 	//Setup and test the I2C
 	I2C_Config();					//Setup the I2C bus
@@ -269,7 +273,8 @@ int main(void)
 	if((sensors&((1<<L3GD20_CONFIG)|(1<<AFROESC_READ)))!=((1<<L3GD20_CONFIG)|(1<<AFROESC_READ))) {
 		f_puts("I2C sensor detect error\r\n",&FATFS_logfile);
 		shutdown_filesystem(ERR, file_opened);//So we log that something went wrong in the logfile
-		shutdown();
+		if(reset_counter<10)
+			shutdown();
 	}
 	//Setup the Timer for PWM
 	Init_Timer();
@@ -384,6 +389,9 @@ int main(void)
 		}
 	}
 	}//Context only
+	PWR_BackupAccessCmd(ENABLE);/* Allow access to BKP Domain */
+	BKP_WriteBackupRegister(BKP_DR2,0x0000);/* Reset the counter on failed boot */
+	PWR_BackupAccessCmd(DISABLE);/* Disable access to BKP Domain */
 	Gps.packetflag=0x00;				//Reset
 	while(Gps.packetflag!=REQUIRED_DATA) {		//Wait for all fix data
 		while(Bytes_In_DMA_Buffer(&Gps_Buffer))	//Dump all the data

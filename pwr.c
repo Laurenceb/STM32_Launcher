@@ -16,6 +16,10 @@ void setuppwr() {
   * @retval None
   */
 void shutdown() {
+	PWR_BackupAccessCmd(ENABLE);/* Allow access to BKP Domain */
+	uint16_t reset_count=BKP_ReadBackupRegister(BKP_DR2);
+	BKP_WriteBackupRegister(BKP_DR2,reset_count+1);/* Incriment the counter on each shutdown */
+	PWR_BackupAccessCmd(DISABLE);/* Disable access to BKP Domain */
 	PWR_WakeUpPinCmd(ENABLE);			//enable the pin
 	PWR_EnterSTANDBYMode();				//only wakes on RTC signals or WKUP pin
 }
