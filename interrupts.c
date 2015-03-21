@@ -183,13 +183,17 @@ __attribute__((externally_visible)) void SysTick_Handler(void)
 			Timer_GPIO_Enable();
 		//AFROESC throttle control
 		float throt;
-		if(AutoSequence<(IGNITION_END/10))		//Ramp up to 100% from 0 until RAMP_DURATION, 100% until IGNITION_END, down over SHUTDOWN_DURATION 
-			throt=(float)AutoSequence/(RAMP_DURATION/10);
+		if(AutoSequence<(SPIN_PRESTART/10))		//First there is a SPIN_PRESTART period of 400ms for the ESC to initialise
+			throt=0;
+		else if(AutoSequence<((SPIN_PRESTART+COMMUTATION_PERIOD)/10))//Then a COMMUTATION_PERIOD of 100ms for commutation to settle
+			throt=0.2;				//20% throttle for the initial commutation period of 100ms
+		else if(AutoSequence<(IGNITION_END/10)) 	//Ramp to 100% from 20% at RAMP_DURATION rate, 100% until IGNITION_END, down over SHUTDOWN_DURATION 
+			throt=(float)(AutoSequence-((SPIN_PRESTART+COMMUTATION_PERIOD)/10))/(RAMP_DURATION/10)+0.2;
 		else {
-			throt=0.9+(float)((IGNITION_END/10)-AutoSequence)/(SHUTDOWN_DURATION/10);//Ramp down over 90% of shutdown duration
-			throt=(throt<0)?0:throt;
+			throt=0.9+(float)((IGNITION_END/10)-AutoSequence)/(SHUTDOWN_DURATION/10);//Ramp down over shutdown duration, note reduced throttle value
+			throt=(throt<0)?0:throt;		//to ensure we end with zero throttle
 		}
-		uint16_t t=(((throt>1)?1:throt)*0x7FFF);
+		uint16_t t=(uint16_t)(((throt>1)?1:throt)*(float)0x7FFF);
 		AFROESC_Throttle=Flipedbytes(t);		//Ramp up to 100%, i.e. 0x7FFF
 		I2C1_Request_Job(AFROESC_THROTTLE);
 		//RPM status read and ignition control goes here
