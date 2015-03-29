@@ -183,11 +183,11 @@ __attribute__((externally_visible)) void SysTick_Handler(void)
 			Timer_GPIO_Enable();
 		//AFROESC throttle control
 		float throt;
-		if(AutoSequence<(SPIN_PRESTART/10))		//First there is a SPIN_PRESTART period of 400ms for the ESC to initialise
+		if(AutoSequence<(SPIN_PRESTART/10))		//First there is a SPIN_PRESTART period of 700ms for the ESC to initialise
 			throt=0;
-		else if(AutoSequence<((SPIN_PRESTART+COMMUTATION_PERIOD)/10))//Then a COMMUTATION_PERIOD of 100ms for commutation to settle
-			throt=0.2;				//20% throttle for the initial commutation period of 100ms
-		else if(AutoSequence<(IGNITION_END/10)) 	//Ramp to 100% from 20% at RAMP_DURATION rate, 100% until IGNITION_END, down over SHUTDOWN_DURATION 
+		else if(AutoSequence<((SPIN_PRESTART+COMMUTATION_PERIOD)/10))//Then a COMMUTATION_PERIOD of 150ms for commutation to settle
+			throt=0.2;				//20% throttle for the initial commutation period of 150ms
+		else if(AutoSequence<(IGNITION_END/10))  	//Ramp to 100% from 20% at RAMP_DURATION rate, 100% until IGNITION_END, down over SHUTDOWN_DURATION 
 			throt=(float)(AutoSequence-((SPIN_PRESTART+COMMUTATION_PERIOD)/10))/(RAMP_DURATION/10)+0.2;
 		else {
 			throt=0.9+(float)((IGNITION_END/10)-AutoSequence)/(SHUTDOWN_DURATION/10);//Ramp down over shutdown duration, note reduced throttle value
@@ -213,6 +213,8 @@ __attribute__((externally_visible)) void SysTick_Handler(void)
 			else
 				INDUCTION_ON;			//Turn on the ignition
 		}
+		if(Ignition_Selftest==1 && AutoSequence<(IGNITION_END/10) && Auto_spin>(Spin_Rate_LPF-40))//Spin rate needs to decrease by 40hz, i.e. >> the ripple
+			AutoSequence=(IGNITION_END/10);		//Start ramping down the throttle if the rpm drops after ignition triggered, as something is wrong
 		if(AutoSequence>=(IGNITION_END/10))
 			INDUCTION_OFF;				//Turn off the ignition
 		AutoSequence++;					//Autosequence allows the launch sequencing to be correctly ordered, it goes from setting to zero
