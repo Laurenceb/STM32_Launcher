@@ -149,7 +149,7 @@ __attribute__((externally_visible)) void SysTick_Handler(void)
 		Ind_Voltage=(float)ADC_GetConversionValue(ADC1)/1241.2;//Ind measurement in volts
 	ReadADC1_noblock(9);					//Ind sense on PortB.1	
 	//Read any I2C bus sensors here (100Hz)
-	if((Completed_Jobs&(1<<L3GD20_STATUS))&&Gyro_x_buffer.data) {//The data also has to exist
+	if((Completed_Jobs&(1<<L3GD20_STATUS))&&Gyro_x_buffer.data) {//The data also has to exist - i.e. buffers have been malloc'd
 		Completed_Jobs&=~(1<<L3GD20_STATUS);
 		uint16_t x=*((uint16_t*)&(L3GD20_Data_Buffer[2]));//Always load these, if the gyro didnt update then the data won't have been changed
 		uint16_t y=*((uint16_t*)&(L3GD20_Data_Buffer[4]));
@@ -159,6 +159,7 @@ __attribute__((externally_visible)) void SysTick_Handler(void)
 		Add_To_Buffer(x,&Gyro_x_buffer); 
 		Add_To_Buffer(y,&Gyro_y_buffer); 
 		Add_To_Buffer(z,&Gyro_z_buffer);		//Add the raw 100hz data to the x,y,z bins
+		Add_To_Buffer(*((uint32_t*)&Spin_Rate),&Gyro_aligned_rpm_buffer);//The current rpm (note delayed by one 10ms cycle)
 		float xf=filterloop((float)(*(int16_t*)&x), xvx, yvx);//Run a 4th order Bessel filter over the data
 		float yf=filterloop((float)(*(int16_t*)&y), xvy, yvy);
 		float zf=filterloop((float)(*(int16_t*)&z), xvz, yvz);

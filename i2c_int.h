@@ -25,7 +25,7 @@ extern volatile I2C_Error_Type I2C1error;	//used to store error state
 extern volatile uint8_t L3GD20_Data_Buffer[8];
 extern volatile uint8_t AFROESC_Data_Buffer[7];
 extern volatile uint16_t AFROESC_Throttle;
-extern volatile buff_type Gyro_x_buffer,Gyro_y_buffer,Gyro_z_buffer;
+extern volatile buff_type Gyro_x_buffer,Gyro_y_buffer,Gyro_z_buffer,Gyro_aligned_rpm_buffer;
 //Macros
 
 //Sensor specific defines

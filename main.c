@@ -242,7 +242,7 @@ int main(void)
 			}
 		}
 	}
-	f_err_code|=write_wave_header(&FATFS_wavfile_gyro, 3, 100, 16);
+	f_err_code|=write_wave_header(&FATFS_wavfile_gyro, 4, 100, 16);//4 channels, last channel is for the current rpm
 	Watchdog_Reset();				//Card Init can take a second or two
 	//Setup and test the silabs radio
 	silab=si446x_setup(silabs_header_);
@@ -390,7 +390,7 @@ int main(void)
 	}
 	}//Context only
 	PWR_BackupAccessCmd(ENABLE);/* Allow access to BKP Domain */
-	BKP_WriteBackupRegister(BKP_DR2,0x0000);/* Reset the counter on failed boot */
+	BKP_WriteBackupRegister(BKP_DR2,0x0000);/* Reset the counter on ok boot */
 	PWR_BackupAccessCmd(DISABLE);/* Disable access to BKP Domain */
 	Gps.packetflag=0x00;				//Reset
 	while(Gps.packetflag!=REQUIRED_DATA) {		//Wait for all fix data
@@ -506,11 +506,14 @@ int main(void)
 		}
 		//Grab the data from the Gyro
 		while(bytes_in_buff(&Gyro_x_buffer)) {
-			uint16_t  data[3];
+			uint16_t  data[4];
 			data[0]=Pop_From_Buffer(&Gyro_x_buffer);
 			data[1]=Pop_From_Buffer(&Gyro_y_buffer);
 			data[2]=Pop_From_Buffer(&Gyro_z_buffer);
-			write_wave_samples(&FATFS_wavfile_gyro, 3, 16, &Gyro_wav_stuffer, (uint16_t*) data);//Put the raw data into the wav file
+			uint32_t dummy_f=Pop_From_Buffer(&Gyro_aligned_rpm_buffer);
+			int16_t dummy_i=(int16_t)*((float*)&dummy_f);//Grab as float then typecast to int16_t, then store as uint16_t
+			data[3]=*(uint16_t*)&dummy_i;
+			write_wave_samples(&FATFS_wavfile_gyro, 4, 16, &Gyro_wav_stuffer, (uint16_t*) data);//Put the raw data into the wav file
 		}
 		//Other sensors etc can go here
 		//Check for changed data
@@ -628,6 +631,7 @@ uint8_t detect_sensors(uint8_t init) {
 		Init_Buffer(&Gyro_x_buffer, 32);
 		Init_Buffer(&Gyro_y_buffer, 32);
 		Init_Buffer(&Gyro_z_buffer, 32);
+		Init_Buffer(&Gyro_aligned_rpm_buffer, 32);
 	}
 	return sensors;
 }
