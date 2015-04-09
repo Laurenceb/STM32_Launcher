@@ -438,7 +438,7 @@ int main(void)
 		//Look for a full set of GPS data (Lat,Long,Alt,Sat info)
 		while(Bytes_In_DMA_Buffer(&Gps_Buffer))	//Dump all the data
 			Gps_Process_Byte((uint8_t)(Pop_From_Dma_Buffer(&Gps_Buffer)),&Gps);
-		if(Gps.packetflag==REQUIRED_DATA) {	//All fix data arrived
+		if(Gps.packetflag==REQUIRED_DATA && (Gps.status==UBLOX_3D || Gps.mslaltitude>1e6)) {//All fix data arrived, update at low alt if £D
 			gps=Gps;			//Copy to a local buffer
 			Gps.packetflag=0x00;		//Reset this here
 		}
