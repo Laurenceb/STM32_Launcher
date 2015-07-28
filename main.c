@@ -64,7 +64,7 @@ int main(void)
 	DBGMCU_Config(DBGMCU_IWDG_STOP, ENABLE);	//Watchdog stopped during JTAG halt
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR | RCC_APB1Periph_BKP, ENABLE);/* Enable PWR and BKP clocks */
 	PWR_BackupAccessCmd(ENABLE);/* Allow access to BKP Domain */
-	uint16_t shutdown_lock=BKP_ReadBackupRegister(BKP_DR1);	//Holds the shutdown lock setting
+	uint16_t shutdown_lock=BKP_ReadBackupRegister(BKP_DR3);	//Holds the shutdown lock setting
 	uint16_t reset_counter=BKP_ReadBackupRegister(BKP_DR2); //The number of consecutive failed reboot cycles
 	PWR_BackupAccessCmd(DISABLE);
 	if(RCC->CSR&RCC_CSR_IWDGRSTF && shutdown_lock!=SHUTDOWNLOCK_MAGIC) {//Watchdog reset, turn off
@@ -97,7 +97,7 @@ int main(void)
 			Watchdog_Reset();		//Reset watchdog here, if we are stalled here the Millis timeout should catch us
 		}
 		PWR_BackupAccessCmd(ENABLE);		/* Allow access to BKP Domain */
-		BKP_WriteBackupRegister(BKP_DR1,0x0000);//Wipe the shutdown lock setting
+		BKP_WriteBackupRegister(BKP_DR3,0x0000);//Wipe the shutdown lock setting
 		PWR_BackupAccessCmd(DISABLE);
 		while(1) {
 			if(!(Millis%1000) && bDeviceState == SUSPENDED) {
@@ -175,7 +175,7 @@ int main(void)
 				f_read(&FATFS_logfile, (void*)(&shutdown_lock),sizeof(shutdown_lock),&br);/*This needs to be set with the same magic flag value*/
 				if(br==2) {
                                 	PWR_BackupAccessCmd(ENABLE);/* Allow access to BKP Domain */
-					BKP_WriteBackupRegister(BKP_DR1,shutdown_lock);//Wipe the shutdown lock setting
+					BKP_WriteBackupRegister(BKP_DR3,shutdown_lock);//Wipe the shutdown lock setting
                                		PWR_BackupAccessCmd(DISABLE);
 				}
 			}
