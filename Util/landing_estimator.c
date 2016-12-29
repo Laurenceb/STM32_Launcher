@@ -56,8 +56,28 @@ void process_new_GPS(Ubx_Gps_Type* GPS_pos) {
 
 //This function takes the current GPS position and estimates the landing location
 void correct_GPS_position(Ubx_Gps_Type* GPS_pos, int32_t landing[2]) {
-	landing[0]=GPS_pos->latitude+(int32_t)Horizontal_Drift[0]*1000;//Latitude is simple, no extra scaling
-	landing[1]=GPS_pos->longitude+(int32_t)((float)Horizontal_Drift[1]*1000.0/cosf((float)GPS_pos->latitude*1e-7*M_PI/180.0));//Longitude is scaled
+	int32_t drift[2]={};		//Used to model the drift (within current layer and total)
+	float indx=((float)(GPS_pos->mslaltitude)/1000000.0);//Floating point index
+	indx-=(float)Current_Bin;	//Fractional index through the current bin
+	if(indx>0.2) {			//Only try to do some further correction when we are more than 1/5th of the way into a layer
+		drift[0]=GPS_pos->latitude-Bin_Entry[0];
+		drift[1]=GPS_pos->longitude-Bin_Entry[1];	
+		uint32_t transit_time=(uint32_t)(GPS_pos->time/1000);//Index into the GPS week in seconds
+		uint16_t transit_time_=*(uint16_t*)&transit_time;//Lower 16 bits
+		int32_t delta_t=(int32_t)transit_time_-(int32_t)Entry_Time;
+		if(delta_t<0) {//Wraparound occured
+			if(!(transit_time&0xFFFF0000))//The current 16bit GPS interval is at the start of a new GPS week
+				delta_t+=(24UL*3600UL*7UL)%(1<<16);//remainer at end of GPS week
+			else
+				delta_t+=(1<<16);//Wraparound was due to the overrun of a 16bit period
+		}
+		float transit_timef=(float)Transit_Times[Current_Bin]/(SLP_Velocity*10.0);
+		transit_timef=transit_timef*indx/delta_t;
+		drift[0]=(int32_t)(transit_timef*(float)drift[0]);//Scale the drift
+		drift[1]=(int32_t)(transit_timef*(float)drift[1]);
+	}
+	landing[0]=GPS_pos->latitude+(int32_t)Horizontal_Drift[0]*1000+drift[0];//Latitude is simple, no extra scaling
+	landing[1]=GPS_pos->longitude+(int32_t)((float)Horizontal_Drift[1]*1000.0/cosf((float)GPS_pos->latitude*1e-7*M_PI/180.0))+drift[1];//Longitude is scaled
 }
 
 //This function is used for boot init of the landing drift predictor. It can be passed force_reset==true as argument to force reset
