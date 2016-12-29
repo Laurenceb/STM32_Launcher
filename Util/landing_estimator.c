@@ -22,20 +22,20 @@ void process_new_GPS(Ubx_Gps_Type* GPS_pos) {
 		Bin_Entry[1]=GPS_pos->longitude;
 		uint32_t transit_time=(uint32_t)(GPS_pos->time/1000);//Index into the GPS week in seconds
 		uint16_t transit_time_=*(uint16_t*)&transit_time;//Lower 16 bits
-		int32_t delta_t=(int32_t)transit_time-(int32_t)Entry_Time;
+		int32_t delta_t=(int32_t)transit_time_-(int32_t)Entry_Time;
 		Entry_Time=transit_time_;//16bit time
 		if(delta_t<0) {//Wraparound occured
 			if(!(transit_time&0xFFFF0000))//The current 16bit GPS interval is at the start of a new GPS week
-				delta_t+=(24*3600*7)%(1<<16);//remainer at end of GPS week
+				delta_t+=(24UL*3600UL*7UL)%(1<<16);//remainer at end of GPS week
 			else
 				delta_t+=(1<<16);//Wraparound was due to the overrun of a 16bit period
 		}
 		//Lookup table holds transit times for each layer in units of 0.1seconds as uint16_t. Assuming 1m/s descent at SLP. These are then scaled to 1km bins
-		float transit_time=(float)Transit_Times[Current_Bin]/(SLP_Velocity*10000.0);//SLP_Velocity is in units of m/s
+		float transit_time=(float)Transit_Times[Current_Bin]/(SLP_Velocity*10.0);//SLP_Velocity is in units of m/s
 		transit_time/=delta_t;//This is now a scaling factor for the horizontal drift
-		float a=(float)delta[0]*transit_time*0.001;//Latitude is easy to process, just divide by factor of 1000
-		Horizontal_Drift[0]+=(int16_t)a;//Add onto the integration bin
-		a=(float)delta[0]*transit_time*0.001*cosf((float)GPS_pos->latitude*1e-7*M_PI/180.0);//The longitude also gets scaled by cos(lat) factor	
+		float a=(float)delta[0]*transit_time*0.001;//Latitude is easy to process, just divide by factor of 1000, to scale to 11m units
+		Horizontal_Drift[0]+=(int16_t)a;//Add onto the integration bin, int16_t in 11m units can accomodate up to approx 350km of descent drift
+		a=(float)delta[1]*transit_time*0.001*cosf((float)GPS_pos->latitude*1e-7*M_PI/180.0);//The longitude also gets scaled by cos(lat) factor	
 		Horizontal_Drift[1]+=(int16_t)a;
 		Current_Bin=current_altitude_bin;
 		if(Current_Bin>=50)	//Should not happen, but handle erranous values here
@@ -57,7 +57,7 @@ void process_new_GPS(Ubx_Gps_Type* GPS_pos) {
 //This function takes the current GPS position and estimates the landing location
 void correct_GPS_position(Ubx_Gps_Type* GPS_pos, int32_t* landing[2]) {
 	landing[0]=GPS_pos->latitude+(int32_t)Horizontal_Drift[0]*1000;//Latitude is simple, no extra scaling
-	landing[1]=GPS_pos->latitude+(int32_t)((float)Horizontal_Drift[0]*1000.0/cosf((float)GPS_pos->latitude*1e-7*M_PI/180.0));//Longitude is scaled
+	landing[1]=GPS_pos->longitude+(int32_t)((float)Horizontal_Drift[1]*1000.0/cosf((float)GPS_pos->latitude*1e-7*M_PI/180.0));//Longitude is scaled
 }
 
 //This function is used for boot init of the landing drift predictor. It can be passed force_reset==true as argument to force reset
@@ -67,7 +67,8 @@ void correct_GPS_position(Ubx_Gps_Type* GPS_pos, int32_t* landing[2]) {
 //7,8 hold entry latitude to the current drift measurement interval
 //9,10 hold entry longitude
 //11 holds entry time in seconds of week as uint16_t. This will roll around every few hours and so needs to be handled appropriatly
-void initialise_landing_estimator(Ubx_Gps_Type* GPS_pos,uint8_t force_reset) {
+void initialise_landing_estimator(Ubx_Gps_Type* GPS_pos,uint8_t force_reset,float SLP_Vel) {
+	SLP_Velocity=SLP_Vel;//The descent velocity at sea level pressure
 	PWR_BackupAccessCmd(ENABLE);
 	if(!force_reset) {
 		Current_Bin=BKP_ReadBackupRegister(BKP_DR4);//This is the last _entered_ bin index
@@ -96,3 +97,4 @@ void initialise_landing_estimator(Ubx_Gps_Type* GPS_pos,uint8_t force_reset) {
 	}
 	PWR_BackupAccessCmd(DISABLE);
 }
+

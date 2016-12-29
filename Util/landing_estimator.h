@@ -10,5 +10,5 @@
 
 void process_new_GPS(Ubx_Gps_Type* GPS_pos);//Run as often as possible (as in ~1hz or a little slower) to update the model
 void correct_GPS_position(Ubx_Gps_Type* GPS_pos, int32_t* landing[2]);//Use to estimate landing for polygon test
-void initialise_landing_estimator(Ubx_Gps_Type* GPS_pos,uint8_t force_reset);//Init the model, call at bootup, use force_reset to wipe stored registers
+void initialise_landing_estimator(Ubx_Gps_Type* GPS_pos,uint8_t force_reset,float SLP_Vel);//Init the model, call at bootup, use force_reset to wipe stored registers
 
