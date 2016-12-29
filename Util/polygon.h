@@ -1,19 +1,40 @@
 #include <stdlib.h>
 #include "stm32f10x.h"
 
-#define UK_GEOFENCE {/* Visualisation : https://www.dropbox.com/s/c4avx6i7ppigz35/uk_geofence.kml \
-Source : http://www.ukho.gov.uk/ProductsandServices/Services/Documents/UK%20Territorial%20Sea%20Limits.pdf */ \
-529089020, 2065430,\
-509999290, 16040040,\
-507086340, 9448240,\
-495252080, -71191410,\
-535141850, -52185060,\
-543357440, -84704590,\
-586026110, -76354980,\
-611432350, -5822750,\
-551788680, -10986330,\
+#define UK_GEOFENCE {/* Visualisation : http://umap.openstreetmap.fr/en/map/untitled-map_118681#6/50.799/-1.780, \
+Note: only good match to the East coast, avoids major cities */ \
+539609367,-26669392, \
+544907819,-18374634, \
+543725586,-6784058, \
+536820687,-7443237, \
+534537137,-302124, \
+531912247,2114868, \
+528674718,-302124, \
+527549872,3577192, \
+528379777,10247192, \
+528379777,12747192, \
+526709968,15247192, \
+524210253,15247192, \
+520880632,11907192, \
+518408687,7827759, \
+516711104,1907192, \
+516350669,-4504395, \
+513786382,-5383301, \
+509324691,-823975, \
+509030328,-31091309, \
+518145580,-23167419, \
+516810709,-30020142, \
+523655376,-32217407, \
+523823056,-18237305, \
+526180578,-17825317, \
+525947063,-24252319, \
+527279758,-32162476, \
+532767107,-26779175, \
+536169502,-27548218, \
+539609367,-26669392 \
 }
 
-#define UK_GEOFENCE_POINTS 9
+#define UK_GEOFENCE_POINTS 29
 
-uint8_t pointinpoly(const int32_t *poly, uint16_t points, int32_t x, int32_t y);
+uint8_t pointinpoly(int32_t *poly, uint16_t points, int32_t x, int32_t y);
+

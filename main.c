@@ -448,7 +448,7 @@ int main(void)
 			last_cuttest=Millis;
 		}
 		if(!(CutFlags&0x0E)) {			//Only check if the cutdown has not already run
-			if(!pointinpoly(Geofence, UK_GEOFENCE_POINTS, gps.longitude, gps.latitude) && gps.latitude && gps.status==UBLOX_3D)//Check to see if we need to cutdown due to polygon here
+			if(!pointinpoly(Geofence, UK_GEOFENCE_POINTS, gps.latitude, gps.longitude) && gps.latitude && gps.status==UBLOX_3D)//Check to see if we need to cutdown due to polygon here
 				CutFlags|=(1<<1)|(1<<7);//Second bit means cutdown triggered due to polygon
 			if( (UplinkFlags&(1<<CUTDOWN_COMMAND)) && Millis<permission_time && permission_time) {//Cutdown was requested, uses the lock bit
 				CutFlags|=(1<<2)|(1<<7);
@@ -548,7 +548,7 @@ int main(void)
 		if(System_state_Global&0x80) {		//A "control" button press
 			system_state=System_state_Global&~0x80;//Copy to local variable
 			if(system_state==1)		//A single button press
-				;//Function call can go here
+				;//Function call can go here TODO function to wipe the landing position estimator BBRAM? Or use MULTIPRESS_TURNOFF?
 			else if(system_state==3)	//A triple button press will turn off the device even if it is in proper flight mode
 				Shutdown_System=MULTIPRESS_TURNOFF;
 			System_state_Global&=~0x80;	//Wipe the flag bit to show this has been processed

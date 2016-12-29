@@ -2,11 +2,10 @@
 
 /**
   * @brief  Tells us if we are inside a polygon
-  * @param  Pointer to polygon (x,y,x,y format), number of points, x,y position
+  * @param  Pointer to polygon (x,y,x,y format), number of points, x,y position (latitude/x, longitude/y format with negative longitude being Westerly)
   * @retval True if we are inside
-  * This initialiser function assumes the clocks and gpio have been configured
   */
-uint8_t pointinpoly(const int32_t *poly, uint16_t points, int32_t x, int32_t y) {
+uint8_t pointinpoly(int32_t *poly, uint16_t points, int32_t x, int32_t y) {
 	int32_t p0, p1, l0, l1;
 	uint8_t c = 0;
 	/* Read the final point */

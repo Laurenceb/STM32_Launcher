@@ -6,7 +6,7 @@ float calculate_temperature(uint16_t raw_adc, thermistor_bridge_t* therm, uint8_
 	a=therm->r*(a/(1.0-a));			//The value of the Thermistor resistance, R is the bridge resistor as a float
 	a=1.0/((1.0/therm->t_zero)+((1.0/therm->beta)*logf(a/therm->r_zero)));	
 	if(kelvin)
-		return a;
+		return(a);
 	else
-		return a-273.16;		//Value in celcius or kelvin
+		return(a-273.16);		//Value in celcius or kelvin
 }
