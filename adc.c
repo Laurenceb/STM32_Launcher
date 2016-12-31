@@ -35,9 +35,11 @@ void ADC_Configuration(void)
   ADC_Init(ADC2, &ADC_InitStructure);
 
   /* ADC2 injected channel configuration */
-  ADC_InjectedSequencerLengthConfig(ADC2, 1);//one conversion, battery voltage only
+  ADC_InjectedSequencerLengthConfig(ADC2, 2);//two conversions, battery voltage and thermistor temperature
 
   ADC_InjectedChannelConfig(ADC2, 1, 1, ADC_SampleTime_239Cycles5);//The battery monitoring
+
+  ADC_InjectedChannelConfig(ADC2, 8, 2, ADC_SampleTime_239Cycles5);//The thermistor
 
   ADC_ExternalTrigInjectedConvConfig(ADC2, ADC_ExternalTrigInjecConv_None);//set this as sw injected channel
 

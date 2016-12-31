@@ -56,6 +56,7 @@ int main(void)
 	uint8_t silab;
 	//Cutdown config stuff here, atm uses hardcoded polygon defined in polygon.h
 	static const int32_t Geofence[UK_GEOFENCE_POINTS*2]=UK_GEOFENCE;
+	float descent;					//Descent velocity at sea level pressure
 	RTC_t RTC_time;
         _REENT_INIT_PTR(&my_reent);
         _impure_ptr = &my_reent;
@@ -66,11 +67,16 @@ int main(void)
 	PWR_BackupAccessCmd(ENABLE);/* Allow access to BKP Domain */
 	uint16_t shutdown_lock=BKP_ReadBackupRegister(BKP_DR3);	//Holds the shutdown lock setting
 	uint16_t reset_counter=BKP_ReadBackupRegister(BKP_DR2); //The number of consecutive failed reboot cycles
-	PWR_BackupAccessCmd(DISABLE);
-	if(RCC->CSR&RCC_CSR_IWDGRSTF && shutdown_lock!=SHUTDOWNLOCK_MAGIC) {//Watchdog reset, turn off
-		RCC->CSR|=RCC_CSR_RMVF;			//Reset the reset flags
-		shutdown();
+	if(RCC->CSR&RCC_CSR_IWDGRSTF) {
+		reset_counter++;
+		BKP_WriteBackupRegister(BKP_DR2,reset_counter);
+		if(shutdown_lock!=SHUTDOWNLOCK_MAGIC) {//Watchdog reset, turn off
+			RCC->CSR|=RCC_CSR_RMVF;			//Reset the reset flags
+			PWR_BackupAccessCmd(DISABLE);
+			shutdown();
+		}
 	}
+	PWR_BackupAccessCmd(DISABLE);
 	if(USB_SOURCE==bootsource) {
 		RCC->CFGR &= ~(uint32_t)RCC_CFGR_PPRE1_DIV16;
 		RCC->CFGR |= (uint32_t)RCC_CFGR_PPRE1_DIV4;//Swap the ABP1 bus to run at 12mhz rather than 4 if we booted from USB, makes USB fast enough
@@ -97,7 +103,8 @@ int main(void)
 			Watchdog_Reset();		//Reset watchdog here, if we are stalled here the Millis timeout should catch us
 		}
 		PWR_BackupAccessCmd(ENABLE);		/* Allow access to BKP Domain */
-		BKP_WriteBackupRegister(BKP_DR3,0x0000);//Wipe the shutdown lock setting
+		BKP_WriteBackupRegister(BKP_DR2,0x0000);//Wipe the reset counter
+		BKP_WriteBackupRegister(BKP_DR3,0x0000);//Wipe the shutdown lock setting		
 		PWR_BackupAccessCmd(DISABLE);
 		while(1) {
 			if(!(Millis%1000) && bDeviceState == SUSPENDED) {
@@ -180,9 +187,14 @@ int main(void)
 				}
 			}
 			if(br==2) {			//Read was successful, next try to read 5 bytes of packet header
-				f_read(&FATFS_logfile, (void*)(silabs_header),5,&br);
-				if(br!=5)
+				f_read(&FATFS_logfile, (void*)(silabs_header),4,&br);
+				if(br==4)
 					silabs_header_=silabs_header;
+			}
+			if(br==4) {
+				f_read(&FATFS_logfile, (void*)&descent,4,&br)
+				if(br!=4)
+					descent=5.0;	//Just hardcode a sane value
 			}
 			f_close(&FATFS_logfile);	//Close the settings.dat file
 		}
@@ -267,18 +279,24 @@ int main(void)
 		if(reset_counter<10)
 			shutdown();			//Abort, but only after sending over the radio, so we are still trackable
 	}
-	//Setup and test the I2C
+	//Setup and test the I2C and cutdown/ignition channels
 	I2C_Config();					//Setup the I2C bus
 	sensors=detect_sensors(0);
-	if((sensors&((1<<L3GD20_CONFIG)|(1<<AFROESC_READ)))!=((1<<L3GD20_CONFIG)|(1<<AFROESC_READ))) {
-		f_puts("I2C sensor detect error\r\n",&FATFS_logfile);
+	if((sensors&(1<<L3GD20_CONFIG))!=(1<<L3GD20_CONFIG)) {
+		f_puts("I2C sensor detect error\n",&FATFS_logfile);
 		shutdown_filesystem(ERR, file_opened);//So we log that something went wrong in the logfile
 		if(reset_counter<10)
 			shutdown();
 	}
-	//Setup the Timer for PWM
-	Init_Timer();
-	PWM_Set(IND_DUTY);
+	if((sensors&0xC0!=0xC0) {			//Need both channels to work - the two upper bits
+		print_string[0]=0x00;
+		printf("Cut test: %01x\n",(sensors&0xC0)>>6);
+		f_puts("Continuity test error:",&FATFS_logfile);
+		f_puts(print_string,&FATFS_logfile);
+		shutdown_filesystem(ERR, file_opened);//So we log that something went wrong in the logfile
+		if(reset_counter<10)
+			shutdown();
+	}
 	rtc_gettime(&RTC_time);				//Get the RTC time and put a timestamp on the start of the file
 	print_string[0]=0x00;				//Set string length to 0
 	printf("%02d-%02d-%02dT%02d:%02d:%02d\n",RTC_time.year,RTC_time.month,RTC_time.mday,RTC_time.hour,RTC_time.min,RTC_time.sec);//ISO 8601 timestamp header
@@ -389,9 +407,12 @@ int main(void)
 		}
 	}
 	}//Context only
-	PWR_BackupAccessCmd(ENABLE);/* Allow access to BKP Domain */
-	BKP_WriteBackupRegister(BKP_DR2,0x0000);/* Reset the counter on ok boot */
-	PWR_BackupAccessCmd(DISABLE);/* Disable access to BKP Domain */
+	if(shutdown_lock!=SHUTDOWNLOCK_MAGIC) {
+		PWR_BackupAccessCmd(ENABLE);/* Allow access to BKP Domain */
+		reset_counter=0;
+		BKP_WriteBackupRegister(BKP_DR2,reset_counter);/* Reset the counter on ok boot when we are not running with the shutdown lock*/
+		PWR_BackupAccessCmd(DISABLE);/* Disable access to BKP Domain */
+	}
 	Gps.packetflag=0x00;				//Reset
 	while(Gps.packetflag!=REQUIRED_DATA) {		//Wait for all fix data
 		while(Bytes_In_DMA_Buffer(&Gps_Buffer))	//Dump all the data
@@ -402,6 +423,7 @@ int main(void)
 	Gps.latitude,Gps.longitude,Gps.mslaltitude,\
 	Gps.vnorth,Gps.veast,Gps.vdown,Gps.horizontal_error,Gps.vertical_error,Gps.speedacc,Gps.nosats);
 	gps=Gps;					//Initialise local GPS data copy
+	initialise_landing_estimator(&gps,((shutdown_lock==SHUTDOWNLOCK_MAGIC)&&reset_counter)?0:1,descent);//Initialise the landing predictor using GPS data
 	print_string[0]=0;				//Reset the print output
 	Millis=0;					//Reset system uptime, we have 50 days before overflow
 	while (1) {					//Main loop
@@ -417,13 +439,16 @@ int main(void)
 				break;
 		}
 		UplinkBytes+=n;				//Stores the amount of uplinked data
-		if(n && strlen(str)==6 && !strncmp(str,Silabs_Header,4)) {//We recived something, here we process the data that was received, as long as it is '$$RO**'
+		if(n && strlen(str)==6 && !strncmp(str,Silabs_Header,4)) {//We received something, here we process the data that was received, as long as it is '$$RO**'
 			if(str[4]==Silabs_Header[4] && str[5]>47 && str[5]<56 ) {//Need to send e.g. "$$ROKx" where x is 0 to 7
 				if((str[5]-48)!=UPLINK_TEST_BIT) {
-					if( UplinkFlags&(1<<(LAUNCH_PERMISSION)) && permission_time && ((str[5]-48)==LAUNCH_PERMISSION))//Sending permission
+					if( UplinkFlags&(1<<(LAUNCH_PERMISSION)) && permission_time && ((str[5]-48)==LAUNCH_PERMISSION)) {//Re-sending permission
 						permission_time+=PERMISSION_DURATION;//command whilst it is set increases time
+						Ignition_Selftest=0;		//Reset this
+						UplinkFlags&=~((1<<(LAUNCH_COMMAND))|(1<<(CUTDOWN_COMMAND)));//Makes sure that cut and ignition bits are wiped
+					}
 					else
-						UplinkFlags|=1<<(str[5]-48);//Set the correct flag bit
+						UplinkFlags^=1<<(str[5]-48);//Toggle the correct flag bit
 				}
 				else
 					UplinkFlags^=1<<UPLINK_TEST_BIT;//The test bit is toggled
@@ -441,23 +466,26 @@ int main(void)
 		if(Gps.packetflag==REQUIRED_DATA && (Gps.status==UBLOX_3D || Gps.mslaltitude>1e6)) {//All fix data arrived, update at low alt if £D
 			gps=Gps;			//Copy to a local buffer
 			Gps.packetflag=0x00;		//Reset this here
+			process_new_GPS(&gps);		//Process using landing predict code
 		}
 		//Test the Cutdown and update the appropriate bit in the Cut flags byte, check for cutdown conditions and process accordingly
 		if(!cutofftime && (Millis-last_cuttest)>30000){//Only test when we arent cutting down
-			CutFlags=(CutFlags&0xFE)|test_cutdown();//LSB is cut test status
+			CutFlags=(CutFlags&0xFC)|test_cutdown(3);//Lower bits are cut test status bits
 			last_cuttest=Millis;
 		}
-		if(!(CutFlags&0x0E)) {			//Only check if the cutdown has not already run
-			if(!pointinpoly(Geofence, UK_GEOFENCE_POINTS, gps.latitude, gps.longitude) && gps.latitude && gps.status==UBLOX_3D)//Check to see if we need to cutdown due to polygon here
-				CutFlags|=(1<<1)|(1<<7);//Second bit means cutdown triggered due to polygon
+		if(!(CutFlags&0x1C)) {			//Only check if the cutdown has not already run
+			int32_t prediction[2]={};
+			correct_GPS_position(&gps, prediction);
+			if(!pointinpoly(Geofence, UK_GEOFENCE_POINTS, prediction[0], prediction[1]) && gps.latitude && gps.status==UBLOX_3D)//Check to see if we need to cutdown due to polygon here
+				CutFlags|=(1<<POLYGON_CUT)|(1<<CUTDOWN_FIRING);//Third bit means cutdown triggered due to polygon
 			if( (UplinkFlags&(1<<CUTDOWN_COMMAND)) && Millis<permission_time && permission_time) {//Cutdown was requested, uses the lock bit
-				CutFlags|=(1<<2)|(1<<7);
+				CutFlags|=(1<<UPLINK_CUT)|(1<<CUTDOWN_FIRING);//Commanded cutdown sets fifth bit
 				UplinkFlags&=~(1<<CUTDOWN_COMMAND);//Wipe the bit
 			}
 			if(Millis>MISSION_TIMEOUT)	//Cutdown after a certain amount of uptime
-				CutFlags|=(1<<3)|(1<<7);
-			if(CutFlags&(1<<7)) {		//Upper bit triggers a cutdown
-				CutFlags&=~(1<<7);	//Wipe the bit
+				CutFlags|=(1<<TIMEOUT_CUT)|(1<<CUTDOWN_FIRING);//This sets the fourth bit
+			if(CutFlags&(1<<CUTDOWN_FIRING)) {	//Upper bit triggers a cutdown, seventh bit triggers ignition, sixth bit marks a fired ignition
+				CutFlags&=~(1<<CUTDOWN_FIRING);	//Wipe the bit
 				CUTDOWN;
 				cutofftime=Millis+6000;	//Cutter on for 6 seconds
 			}
@@ -469,25 +497,18 @@ int main(void)
 		//The launch functionality, needs an uplink command and for the gyro rates, induction self test and altitude conditions to be met
 		if((Gyro_XY_Rate>(XY_RATE_LIMIT*XY_RATE_LIMIT))||(Gyro_Z_Rate>(Z_RATE_LIMIT*Z_RATE_LIMIT)))
 			badgyro=Millis;			//This is used for timestamping bad events
-		if((Millis-indtest)>100000) {		//Test the induction system every 100 seconds
-			indtest=Millis;
-			Timer_GPIO_Enable();
-			Auto_volt=0;			//Clear this here
-		}
-		if((Millis-indtest)>100 && !Auto_volt ) {//Wait at least 100ms before testing the voltage, then turn off straight away
-			Auto_volt=Ind_Voltage;
-			Timer_GPIO_Disable();
-		}
 		//This processes and checks the actual launch command
 		if( UplinkFlags&(1<<(LAUNCH_PERMISSION)) && !permission_time) {
 			permission_time=Millis+PERMISSION_DURATION;//The permission command allows a launch to proceed at any point in this time window
-			Ignition_Selftest=0;		//Reset this here
+			Ignition_Selftest=0;		//Reset this
+			UplinkFlags&=~((1<<(LAUNCH_COMMAND))|(1<<(CUTDOWN_COMMAND)));//Makes sure that cut and ignition bits are wiped in case they were set by error
 		}
 		if( Millis<permission_time && permission_time ) {//Load the Flag bits during the permission time
-			UplinkFlags|=(Ignition_Selftest&0x07)<<IGNITON_FLAG_BITS;//This should change from 0 to 1 following a launch, or 2 or 3 if autosequence fails
+			UplinkFlags&=~(0x07<<IGNITION_FLAG_BITS);//Wipe the bits first
+			UplinkFlags|=(Ignition_Selftest&0x07)<<IGNITON_FLAG_BITS;//This should change from 0 to 1 following a launch,or 2 or 3 if autosequence fails
 			if( UplinkFlags&(1<<(LAUNCH_COMMAND)) && Millis<(permission_time-PERMISSION_HOLD)) {//Need to send the command whilst the permission is valid
 				UplinkFlags&=~(1<<(LAUNCH_COMMAND));//Wipe the bit
-				if( ((gps.mslaltitude/1000) > (int32_t)LAUNCH_ALTITUDE) && ((Millis-badgyro)>LAUNCH_STABLE_PERIOD ) && (Auto_volt>INDUCT_SENSE_LOW && Auto_volt<INDUCT_SENSE_HIGH)) {
+				if( ((gps.mslaltitude/1000) > (int32_t)LAUNCH_ALTITUDE) && ((Millis-badgyro)>LAUNCH_STABLE_PERIOD ) ) {
 					countdown_time=Millis+COUNTDOWN_DELAY;
 					GOPRO_TRIG_ON;		//Turn the GoPro on the record the launch, it runs an autoexec.ash script
 				} else				//Launch refused
@@ -496,6 +517,7 @@ int main(void)
 		}
 		else {
 			UplinkFlags&=~(1<<LAUNCH_PERMISSION);//Wipe the bit when time expires
+			UplinkFlags&=~((1<<(LAUNCH_COMMAND))|(1<<(CUTDOWN_COMMAND)));//Makes sure that cut and ignition bits are wiped
 			permission_time=0;		//Reset this to zero
 		}
 		if( countdown_time && Millis>(countdown_time-COUNTDOWN_DELAY+GOPRO_TRIGGER_TIME) )
@@ -535,11 +557,11 @@ int main(void)
 				sensors_=detect_sensors(1);//Search for connected sensors -argument means the i2c data output buffers are not reinitialised
 				Delay(100000);
 				//If it didn't work the first time - call the preallocator to force a file sync, saving all data
-				if((sensors_&((1<<L3GD20_CONFIG)|(1<<AFROESC_READ)))!=((1<<L3GD20_CONFIG)|(1<<AFROESC_READ))) {	
+				if((sensors_&(1<<L3GD20_CONFIG))!=(1<<L3GD20_CONFIG)) {	
 					f_sync(&FATFS_logfile);
 					f_sync(&FATFS_wavfile_gyro);
 				}			//Loop forever if we dont find correct sensors - watchdog will kill us in the end
-			} while((sensors_&((1<<L3GD20_CONFIG)|(1<<AFROESC_READ)))!=((1<<L3GD20_CONFIG)|(1<<AFROESC_READ)));
+			} while((sensors_&(1<<L3GD20_CONFIG))!=(1<<L3GD20_CONFIG));
 			sensors=sensors_;
 			i2c_resets++;	
 			Watchdog_Reset();		//Recovered ok, so reset
@@ -548,7 +570,16 @@ int main(void)
 		if(System_state_Global&0x80) {		//A "control" button press
 			system_state=System_state_Global&~0x80;//Copy to local variable
 			if(system_state==1)		//A single button press
-				;//Function call can go here TODO function to wipe the landing position estimator BBRAM? Or use MULTIPRESS_TURNOFF?
+				;//Function call can go here 
+			if(system_state==2) {		//Double press -> function to wipe the landing position estimator BBRAM
+				initialise_landing_estimator(&gps,1,descent);
+				reset_counter=0;
+				shutdown_lock=0;
+				PWR_BackupAccessCmd(ENABLE);/* Allow access to BKP Domain */
+				BKP_WriteBackupRegister(BKP_DR2,reset_counter);/* Reset the counter on ok boot when we are not running with the shutdown lock*/
+				BKP_WriteBackupRegister(BKP_DR3,shutdown_lock);
+				PWR_BackupAccessCmd(DISABLE);
+			}
 			else if(system_state==3)	//A triple button press will turn off the device even if it is in proper flight mode
 				Shutdown_System=MULTIPRESS_TURNOFF;
 			System_state_Global&=~0x80;	//Wipe the flag bit to show this has been processed
@@ -558,7 +589,7 @@ int main(void)
 			last_telemetry=Millis;
 			rtc_gettime(&RTC_time);		//Get the RTC time and put a timestamp on the start of the file
 			print_string[0]=0x00;		//Set string length to 0
-			printf("$$%s,%d,%02d:%02d,%3f,%3f,%1f,%1f,%1f,%1f,%1f,%d,%d,%02x,%d,%02x,%1f,%2f",CALLSIGN,sentence_counter++,RTC_time.hour,RTC_time.min,(float)gps.latitude*1e-7,(float)gps.longitude*1e-7,(float)gps.mslaltitude*1e-3,Battery_Voltage,Aux_Voltage,Gyro_XY_Rate,Gyro_Z_Rate,Gyro_Temperature,UplinkBytes,UplinkFlags,Last_RSSI,CutFlags,Auto_spin,Auto_volt);
+			printf("$$%s,%d,%02d:%02d,%3f,%3f,%1f,%1f,%1f,%1f,%1f,%d,%d,%02x,%d,%02x",CALLSIGN,sentence_counter++,RTC_time.hour,RTC_time.min,(float)gps.latitude*1e-7,(float)gps.longitude*1e-7,(float)gps.mslaltitude*1e-3,Battery_Voltage,Temperature,Gyro_XY_Rate,Gyro_Z_Rate,Gyro_Temperature,UplinkBytes,UplinkFlags,Last_RSSI,CutFlags);
 			uint16_t checksum=string_CRC16_checksum (print_string);//Generate the checksum
 			printf("*%04x\n",checksum);
 			send_string_to_silabs(print_string);//Output the string via the silabs
@@ -614,7 +645,7 @@ void __str_print_char(char c) {
 
 /**
   * @brief  Detects which sensors are plugged in, inits buffers for attached peripheral sensors
-  * @param  None
+  * @param  Init - pass zero to allow buffer initialisation
   * @retval Bitmask of detected sensors
   */
 uint8_t detect_sensors(uint8_t init) {
@@ -627,12 +658,13 @@ uint8_t detect_sensors(uint8_t init) {
 	}
 	sensors=Completed_Jobs;				//Which I2C jobs completed ok?
 	//Initialise the buffers if all is ok and we are allowed to
-	if(!init && ((sensors&((1<<L3GD20_CONFIG)|(1<<AFROESC_READ)))==((1<<L3GD20_CONFIG)|(1<<AFROESC_READ)))) {
+	if(!init && ((sensors&(1<<L3GD20_CONFIG))==(1<<L3GD20_CONFIG)) ) {
 		Init_Buffer(&Gyro_x_buffer, 32);
 		Init_Buffer(&Gyro_y_buffer, 32);
 		Init_Buffer(&Gyro_z_buffer, 32);
 		Init_Buffer(&Gyro_aligned_rpm_buffer, 32);
 	}
+	sensors|=test_cutdown(3)<<6;			//Upper two bits are the cutdowns
 	return sensors;
 }
 

@@ -8,11 +8,11 @@
 #define GET_VBUS_STATE GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_2)
 #define GET_PWR_STATE GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_0)
 
-#define INDUCTION_ON GPIO_WriteBit(GPIOB,GPIO_Pin_12,Bit_SET)
-#define INDUCTION_OFF GPIO_WriteBit(GPIOB,GPIO_Pin_12,Bit_RESET)
+#define IGNITION_ON GPIO_WriteBit(GPIOB,GPIO_Pin_1,Bit_SET)
+#define IGNITION_OFF GPIO_WriteBit(GPIOB,GPIO_Pin_1,Bit_RESET)
 
-#define CUTDOWN GPIO_WriteBit(GPIOA,GPIO_Pin_15,Bit_RESET)
-#define CUTOFF GPIO_WriteBit(GPIOA,GPIO_Pin_15,Bit_SET)
+#define CUTDOWN GPIO_WriteBit(GPIOB,GPIO_Pin_3,Bit_SET)
+#define CUTOFF GPIO_WriteBit(GPIOB,GPIO_Pin_3,Bit_RESET)
 
 #define GOPRO_TRIG_ON GPIO_WriteBit(GPIOB,GPIO_Pin_4,Bit_SET)
 #define GOPRO_TRIG_OFF GPIO_WriteBit(GPIOB,GPIO_Pin_4,Bit_RESET)
@@ -21,4 +21,5 @@ extern uint8_t bootsource;
 
 void setup_gpio(void);
 uint8_t get_wkup(void);
-uint8_t test_cutdown(void);
+uint8_t test_cutdown(uint8_t cut_channel);
+

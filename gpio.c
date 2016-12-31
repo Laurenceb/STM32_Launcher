@@ -53,22 +53,21 @@ void setup_gpio(void)
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;//pushpull
 	GPIO_Init( GPIOB, &GPIO_InitStructure );
 	GPIO_WriteBit(GPIOB,GPIO_Pin_5,Bit_SET);	//Make sure power enabled
-	//Configure the ADC inputs, PortA/B.1
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1;
+	//Configure the ADC inputs, PortA.1 and A.8
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1|GPIO_Pin_8;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
 	GPIO_Init( GPIOA, &GPIO_InitStructure );
-	GPIO_Init( GPIOB, &GPIO_InitStructure );
-	//Configure the PWM output - in timer function
-	//Configure the Cutdown and Inductor enable pins
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;//Cutdown is first - PortA.15
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_15;
+	//Configure the Cutdown outputs, and set them off
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1|GPIO_Pin_3;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-	GPIO_Init( GPIOA, &GPIO_InitStructure );
-	GPIO_WriteBit(GPIOA,GPIO_Pin_15,Bit_SET);//Make sure CUT disabled (note its inverted due to driver)
-	//Configure Inductor enable pin
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12;
 	GPIO_Init( GPIOB, &GPIO_InitStructure );
-	GPIO_WriteBit(GPIOB,GPIO_Pin_12,Bit_RESET);//Make sure Igntion off
+	GPIO_WriteBit(GPIOB,GPIO_Pin_1,Bit_RESET);
+	GPIO_WriteBit(GPIOB,GPIO_Pin_3,Bit_RESET);
+	//Configure the two Cutdown test pins, they are set to input pull up, pin state should then be low for continuity test ok
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_15;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+	GPIO_Init( GPIOA, &GPIO_InitStructure );
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12;
 	GPIO_Init( GPIOB, &GPIO_InitStructure );
 	//Configure GoPro trigger pin
 	GPIO_WriteBit(GPIOB,GPIO_Pin_4,Bit_RESET);//Make sure GoPro off
@@ -82,18 +81,14 @@ uint8_t get_wkup()
 	return GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_0);
 }
 
-uint8_t test_cutdown() {
-	GPIO_InitTypeDef	GPIO_InitStructure;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;//Cutdown is first - PortA.15
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_15;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
-	GPIO_Init( GPIOA, &GPIO_InitStructure );//Set the pin to input, if it floats down then there is a continuity failure
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-	Delay(20);				//Beware, this function is blocking
-	uint8_t t=GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_15);//High value means power is good and continuity is ok
-	GPIO_WriteBit(GPIOA,GPIO_Pin_15,Bit_SET);
-	GPIO_Init( GPIOA, &GPIO_InitStructure );//Return to origonal state
-	GPIO_WriteBit(GPIOA,GPIO_Pin_15,Bit_SET);//Make sure CUT disabled (note its inverted due to driver)
-	return t;
+//Call with argument 1==CUT1, 2==CUT2
+uint8_t test_cutdown(uint8_t cut_channel) {
+	if(cut_channel==3)
+		return ((!GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_15))<<1)|(!GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_12));//Test both channels, 0x03==good
+	else if(cut_channel==2)
+		return !GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_15);// Called CUT2 on the board, note that channels are inverted, returns true for continuity pass
+	else if(cut_channel==1)
+		return !GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_12);// Called CUT1 on the board
+	return 0;
 }
 

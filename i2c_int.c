@@ -6,8 +6,6 @@
 
 //Globals for the data IO to the driver
 volatile uint8_t L3GD20_Data_Buffer[8];
-volatile uint8_t AFROESC_Data_Buffer[7];
-volatile uint16_t AFROESC_Throttle;	//note that this is big endian 
 
 volatile buff_type Gyro_x_buffer,Gyro_y_buffer,Gyro_z_buffer,Gyro_aligned_rpm_buffer;//Buffers for raw data
 

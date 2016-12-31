@@ -9,20 +9,8 @@
 #define PRE_SIZE 1000000ul	/*Preallocate size*/
 
 //Ignition system defines
-#define SPIN_PRESTART 700
-#define COMMUTATION_PERIOD 150
-#define RAMP_DURATION 300
-#define IGNITION_TEST (SPIN_PRESTART+COMMUTATION_PERIOD+RAMP_DURATION+100)
-#define IGNITION_END (IGNITION_TEST+1600)
-#define SHUTDOWN_DURATION 500
+#define IGNITION_END 1600
 
-#define SPIN_RATE_HIGH 300
-#define SPIN_RATE_LOW 165
-
-#define INDUCT_SENSE_LOW 0.15	/*need to check these values again*/
-#define INDUCT_SENSE_HIGH 0.455 
-
-#define IND_DUTY 0.2		/*PWM duty cycle for ignition*/
 
 #define XY_RATE_LIMIT 10.0	/*10 degrees per second max in horizontal plane*/
 #define Z_RATE_LIMIT 30.0	/*30 around the vertical axis*/
@@ -66,6 +54,7 @@
 
 enum{BUTTON_TURNOFF=1,USB_INSERTED,ERR,LOW_BATTERY,MULTIPRESS_TURNOFF};
 enum{BUTTON_SOURCE=0,USB_SOURCE=1};
+enum{IGNITION_TEST=0,CUTDOWN_TEST,POLYGON_CUT,TIMEOUT_CUT,UPLINK_CUT,IGNITION_FIRED,IGNITION_FIRING,CUTDOWN_FIRING};//The bits of the cutdown/igintion flag byte
 //Battery specific config goes here
 #define BATTERY_STARTUP_LIMIT 3.7 /*Around 25% capacity remaining for lithium polymer at 25C slow discharge*/
 #define MINIMUM_VOLTAGE 3.42	/* Lowest cell voltage through LDO regulator - no smps */

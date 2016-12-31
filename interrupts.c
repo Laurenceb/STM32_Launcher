@@ -4,12 +4,10 @@
 
 volatile uint8_t Button_hold_tim,Low_Battery_Warning,System_state_Global,Shutdown_System;//Timer for On/Off/Control button functionality, battery warning, button function
 volatile uint32_t Millis;					//Timer for system uptime
-volatile float Battery_Voltage,Aux_Voltage,Ind_Voltage,Spin_Rate,Spin_Rate_LPF,Gyro_XY_Rate,Gyro_Z_Rate,Auto_spin,Auto_volt;
+volatile float Battery_Voltage,Temperature,Gyro_XY_Rate,Gyro_Z_Rate;
 volatile int8_t Gyro_Temperature;
 volatile uint16_t AutoSequence;
-volatile uint8_t Ignition_Selftest;				//Used for status readout
 
-#define MOTOR_POLES 14		/* Turnigy motor */
 #define L3GD20_GAIN (1/(114.28*114.28))	/* This is actually 1/gain^2 */
 
 /* Digital filter designed by mkfilter/mkshape/gencode   A.J. Fisher, 2.5hz lowpass Bessel filter
@@ -140,14 +138,11 @@ __attribute__((externally_visible)) void SysTick_Handler(void)
 	if(ADC_GetFlagStatus(ADC2, ADC_FLAG_JEOC)) {		//We have adc2 converted data from the injected channels
 		ADC_ClearFlag(ADC2, ADC_FLAG_JEOC);		//Clear the flag
 		Battery_Voltage=((float)ADC_GetInjectedConversionValue(ADC2, ADC_InjectedChannel_1))*0.001611*BAT_FUDGE_FACTOR;
+		Temperature=calculate_temperature(ADC_GetInjectedConversionValue(ADC2,ADC_InjectedChannel_2),&Thermistor_Bridge,0)//Get the temperature
 	}
 	if(Low_Battery_Warning)
 		Low_Battery_Warning-=1;
 	ADC_SoftwareStartInjectedConvCmd(ADC2, ENABLE);		//Trigger the injected channel group
-	//Trigger an ADC1 read of the Inductor sense
-	if(ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC) == SET)
-		Ind_Voltage=(float)ADC_GetConversionValue(ADC1)/1241.2;//Ind measurement in volts
-	ReadADC1_noblock(9);					//Ind sense on PortB.1	
 	//Read any I2C bus sensors here (100Hz)
 	if((Completed_Jobs&(1<<L3GD20_STATUS))&&Gyro_x_buffer.data) {//The data also has to exist - i.e. buffers have been malloc'd
 		Completed_Jobs&=~(1<<L3GD20_STATUS);
@@ -169,59 +164,27 @@ __attribute__((externally_visible)) void SysTick_Handler(void)
 	}
 	if(Completed_Jobs&(1<<L3GD20_CONFIG))
 		I2C1_Request_Job(L3GD20_STATUS);		//Request a L3GD20 status read 
-	if(Completed_Jobs&(1<<AFROESC_READ)) {
-		Completed_Jobs&=~(1<<AFROESC_READ);
-		Spin_Rate=(float)__REVSH(*(volatile int16_t*)&AFROESC_Data_Buffer);//Commutation counter. AfroESC is big endian
-		Spin_Rate*=100/(MOTOR_POLES/2);			//This is the current spin rate in Hz
-		Spin_Rate_LPF=Spin_Rate_LPF*0.8+Spin_Rate*0.2;	//A ~50ms time constant with reduced ~+-85rpm jitter
-		int16_t volt_aux=(int16_t)__REVSH(*(volatile int16_t*)&AFROESC_Data_Buffer[2]);
-		Aux_Voltage=((float)(volt_aux>>6))*0.0315;	//33k,180k PD on AFROESC, with 10bit adc left aligned running from 5v supply
-		I2C1_Request_Job(AFROESC_READ);			//Read ESC temperature and voltage
-	}
 	//Ignition and launch autosequence
 	if(AutoSequence) {
-		if(AutoSequence==1)				//Setup the PWM to the induction system
-			Timer_GPIO_Enable();
-		//AFROESC throttle control
-		float throt;
-		if(AutoSequence<(SPIN_PRESTART/10))		//First there is a SPIN_PRESTART period of 700ms for the ESC to initialise
-			throt=0;
-		else if(AutoSequence<((SPIN_PRESTART+COMMUTATION_PERIOD)/10))//Then a COMMUTATION_PERIOD of 150ms for commutation to settle
-			throt=0.2;				//20% throttle for the initial commutation period of 150ms
-		else if(AutoSequence<(IGNITION_END/10))  	//Ramp to 100% from 20% at RAMP_DURATION rate, 100% until IGNITION_END, down over SHUTDOWN_DURATION 
-			throt=(float)(AutoSequence-((SPIN_PRESTART+COMMUTATION_PERIOD)/10))/(RAMP_DURATION/10)+0.2;
-		else {
-			throt=0.9+(float)((IGNITION_END/10)-AutoSequence)/(SHUTDOWN_DURATION/10);//Ramp down over shutdown duration, note reduced throttle value
-			throt=(throt<0)?0:throt;		//to ensure we end with zero throttle
-		}
-		uint16_t t=(uint16_t)(((throt>1)?1:throt)*(float)0x7FFF);
-		AFROESC_Throttle=Flipedbytes(t);		//Ramp up to 100%, i.e. 0x7FFF
-		I2C1_Request_Job(AFROESC_THROTTLE);
-		//RPM status read and ignition control goes here
-		if(AutoSequence==(IGNITION_TEST/10)) {		//At this point we test the voltage and the rpm
-			Auto_spin=Spin_Rate_LPF;
-			Auto_volt=Ind_Voltage;
+		if(AutoSequence==1) {
 			if(Gyro_XY_Rate>(XY_RATE_LIMIT*XY_RATE_LIMIT))
 				Ignition_Selftest=3;		//3==xy axis stability failure
 			else {
-				if(Spin_Rate_LPF<SPIN_RATE_LOW || Spin_Rate>SPIN_RATE_HIGH)
-					Ignition_Selftest=2;	//2==spin failure
+				if(!test_cutdown(1))		//CUT1 is the ignition channel
+					Ignition_Selftest=2;	//2==ignition failure
 				else
-					Ignition_Selftest=(Ind_Voltage>INDUCT_SENSE_LOW && Ind_Voltage<INDUCT_SENSE_HIGH)?1:3;//3==induction failure,1==all ok
+					Ignition_Selftest=1;	//1==all ok
 			}
 			if(Ignition_Selftest!=1)
 				AutoSequence=(IGNITION_END/10);	//Start ramping down the throttle immediatly
 			else
-				INDUCTION_ON;			//Turn on the ignition
+				IGNITION_ON;			//Turn on the ignition
 		}
-		if(Ignition_Selftest==1 && AutoSequence<(IGNITION_END/10) && Auto_spin>(Spin_Rate_LPF-40))//Spin rate needs to decrease by 40hz, i.e. >> the ripple
-			AutoSequence=(IGNITION_END/10);		//Start ramping down the throttle if the rpm drops after ignition triggered, as something is wrong
-		if(AutoSequence>=(IGNITION_END/10))
-			INDUCTION_OFF;				//Turn off the ignition
 		AutoSequence++;					//Autosequence allows the launch sequencing to be correctly ordered, it goes from setting to zero
+		if(AutoSequence>=(IGNITION_END/10))
+			IGNITION_OFF;				//Turn off the ignition
 		//Clean up code to complete the autosequence
-		if(AutoSequence>=(IGNITION_END/10)+(SHUTDOWN_DURATION/10)) {
-			Timer_GPIO_Disable();
+		if(AutoSequence>=(IGNITION_END/10)) {
 			AutoSequence=0;
 		}
 	}
