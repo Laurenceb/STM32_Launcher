@@ -302,7 +302,7 @@ int main(void)
 	printf("%02d-%02d-%02dT%02d:%02d:%02d\n",RTC_time.year,RTC_time.month,RTC_time.mday,RTC_time.hour,RTC_time.min,RTC_time.sec);//ISO 8601 timestamp header
 	printf("Battery: %3fV\n",Battery_Voltage);	//Get the battery voltage using blocking regular conversion and print
 	printf("Time,Counter,RTC,");			//Print out a header for columns that are present in the CSV file
-	printf("Lat,Long,Alt,Voltage,Aux_Voltage,XY_Gyro,Z_Gyro,Temperature,Uplink(Bytes),Uplink_CommandFlags,Packet RSSI,Cutdown,Spin,Ind,Button press\r\n");
+	printf("Lat,Long,Alt,Voltage,Tube temperature,XY_Gyro,Z_Gyro,Temperature,Uplink(Bytes),Uplink_CommandFlags,Packet RSSI,Cutdown,Button press\r\n");
 	if(file_opened) {
 		f_puts(print_string,&FATFS_logfile);
 		print_string[0]=0x00;			//Set string length to 0
