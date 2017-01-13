@@ -7,7 +7,7 @@
 //Globals for the data IO to the driver
 volatile uint8_t L3GD20_Data_Buffer[8];
 
-volatile buff_type Gyro_x_buffer,Gyro_y_buffer,Gyro_z_buffer,Gyro_aligned_rpm_buffer;//Buffers for raw data
+volatile buff_type Gyro_x_buffer,Gyro_y_buffer,Gyro_z_buffer;//Buffers for raw data
 
 //Globals for the driver
 volatile uint32_t Jobs,Completed_Jobs;	//used for task control (only ever access this from outside for polling Jobs/Reading Completed_Jobs)
@@ -293,8 +293,6 @@ void I2C_Config() {			//Configure I2C1 for the sensor bus
 	//Setup the pointers to the read data
 	I2C1_Setup_Job(L3GD20_STATUS, (volatile uint8_t*)L3GD20_Data_Buffer);//Gyro data buffer
 	I2C1_Setup_Job(L3GD20_READ, (volatile uint8_t*)&(L3GD20_Data_Buffer[2]));//Gyro data buffer, index to the mems data
-	I2C1_Setup_Job(AFROESC_READ, (volatile uint8_t*)AFROESC_Data_Buffer);//ESC data buffer
-	I2C1_Setup_Job(AFROESC_THROTTLE, (volatile uint8_t*)&AFROESC_Throttle);//ESC throttle
 	//Assert the bus
 	GPIO_SetBits(GPIOB,I2C1_SDA|I2C1_SCL);//Set bus high, make sure GPIO in correct state to start with
 	GPIO_InitTypeDef	GPIO_InitStructure;

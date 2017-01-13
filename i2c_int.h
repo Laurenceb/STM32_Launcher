@@ -23,7 +23,7 @@ extern volatile uint32_t Jobs,Completed_Jobs;	//used for task control (only ever
 extern volatile I2C_Error_Type I2C1error;	//used to store error state
 //Sensor Globals
 extern volatile uint8_t L3GD20_Data_Buffer[8];
-extern volatile buff_type Gyro_x_buffer,Gyro_y_buffer,Gyro_z_buffer,Gyro_aligned_rpm_buffer;
+extern volatile buff_type Gyro_x_buffer,Gyro_y_buffer,Gyro_z_buffer;
 //Macros
 
 //Sensor specific defines
@@ -47,7 +47,7 @@ extern volatile buff_type Gyro_x_buffer,Gyro_y_buffer,Gyro_z_buffer,Gyro_aligned
 //Job identifiers used to run the gyro sampler and the ESC status info, ESC commands, and Gyro config
 enum{L3GD20_STATUS=0,L3GD20_READ,L3GD20_CONFIG,L3GD20_CONFIG2};
 //Config all the sensors
-#define CONFIG_SENSORS (1<<L3GD20_CONFIG2))	/*Read esc to test its there and running*/
+#define CONFIG_SENSORS (1<<L3GD20_CONFIG2)	/*Read esc to test its there and running*/
 #define SCHEDULE_CONFIG I2C1_Request_Job(L3GD20_CONFIG);Jobs|=CONFIG_SENSORS/*Just adds directly - job request call starts i2c interrupts off*/
 
 //Function prototypes

@@ -18,7 +18,7 @@
 #include "main.h"
 #include "adc.h"
 #include "pwr.h"
-#include "temperature.h"
+#include "thermistor.h"
 
 //Externals
 extern volatile uint8_t Button_hold_tim,Low_Battery_Warning,System_state_Global,Shutdown_System;//Timer for On/Off/Control button functionality, battery warning, button function
@@ -26,6 +26,9 @@ extern volatile uint32_t Millis;					//Timer for system uptime
 extern volatile float Battery_Voltage,Temperature,Gyro_XY_Rate,Gyro_Z_Rate;
 extern volatile int8_t Gyro_Temperature;
 extern volatile uint16_t AutoSequence;
+extern volatile uint8_t Ignition_Selftest;
+
+extern thermistor_bridge_t Thermistor_Bridge;
 
 //Added functions
 void ISR_Config(void);

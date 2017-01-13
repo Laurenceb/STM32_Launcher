@@ -30,7 +30,7 @@
 #define LAUNCH_COMMAND 6
 #define LAUNCH_PERMISSION 7
 #define LAUNCH_REFUSED 2
-#define IGNITON_FLAG_BITS 3	/* Bits 3, 4, and 5 used for autolaunch feedback whilst permission is set*/
+#define IGNITION_FLAG_BITS 3	/* Bits 3, 4, and 5 used for autolaunch feedback whilst permission is set*/
 #define UPLINK_TEST_BIT 1	/* Bit 1  toggles when there is an uplink*/
 
 #define MISSION_TIMEOUT 12600000UL /* 3.5 hours */

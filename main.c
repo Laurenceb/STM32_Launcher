@@ -192,7 +192,7 @@ int main(void)
 					silabs_header_=silabs_header;
 			}
 			if(br==4) {
-				f_read(&FATFS_logfile, (void*)&descent,4,&br)
+				f_read(&FATFS_logfile, (void*)&descent,4,&br);
 				if(br!=4)
 					descent=5.0;	//Just hardcode a sane value
 			}
@@ -254,7 +254,7 @@ int main(void)
 			}
 		}
 	}
-	f_err_code|=write_wave_header(&FATFS_wavfile_gyro, 4, 100, 16);//4 channels, last channel is for the current rpm
+	f_err_code|=write_wave_header(&FATFS_wavfile_gyro, 3, 100, 16);//3 channels, gyro x,y,z
 	Watchdog_Reset();				//Card Init can take a second or two
 	//Setup and test the silabs radio
 	silab=si446x_setup(silabs_header_);
@@ -288,7 +288,7 @@ int main(void)
 		if(reset_counter<10)
 			shutdown();
 	}
-	if((sensors&0xC0!=0xC0) {			//Need both channels to work - the two upper bits
+	if((sensors&0xC0)!=0xC0) {			//Need both channels to work - the two upper bits
 		print_string[0]=0x00;
 		printf("Cut test: %01x\n",(sensors&0xC0)>>6);
 		f_puts("Continuity test error:",&FATFS_logfile);
@@ -362,15 +362,15 @@ int main(void)
 			break;
 		//Now some radio debug and 10 secondly output
 		if(Millis-last_message>10000 || !last_message) {
-			Auto_volt=Ind_Voltage;
 			Timer_GPIO_Disable();
 			print_string[0]=0;
-			if(test_cutdown()) {//Cutdown self test
-				printf("Rockoon:%d sats, Cut:ok, Ind:%2f\n",Gps.nosats,Auto_volt);//Test the silabs RTTY
+			uint8_t tst=test_cutdown(3);
+			if(tst==3) {//Cutdown self test
+				printf("Rockoon:%d sats, Cut:ok\n",Gps.nosats);//Test the silabs RTTY
 				CutFlags|=0x01;//LSB is cut test status
 			}
 			else {
-				printf("Rockoon:%d sats, Cut:fail, Ind:%2f\n",Gps.nosats,Auto_volt);
+				printf("Rockoon:%d sats, Cut:fail - %02x\n",Gps.nosats,tst);
 				CutFlags&=0xFE;//LSB is cut test status
 			}
 			send_string_to_silabs(print_string);//Send the string
@@ -505,7 +505,7 @@ int main(void)
 		}
 		if( Millis<permission_time && permission_time ) {//Load the Flag bits during the permission time
 			UplinkFlags&=~(0x07<<IGNITION_FLAG_BITS);//Wipe the bits first
-			UplinkFlags|=(Ignition_Selftest&0x07)<<IGNITON_FLAG_BITS;//This should change from 0 to 1 following a launch,or 2 or 3 if autosequence fails
+			UplinkFlags|=(Ignition_Selftest&0x07)<<IGNITION_FLAG_BITS;//This should change from 0 to 1 following a launch,or 2 or 3 if autosequence fails
 			if( UplinkFlags&(1<<(LAUNCH_COMMAND)) && Millis<(permission_time-PERMISSION_HOLD)) {//Need to send the command whilst the permission is valid
 				UplinkFlags&=~(1<<(LAUNCH_COMMAND));//Wipe the bit
 				if( ((gps.mslaltitude/1000) > (int32_t)LAUNCH_ALTITUDE) && ((Millis-badgyro)>LAUNCH_STABLE_PERIOD ) ) {
@@ -528,13 +528,10 @@ int main(void)
 		}
 		//Grab the data from the Gyro
 		while(bytes_in_buff(&Gyro_x_buffer)) {
-			uint16_t  data[4];
+			uint16_t  data[3];
 			data[0]=Pop_From_Buffer(&Gyro_x_buffer);
 			data[1]=Pop_From_Buffer(&Gyro_y_buffer);
 			data[2]=Pop_From_Buffer(&Gyro_z_buffer);
-			uint32_t dummy_f=Pop_From_Buffer(&Gyro_aligned_rpm_buffer);
-			int16_t dummy_i=(int16_t)*((float*)&dummy_f);//Grab as float then typecast to int16_t, then store as uint16_t
-			data[3]=*(uint16_t*)&dummy_i;
 			write_wave_samples(&FATFS_wavfile_gyro, 4, 16, &Gyro_wav_stuffer, (uint16_t*) data);//Put the raw data into the wav file
 		}
 		//Other sensors etc can go here
@@ -662,7 +659,6 @@ uint8_t detect_sensors(uint8_t init) {
 		Init_Buffer(&Gyro_x_buffer, 32);
 		Init_Buffer(&Gyro_y_buffer, 32);
 		Init_Buffer(&Gyro_z_buffer, 32);
-		Init_Buffer(&Gyro_aligned_rpm_buffer, 32);
 	}
 	sensors|=test_cutdown(3)<<6;			//Upper two bits are the cutdowns
 	return sensors;

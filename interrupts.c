@@ -7,6 +7,9 @@ volatile uint32_t Millis;					//Timer for system uptime
 volatile float Battery_Voltage,Temperature,Gyro_XY_Rate,Gyro_Z_Rate;
 volatile int8_t Gyro_Temperature;
 volatile uint16_t AutoSequence;
+volatile uint8_t Ignition_Selftest;
+
+thermistor_bridge_t Thermistor_Bridge;
 
 #define L3GD20_GAIN (1/(114.28*114.28))	/* This is actually 1/gain^2 */
 
@@ -138,7 +141,7 @@ __attribute__((externally_visible)) void SysTick_Handler(void)
 	if(ADC_GetFlagStatus(ADC2, ADC_FLAG_JEOC)) {		//We have adc2 converted data from the injected channels
 		ADC_ClearFlag(ADC2, ADC_FLAG_JEOC);		//Clear the flag
 		Battery_Voltage=((float)ADC_GetInjectedConversionValue(ADC2, ADC_InjectedChannel_1))*0.001611*BAT_FUDGE_FACTOR;
-		Temperature=calculate_temperature(ADC_GetInjectedConversionValue(ADC2,ADC_InjectedChannel_2),&Thermistor_Bridge,0)//Get the temperature
+		Temperature=calculate_temperature(ADC_GetInjectedConversionValue(ADC2,ADC_InjectedChannel_2),&Thermistor_Bridge,0);//Get the temperature
 	}
 	if(Low_Battery_Warning)
 		Low_Battery_Warning-=1;
@@ -154,7 +157,6 @@ __attribute__((externally_visible)) void SysTick_Handler(void)
 		Add_To_Buffer(x,&Gyro_x_buffer); 
 		Add_To_Buffer(y,&Gyro_y_buffer); 
 		Add_To_Buffer(z,&Gyro_z_buffer);		//Add the raw 100hz data to the x,y,z bins
-		Add_To_Buffer(*((uint32_t*)&Spin_Rate),&Gyro_aligned_rpm_buffer);//The current rpm (note delayed by one 10ms cycle)
 		float xf=filterloop((float)(*(int16_t*)&x), xvx, yvx);//Run a 4th order Bessel filter over the data
 		float yf=filterloop((float)(*(int16_t*)&y), xvy, yvy);
 		float zf=filterloop((float)(*(int16_t*)&z), xvz, yvz);
