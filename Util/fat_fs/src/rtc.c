@@ -235,11 +235,13 @@ void my_RTC_SetCounter(uint32_t cnt)
 	/* Allow access to BKP Domain */
 	PWR_BackupAccessCmd(ENABLE);
 	/* Wait until last write operation on RTC registers has finished */
-	RTC_WaitForLastTask();
+	if(RCC_GetFlagStatus(RCC_FLAG_LSERDY) != RESET)
+		RTC_WaitForLastTask();
 	/* Change the current time */
 	RTC_SetCounter(cnt);
 	/* Wait until last write operation on RTC registers has finished */
-	RTC_WaitForLastTask();
+	if(RCC_GetFlagStatus(RCC_FLAG_LSERDY) != RESET)
+		RTC_WaitForLastTask();
 	PWR_BackupAccessCmd(DISABLE);
 }
 
@@ -288,18 +290,22 @@ int rtc_init(void)
 	if (BKP_ReadBackupRegister(BKP_DR1) != 0xA5A5) {
 		/* Backup data register value is not correct or not yet programmed (when
 		   the first time the program is executed) */
+		if(BKP_ReadBackupRegister(BKP_DR1) != 0xB4B4) {
+			/* Allow access to BKP Domain */
+			PWR_BackupAccessCmd(ENABLE);
 
-		/* Allow access to BKP Domain */
-		PWR_BackupAccessCmd(ENABLE);
+			/* Reset Backup Domain */
+			BKP_DeInit();
 
-		/* Reset Backup Domain */
-		BKP_DeInit();
+			/* Enable LSE */
+			RCC_LSEConfig(RCC_LSE_ON);
 
-		/* Enable LSE */
-		RCC_LSEConfig(RCC_LSE_ON);
+			/* Write a magic value to allow a failure here to be identified */
+			BKP_WriteBackupRegister(BKP_DR1, 0xB4B4);
 
-		/* Wait till LSE is ready */
-		while (RCC_GetFlagStatus(RCC_FLAG_LSERDY) == RESET) { ; }
+			/* Wait till LSE is ready */
+			while (RCC_GetFlagStatus(RCC_FLAG_LSERDY) == RESET) { ; }
+		}
 
 		/* Select LSE as RTC Clock Source */
 		RCC_RTCCLKConfig(RCC_RTCCLKSource_LSE);
@@ -308,22 +314,26 @@ int rtc_init(void)
 		RCC_RTCCLKCmd(ENABLE);
 
 		/* Wait for RTC registers synchronization */
-		RTC_WaitForSynchro();
+		if(RCC_GetFlagStatus(RCC_FLAG_LSERDY) != RESET)
+			RTC_WaitForSynchro();
 
 		/* Wait until last write operation on RTC registers has finished */
-		RTC_WaitForLastTask();
+		if(RCC_GetFlagStatus(RCC_FLAG_LSERDY) != RESET)
+			RTC_WaitForLastTask();
 
 		/* Set RTC prescaler: set RTC period to 1sec */
 		RTC_SetPrescaler(32767); /* RTC period = RTCCLK/RTC_PR = (32.768 KHz)/(32767+1) */
 
 		/* Wait until last write operation on RTC registers has finished */
-		RTC_WaitForLastTask();
+		if(RCC_GetFlagStatus(RCC_FLAG_LSERDY) != RESET)
+			RTC_WaitForLastTask();
 
 		/* Set initial value */
 		RTC_SetCounter( (uint32_t)((11*60+55)*60) ); // here: 1st January 2000 11:55:00
 
 		/* Wait until last write operation on RTC registers has finished */
-		RTC_WaitForLastTask();
+		if(RCC_GetFlagStatus(RCC_FLAG_LSERDY) != RESET)
+			RTC_WaitForLastTask();
 
 		BKP_WriteBackupRegister(BKP_DR1, 0xA5A5);
 
@@ -333,7 +343,8 @@ int rtc_init(void)
 	} else {
 
 		/* Wait for RTC registers synchronization */
-		RTC_WaitForSynchro();
+		if(RCC_GetFlagStatus(RCC_FLAG_LSERDY) != RESET)
+			RTC_WaitForSynchro();
 
 	}
 

@@ -69,12 +69,12 @@ int main(void)
 	uint16_t reset_counter=BKP_ReadBackupRegister(BKP_DR2); //The number of consecutive failed reboot cycles
 	if(RCC->CSR&RCC_CSR_IWDGRSTF) {
 		reset_counter++;
-		BKP_WriteBackupRegister(BKP_DR2,reset_counter);
 		if(shutdown_lock!=SHUTDOWNLOCK_MAGIC) {//Watchdog reset, turn off
 			RCC->CSR|=RCC_CSR_RMVF;			//Reset the reset flags
 			PWR_BackupAccessCmd(DISABLE);
 			shutdown();
 		}
+		BKP_WriteBackupRegister(BKP_DR2,reset_counter);
 	}
 	PWR_BackupAccessCmd(DISABLE);
 	if(USB_SOURCE==bootsource) {
@@ -82,7 +82,7 @@ int main(void)
 		RCC->CFGR |= (uint32_t)RCC_CFGR_PPRE1_DIV4;//Swap the ABP1 bus to run at 12mhz rather than 4 if we booted from USB, makes USB fast enough
 	}
 	SysTick_Configuration();			//Start up system timer at 100Hz for uSD card functionality
-	Watchdog_Config(WATCHDOG_TIMEOUT);		//Set the watchdog
+	Watchdog_Config(WATCHDOG_TIMEOUT);		//Set the watchdog, any lockup past this point will cause a reset
 	Watchdog_Reset();				//Reset watchdog as soon as possible incase it is still running at power on
 	rtc_init();					//Real time clock initialise - (keeps time unchanged if set)
 	Usarts_Init();
@@ -95,8 +95,8 @@ int main(void)
 		USB_Init();
 		uint32_t nojack=0x000FFFFF;		//Countdown timer - a few hundered ms of 0v on jack detect forces a shutdown
 		while (bDeviceState != CONFIGURED) {	//Wait for USB config - timeout causes shutdown
-			if((Millis>10000 && bDeviceState == UNCONNECTED)|| !nojack)	//No USB cable - shutdown (Charger pin will be set to open drain, cant be disabled without usb)
-				shutdown();
+			if((Millis>10000 && bDeviceState == UNCONNECTED)|| !nojack)	//No USB cable - shutdown  disabled without usb)
+				shutdown();		//The watchdog reset will fire after a short delay and normal reboot logic will run again
 			if(GET_VBUS_STATE)		//Jack detect resets the countdown
 				nojack=0x0FFFFF;
 			nojack--;
@@ -110,7 +110,7 @@ int main(void)
 			if(!(Millis%1000) && bDeviceState == SUSPENDED) {
 				Delay(100);
 				if(!GET_VBUS_STATE)
-					shutdown();
+					shutdown();	//The watchdog reset will fire after a short delay and normal reboot logic will run again
 			}
 			Watchdog_Reset();
 			__WFI();			//Sleep mode
@@ -610,7 +610,7 @@ int main(void)
 			if(file_opened)
 				shutdown_filesystem(Shutdown_System, file_opened);
 			if(Shutdown_System==USB_INSERTED)
-				NVIC_SystemReset();	//Software reset of the system - USB inserted whilst running
+				NVIC_SystemReset();	//Software reset of the system - USB inserted whilst running (this can only be used without magic lock)
 			else {
 				shutdown();		//Puts us into sleep mode
 			}
