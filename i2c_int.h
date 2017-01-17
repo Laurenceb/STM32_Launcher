@@ -27,7 +27,7 @@ extern volatile buff_type Gyro_x_buffer,Gyro_y_buffer,Gyro_z_buffer;
 //Macros
 
 //Sensor specific defines
-#define L3GD20_ADDR 0xD4
+#define L3GD20_ADDR 0xD0			/*we are actually using an I3G4250D*/
 #define L3GD20_STAT 0xA6			/*sub address where status begins*/
 #define L3GD20_DATA 0xA8			/*sub address for the data*/
 #define L3GD20_CONF 0xA0			/*sub address for configuration*/

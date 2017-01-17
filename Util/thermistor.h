@@ -7,7 +7,7 @@
 typedef struct {
 	uint8_t adc_bits;//Number of bits (e.g. 12 for normal stm32 ADC)
 	float r;	//The bridge resistor (from the center of the potential divider to VCC, shared with the ADC/ADC reference)
-	float t_zero;	//This must be in degrees Kelvib
+	float t_zero;	//This must be in degrees Kelvin
 	float r_zero;	//This must be in the same units as r (usually ohms)
 	float beta;	//This is in units of Kelvin
 	} thermistor_bridge_t;

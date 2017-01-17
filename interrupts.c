@@ -9,7 +9,7 @@ volatile int8_t Gyro_Temperature;
 volatile uint16_t AutoSequence;
 volatile uint8_t Ignition_Selftest;
 
-thermistor_bridge_t Thermistor_Bridge;
+thermistor_bridge_t Thermistor_Bridge={.adc_bits=12, .r=10.0, .t_zero=298.15, .r_zero=10.0, .beta=3380.0};//Default values: 12bit adc with NCP15XH103F03RC
 
 #define L3GD20_GAIN (1/(114.28*114.28))	/* This is actually 1/gain^2 */
 
