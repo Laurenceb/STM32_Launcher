@@ -313,26 +313,34 @@ int rtc_init(void)
 		/* Enable RTC Clock */
 		RCC_RTCCLKCmd(ENABLE);
 
-		/* Wait for RTC registers synchronization */
-		if(RCC_GetFlagStatus(RCC_FLAG_LSERDY) != RESET)
-			RTC_WaitForSynchro();
+		/* Wait for RTC registers synchronization (also RTC self test) */
+		if(RCC_GetFlagStatus(RCC_FLAG_LSERDY) != RESET) {
+			RTC->CRL &= (uint16_t)~RTC_FLAG_RSF;/* wait for syncronisation with timeout and abort*/
+			/* Loop until RSF flag is set */
+			while (((RTC->CRL & RTC_FLAG_RSF) == (uint16_t)RESET) && (i<25000)) { i++; }
+		}
+		else
+			i=25000;	/*Failure state marked as high i value*/
+
+		if(i<25000)
+			i=0;
 
 		/* Wait until last write operation on RTC registers has finished */
-		if(RCC_GetFlagStatus(RCC_FLAG_LSERDY) != RESET)
+		if(!i)
 			RTC_WaitForLastTask();
 
 		/* Set RTC prescaler: set RTC period to 1sec */
 		RTC_SetPrescaler(32767); /* RTC period = RTCCLK/RTC_PR = (32.768 KHz)/(32767+1) */
 
 		/* Wait until last write operation on RTC registers has finished */
-		if(RCC_GetFlagStatus(RCC_FLAG_LSERDY) != RESET)
+		if(!i)
 			RTC_WaitForLastTask();
 
 		/* Set initial value */
 		RTC_SetCounter( (uint32_t)((11*60+55)*60) ); // here: 1st January 2000 11:55:00
 
 		/* Wait until last write operation on RTC registers has finished */
-		if(RCC_GetFlagStatus(RCC_FLAG_LSERDY) != RESET)
+		if(!i)
 			RTC_WaitForLastTask();
 
 		BKP_WriteBackupRegister(BKP_DR1, 0xA5A5);
@@ -340,15 +348,24 @@ int rtc_init(void)
 		/* Lock access to BKP Domain */
 		PWR_BackupAccessCmd(DISABLE);
 
+		if(i)
+			return 1;	//Failure
+
 	} else {
+		/* Wait for RTC registers synchronization (also RTC selft test) */
+		if(RCC_GetFlagStatus(RCC_FLAG_LSERDY) != RESET) {
+			RTC->CRL &= (uint16_t)~RTC_FLAG_RSF;/* wait for syncronisation with timeout and abort*/
+			/* Loop until RSF flag is set */
+			while (((RTC->CRL & RTC_FLAG_RSF) == (uint16_t)RESET) && (i<25000)) { i++; }
+		}
+		else
+			i=25000;	/*Failure state marked as high i value*/
 
-		/* Wait for RTC registers synchronization */
-		if(RCC_GetFlagStatus(RCC_FLAG_LSERDY) != RESET)
-			RTC_WaitForSynchro();
-
+		if(i>=25000)
+			return 1;	//Failure
 	}
 
-	return 0;
+	return 0;			//Success
 }
 
 
